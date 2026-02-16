@@ -10,7 +10,7 @@ namespace UI.Numerics;
 /// </summary>
 public interface ISaturationHandler<T> where T : INumber<T>
 {
-    /// <summary>The value to return for a NaN input when converting to an integral type.</summary>
+    /// <summary>The value to return for a NaN input.</summary>
     static abstract T NaN();
     /// <summary>The upper boundary to clamp to on overflow.</summary>
     static abstract T Overflow();
@@ -19,8 +19,7 @@ public interface ISaturationHandler<T> where T : INumber<T>
 }
 
 /// <summary>
-/// The default saturation handler for floating points, which clamps to the destination type's
-/// maximum, minimum, or infinity values.
+/// The default saturation handler for floating-point types, clamping to infinity and NaN.
 /// </summary>
 public struct SaturationDefaultLimitsFloat<T> : ISaturationHandler<T>
     where T : IFloatingPointIeee754<T>
@@ -31,11 +30,10 @@ public struct SaturationDefaultLimitsFloat<T> : ISaturationHandler<T>
 }
 
 /// <summary>
-/// The default saturation handler for integers, which clamps to the destination type's
-/// maximum, minimum, or infinity values.
+/// The default saturation handler for integer types, clamping to MaxValue and MinValue.
 /// </summary>
 public struct SaturationDefaultLimitsInt<T> : ISaturationHandler<T>
-    where T : INumber<T>, IMinMaxValue<T>
+    where T : IBinaryInteger<T>
 {
     public static T NaN() => T.Zero;
     public static T Overflow() => T.MaxValue;
@@ -49,14 +47,11 @@ public struct SaturationDefaultLimitsInt<T> : ISaturationHandler<T>
 public static class SafeConversions
 {
     /// <summary>
-    /// saturated_cast<> is analogous to static_cast<> for numeric types, except
-    // that the specified numeric conversion will saturate by default rather than
-    // overflow or underflow, and NaN assignment to an integral will return 0.
-    // All boundary condition behaviors can be overridden with a custom handler.
+    /// The core implementation of saturated_cast. It uses a generic saturation handler to define its clamping boundaries.
     /// </summary>
     public static TDest SaturatedCast<TDest, TSrc, THandler>(TSrc value)
-        where TDest : INumber<TDest>, IMinMaxValue<TDest>
-        where TSrc : INumber<TSrc>
+        where TDest : INumber<TDest>
+        where TSrc : IFloatingPointIeee754<TSrc> // Source is always float/double for these conversions
         where THandler : ISaturationHandler<TDest>
     {
         if (TSrc.IsNaN(value))
@@ -68,85 +63,56 @@ public static class SafeConversions
         if (TSrc.IsNegativeInfinity(value))
             return THandler.Underflow();
 
-        // Compare against the handler's custom boundaries.
         if (TSrc.CreateSaturating(value) > TSrc.CreateSaturating(THandler.Overflow()))
             return THandler.Overflow();
 
         if (TSrc.CreateSaturating(value) < TSrc.CreateSaturating(THandler.Underflow()))
             return THandler.Underflow();
 
-        // The value is within the custom bounds, so we can safely cast it.
-        // CreateTruncating is used because we've already done the safety checks.
         return TDest.CreateTruncating(value);
-    }
-    
-    /// <summary>
-    /// A version of SaturatedCast that uses the default saturation limits for the destination type.
-    /// </summary>
-    public static TDest SaturatedCast<TDest, TSrc>(TSrc value)
-        where TDest : INumber<TDest>, IMinMaxValue<TDest>
-        where TSrc : INumber<TSrc>
-    {
-        // Use the default handler. This more closely matches the behavior of the old implementation.
-        return SaturatedCast<TDest, TSrc, SaturationDefaultLimits<TDest>>(value);
     }
 
     /// <summary>
-    /// checked_cast<> is analogous to static_cast<> for numeric types,
-    /// except that it CHECKs that the specified numeric conversion will not
-    /// overflow or underflow. NaN source will always trigger a CHECK.
+    /// Public overload of SaturatedCast for floating-point destinations. Uses the float-specific default handler.
     /// </summary>
+    public static TDest SaturatedCast<TDest, TSrc>(TSrc value)
+        where TDest : IFloatingPointIeee754<TDest>
+        where TSrc : IFloatingPointIeee754<TSrc>
+    {
+        return SaturatedCast<TDest, TSrc, SaturationDefaultLimitsFloat<TDest>>(value);
+    }
+
+    /// <summary>
+    /// Public overload of SaturatedCast for integer destinations. Uses the int-specific default handler.
+    /// </summary>
+    public static TDest SaturatedCast<TDest, TSrc>(TSrc value)
+        where TDest : IBinaryInteger<TDest>
+        where TSrc : IFloatingPointIeee754<TSrc>
+    {
+        return SaturatedCast<TDest, TSrc, SaturationDefaultLimitsInt<TDest>>(value);
+    }
+
     public static TDest CheckedCast<TDest, TSrc>(TSrc value)
         where TDest : INumber<TDest>
         where TSrc : INumber<TSrc>
     {
-        // .NET also provides an optimized checked version.
         return TDest.CreateChecked(value);
     }
 
-    /// <summary>
-    /// strict_cast<> is analogous to static_cast<> for numeric types, except that
-    /// it will cause a compile failure if the destination type is not large enough
-    /// to contain any value in the source type. It performs no runtime checking.
-    /// (This must be enforced by a separate static analyzer).
-    /// </summary>
     public static TDest StrictCast<TDest, TSrc>(TSrc value)
         where TDest : INumber<TDest>
         where TSrc : INumber<TSrc>
     {
-        // This operation truncates, like a standard C# cast (e.g., (short)myInt).
-        // The "strictness" must be enforced at compile time by an analyzer.
         return TDest.CreateTruncating(value);
     }
 
-    // floating -> integral conversions that saturate and thus can actually return
-    // an integral type.
-
-    // Rounds towards negative infinity (i.e., down).
-    public static int ClampFloor(float value) => SaturatedCast<int, float>((float)Math.Floor(value));
+    // floating -> integral conversions
+    public static int ClampFloor(float value) => SaturatedCast<int, float>(MathF.Floor(value));
     public static int ClampFloor(double value) => SaturatedCast<int, double>(Math.Floor(value));
-
-    // Rounds towards positive infinity (i.e., up).
-    public static int ClampCeil(float value) => SaturatedCast<int, float>((float)Math.Ceiling(value));
+    public static int ClampCeil(float value) => SaturatedCast<int, float>(MathF.Ceiling(value));
     public static int ClampCeil(double value) => SaturatedCast<int, double>(Math.Ceiling(value));
-
-    // Rounds towards nearest integer, with ties away from zero.
-    public static int ClampRound(float value) => SaturatedCast<int, float>((float)Math.Round(value));
+    public static int ClampRound(float value) => SaturatedCast<int, float>(MathF.Round(value));
     public static int ClampRound(double value) => SaturatedCast<int, double>(Math.Round(value));
 
-    // This performs a safe, absolute value via unsigned overflow.
-    public static uint SafeUnsignedAbs(int value)
-    {
-        return value < 0 ? 0u - (uint)value : (uint)value; // This works even for int.MinValue, because it uses unsigned wraparound.
-    }
-
-    public static bool IsValueInRangeForInt(long value) => value == (int)value;
-
-    public static bool IsValueInRangeForInt(double value) => value >= int.MinValue && value <= int.MaxValue && value == (int)value;
-
-    public static bool IsValueInRangeForInt(float value) => value >= int.MinValue && value <= int.MaxValue && value == (int)value;
-
-    public static bool IsValueInRangeForUInt(int value) => (uint)value <= uint.MaxValue; // always true for int >= 0, false otherwise
-
-    public static bool IsValueInRangeForUInt(long value) => (ulong)value <= uint.MaxValue;
+    public static uint SafeUnsignedAbs(int value) => (uint)(value < 0 ? -value : value);
 }
