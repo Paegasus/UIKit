@@ -1,8 +1,11 @@
-using System;
-using System.Collections.Generic;
+using System.Diagnostics;
+using UI.Extensions;
+
+using static UI.Numerics.SafeConversions;
 
 namespace UI.GFX.Geometry;
 
+// A floating version of Rect.
 public struct RectF : IEquatable<RectF>
 {
     private PointF origin_;
@@ -46,7 +49,10 @@ public struct RectF : IEquatable<RectF>
         size_.SetSize(width, height);
     }
 
+    // Shrinks the rectangle by |inset| on all sides.
     public void Inset(float inset) => Inset(new InsetsF(inset));
+
+    // Shrinks the rectangle by the given |insets|.
     public void Inset(in InsetsF insets)
     {
         origin_.Offset(insets.left(), insets.top());
@@ -54,33 +60,52 @@ public struct RectF : IEquatable<RectF>
         height -= insets.height();
     }
 
+    // Expands the rectangle by |outset| on all sides.
     public void Outset(float outset) => Inset(-outset);
+
+    // Expands the rectangle by the given |outsets|.
     public void Outset(in OutsetsF outsets) => Inset(outsets.ToInsets());
 
+    // Move the rectangle by a horizontal and vertical distance.
     public void Offset(float horizontal, float vertical) => origin_.Offset(horizontal, vertical);
     public void Offset(in Vector2DF distance) => origin_.Offset(distance.x, distance.y);
 
     public readonly InsetsF InsetsFrom(in RectF inner) =>
         InsetsF.TLBR(inner.y - y, inner.x - x, bottom() - inner.bottom(), right() - inner.right());
 
+    // Returns true if the area of the rectangle is zero.
     public readonly bool IsEmpty() => size_.IsEmpty();
 
+    // Returns true if the point identified by point_x and point_y falls inside
+    // this rectangle (including the left and the top edges, excluding the right
+    // and the bottom edges). If this rectangle is empty, this method returns
+    // false regardless of the point.
     public readonly bool Contains(float point_x, float point_y) =>
         point_x >= x && point_x < right() && point_y >= y && point_y < bottom();
 
+    // Returns true if the specified point is contained by this rectangle.
     public readonly bool Contains(in PointF point) => Contains(point.x, point.y);
+    
+    // Returns true if this rectangle contains the specified rectangle.
     public readonly bool Contains(in RectF rect) =>
         rect.x >= x && rect.right() <= right() && rect.y >= y && rect.bottom() <= bottom();
     
+    // Similar to Contains(), but uses edge-inclusive geometry, i.e. also returns
+    // true if the point is on the right or the bottom edge. If this rectangle
+    // is empty, this method returns true only if the point is at the origin of
+    // this rectangle.
     public readonly bool InclusiveContains(float point_x, float point_y) =>
         point_x >= x && point_x <= right() && point_y >= y && point_y <= bottom();
 
     public readonly bool InclusiveContains(in PointF point) => InclusiveContains(point.x, point.y);
 
+    // Returns true if this rectangle intersects the specified rectangle.
+    // An empty rectangle doesn't intersect any rectangle.
     public readonly bool Intersects(in RectF rect) =>
         !IsEmpty() && !rect.IsEmpty() && rect.x < right() && rect.right() > x && rect.y < bottom() &&
         rect.bottom() > y;
 
+    // Sets this rect to be the intersection of this rectangle with the given rectangle.
     public void Intersect(in RectF rect)
     {
         if (IsEmpty() || rect.IsEmpty())
@@ -93,7 +118,7 @@ public struct RectF : IEquatable<RectF>
         float ry = Math.Max(y, rect.y);
         float rr = Math.Min(right(), rect.right());
         float rb = Math.Min(bottom(), rect.bottom());
-
+        
         if (rx >= rr || ry >= rb)
         {
             SetRect(0, 0, 0, 0);
@@ -102,7 +127,14 @@ public struct RectF : IEquatable<RectF>
 
         SetRect(rx, ry, rr - rx, rb - ry);
     }
-    
+
+    // Sets this rect to be the intersection of itself and |rect| using
+    // edge-inclusive geometry.  If the two rectangles overlap but the overlap
+    // region is zero-area (either because one of the two rectangles is zero-area,
+    // or because the rectangles overlap at an edge or a corner), the result is
+    // the zero-area intersection.  The return value indicates whether the two
+    // rectangle actually have an intersection, since checking the result for
+    // isEmpty() is not conclusive.
     public bool InclusiveIntersect(in RectF rect)
     {
         float rx = Math.Max(x, rect.x);
@@ -110,6 +142,7 @@ public struct RectF : IEquatable<RectF>
         float rr = Math.Min(right(), rect.right());
         float rb = Math.Min(bottom(), rect.bottom());
 
+        // Return a clean empty rectangle for non-intersecting cases.
         if (rx > rr || ry > rb)
         {
             SetRect(0, 0, 0, 0);
@@ -120,6 +153,9 @@ public struct RectF : IEquatable<RectF>
         return true;
     }
 
+    // Sets this rect to be the union of this rectangle with the given rectangle.
+    // The union is the smallest rectangle containing both rectangles if not
+    // empty. If both rects are empty, this rect will become |rect|.
     public void Union(in RectF rect)
     {
         if (IsEmpty())
@@ -133,6 +169,9 @@ public struct RectF : IEquatable<RectF>
         UnionEvenIfEmpty(rect);
     }
 
+    // Similar to Union(), but the result will contain both rectangles even if
+    // either of them is empty. For example, union of (100, 100, 0x0) and
+    // (200, 200, 50x0) is (100, 100, 150x100).
     public void UnionEvenIfEmpty(in RectF rect)
     {
         float rx = Math.Min(x, rect.x);
@@ -141,15 +180,35 @@ public struct RectF : IEquatable<RectF>
         float rb = Math.Max(bottom(), rect.bottom());
         
         SetRect(rx, ry, rr - rx, rb - ry);
+
+        // Due to floating errors and SizeF::clamp(), the new rect may not fully
+        // contain the original rects at the right/bottom side. Expand the rect in the case.
+
+        if (right() < rr && width < float.MaxValue)
         
-        if (right() < rr) size_.SetToNextWidth();
-        if (bottom() < rb) size_.SetToNextHeight();
+            size_.SetToNextWidth();
+#if DEBUG
+            //DCHECK_GE(right(), rr);
+            Debug.Assert(right() >= rr, "RectF.UnionEvenIfEmpty(): right() should be >= rr.");
+#endif
+        
+        if (bottom() < rb && height < float.MaxValue)
+        {
+            size_.SetToNextHeight();
+#if DEBUG
+            //DCHECK_GE(bottom(), rb);
+            Debug.Assert(bottom() >= rb, "RectF.UnionEvenIfEmpty(): bottom() should be >= rb.");
+#endif
+        }
     }
 
+    // Sets this rect to be the rectangle resulting from subtracting |rect| from
+    // |*this|, i.e. the bounding rect of |Region(*this) - Region(rect)|.
     public void Subtract(in RectF rect)
     {
         if (!Intersects(rect))
             return;
+
         if (rect.Contains(this))
         {
             SetRect(0, 0, 0, 0);
@@ -163,17 +222,33 @@ public struct RectF : IEquatable<RectF>
 
         if (rect.y <= y && rect.bottom() >= bottom())
         {
-            if (rect.x <= x) rx = rect.right();
-            else if (rect.right() >= right()) rr = rect.x;
+            // complete intersection in the y-direction
+
+            if (rect.x <= x)
+                rx = rect.right();
+
+            else if (rect.right() >= right())
+                rr = rect.x;
         }
         else if (rect.x <= x && rect.right() >= right())
         {
-            if (rect.y <= y) ry = rect.bottom();
-            else if (rect.bottom() >= bottom()) rb = rect.y;
+            // complete intersection in the x-direction
+
+            if (rect.y <= y)
+                ry = rect.bottom();
+
+            else if (rect.bottom() >= bottom())
+                rb = rect.y;
         }
+
         SetRect(rx, ry, rr - rx, rb - ry);
     }
 
+    // Fits as much of the receiving rectangle into the supplied rectangle as
+    // possible, becoming the result. For example, if the receiver had
+    // a x-location of 2 and a width of 4, and the supplied rectangle had
+    // an x-location of 0 with a width of 5, the returned rectangle would have
+    // an x-location of 1 with a width of 4.
     public void AdjustToFit(in RectF rect)
     {
         float new_x = x;
@@ -185,8 +260,10 @@ public struct RectF : IEquatable<RectF>
         SetRect(new_x, new_y, new_width, new_height);
     }
 
+    // Returns the center of this rectangle.
     public readonly PointF CenterPoint() => new(x + width / 2, y + height / 2);
 
+    // Becomes a rectangle that has the same center point but with a size capped at given |size|.
     public void ClampToCenteredSize(in SizeF size)
     {
         float new_width = Math.Min(width, size.width);
@@ -196,41 +273,61 @@ public struct RectF : IEquatable<RectF>
         SetRect(new_x, new_y, new_width, new_height);
     }
 
+    // Transpose x and y axis.
     public void Transpose() => SetRect(y, x, height, width);
 
+    // Splits `this` in two halves, `left_half` and `right_half`.
     public void SplitVertically(out RectF left_half, out RectF right_half)
     {
         left_half = new RectF(x, y, width / 2, height);
         right_half = new RectF(left_half.right(), y, width - left_half.width, height);
     }
 
+    // Splits `this` in two halves, `top_half` and `bottom_half`.
     public void SplitHorizontally(out RectF top_half, out RectF bottom_half)
     {
         top_half = new RectF(x, y, width, height / 2);
         bottom_half = new RectF(x, top_half.bottom(), width, height - top_half.height);
     }
 
+    // Returns true if this rectangle shares an entire edge (i.e., same width or
+    // same height) with the given rectangle, and the rectangles do not overlap.
     public readonly bool SharesEdgeWith(in RectF rect) =>
         (y == rect.y && height == rect.height && (x == rect.right() || right() == rect.x)) ||
         (x == rect.x && width == rect.width && (y == rect.bottom() || bottom() == rect.y));
 
+    // Returns the manhattan distance from the rect to the point. If the point is
+    // inside the rect, returns 0.
     public readonly float ManhattanDistanceToPoint(in PointF point) =>
         Math.Max(0, Math.Max(x - point.x, point.x - right())) +
         Math.Max(0, Math.Max(y - point.y, point.y - bottom()));
 
+    // Returns the manhattan distance between the contents of this rect and the
+    // contents of the given rect. That is, if the intersection of the two rects
+    // is non-empty then the function returns 0. If the rects share a side, it
+    // returns the smallest non-zero value appropriate for float.
     public float ManhattanInternalDistance(in RectF rect)
     {
         RectF c = this;
         c.Union(rect);
         
-        float x = Math.Max(0, c.width - width - rect.width + float.Epsilon);
-        float y = Math.Max(0, c.height - height - rect.height + float.Epsilon);
+        float x = Math.Max(0, c.width - width - rect.width + float.MachineEpsilon);
+        float y = Math.Max(0, c.height - height - rect.height + float.MachineEpsilon);
         return x + y;
     }
 
-    public readonly PointF ClosestPoint(in PointF point) =>
-        new(Math.Clamp(point.x, x, right()), Math.Clamp(point.y, y, bottom()));
+    // Returns the closest point in or on an edge of this rect to the given point.
+    public readonly PointF ClosestPoint(in PointF point)
+    {
+        // Don't use Math.Clamp since it throws
+        // return new(Math.Clamp(point.x, x, right()), Math.Clamp(point.y, y, bottom()));
 
+        float cx = MathF.Min(MathF.Max(point.x, x), right());
+        float cy = MathF.Min(MathF.Max(point.y, y), bottom());
+        return new PointF(cx, cy);
+    }
+
+    // Scales the rectangle by |scale|.
     public void Scale(float scale) => Scale(scale, scale);
     public void Scale(float x_scale, float y_scale)
     {
@@ -238,6 +335,7 @@ public struct RectF : IEquatable<RectF>
         size = SizeF.ScaleSize(size, x_scale, y_scale);
     }
 
+    // Divides the rectangle by |inv_scale|.
     public void InvScale(float inv_scale) => InvScale(inv_scale, inv_scale);
     public void InvScale(float inv_x_scale, float inv_y_scale)
     {
@@ -245,6 +343,17 @@ public struct RectF : IEquatable<RectF>
         size.InvScale(inv_x_scale, inv_y_scale);
     }
 
+    // This method reports if the RectF can be safely converted to an integer
+    // Rect. When it is false, some dimension of the RectF is outside the bounds
+    // of what an integer can represent, and converting it to a Rect will require clamping.
+    public readonly bool IsExpressibleAsRect() =>
+        IsValueInRangeForInt(x) &&
+        IsValueInRangeForInt(y) &&
+        IsValueInRangeForInt(width) &&
+        IsValueInRangeForInt(height) &&
+        IsValueInRangeForInt(right()) &&
+        IsValueInRangeForInt(bottom());
+/*
     public readonly bool IsExpressibleAsRect() =>
         x >= int.MinValue && x <= int.MaxValue &&
         y >= int.MinValue && y <= int.MaxValue &&
@@ -252,10 +361,13 @@ public struct RectF : IEquatable<RectF>
         height >= int.MinValue && height <= int.MaxValue &&
         right() >= int.MinValue && right() <= int.MaxValue &&
         bottom() >= int.MinValue && bottom() <= int.MaxValue;
+*/
 
     public readonly bool ApproximatelyEqual(in RectF rect, float tolerance_x, float tolerance_y) =>
-        Math.Abs(x - rect.x) <= tolerance_x && Math.Abs(y - rect.y) <= tolerance_y &&
-        Math.Abs(right() - rect.right()) <= tolerance_x && Math.Abs(bottom() - rect.bottom()) <= tolerance_y;
+        MathF.Abs(x - rect.x) <= tolerance_x &&
+        MathF.Abs(y - rect.y) <= tolerance_y &&
+        MathF.Abs(right() - rect.right()) <= tolerance_x &&
+        MathF.Abs(bottom() - rect.bottom()) <= tolerance_y;
 
     public override readonly string ToString() => $"{origin_} {size_}";
     public override readonly int GetHashCode() => HashCode.Combine(origin_, size_);
@@ -264,11 +376,12 @@ public struct RectF : IEquatable<RectF>
 
     private static void AdjustAlongAxis(float dst_origin, float dst_size, ref float origin, ref float size)
     {
-        size = Math.Min(dst_size, size);
+        size = MathF.Min(dst_size, size);
+
         if (origin < dst_origin)
             origin = dst_origin;
         else
-            origin = Math.Min(dst_origin + dst_size, origin + size) - size;
+            origin = MathF.Min(dst_origin + dst_size, origin + size) - size;
     }
 
     public static bool operator ==(in RectF lhs, in RectF rhs) => lhs.Equals(rhs);
@@ -293,7 +406,8 @@ public struct RectF : IEquatable<RectF>
         result.Union(b);
         return result;
     }
-    
+
+    // Note: Uses base::span<const RectF> in original C++ code, consider using C# Span types
     public static RectF UnionRects(IEnumerable<RectF> rects)
     {
         RectF result = new RectF();
@@ -316,29 +430,59 @@ public struct RectF : IEquatable<RectF>
         return result;
     }
 
+    public static RectF ScaleRect(in RectF r, float x_scale, float y_scale) => new RectF(r.x * x_scale, r.y * y_scale, r.width * x_scale, r.height * y_scale);
+
+    public static RectF ScaleRect(in RectF r, in SizeF size) => ScaleRect(r, size.width, size.height);
+
+    public static RectF ScaleRect(in RectF r, in Size size) => ScaleRect(r, (SizeF)size);
+
+    public static RectF ScaleRect(in RectF r, float scale) => ScaleRect(r, scale, scale);
+
+    public static RectF TransposeRect(in RectF r) => new RectF(r.y, r.x, r.height, r.width);
+
+    // Construct a rectangle with top-left corner at |p1| and bottom-right corner
+    // at |p2|. If the exact result of top - bottom or left - right cannot be
+    // presented in float, then the height/width will be grown to the next
+    // float, so that it includes both |p1| and |p2|.
+    //
+    // This could also be thought of as "the smallest rect that contains both
+    // points", except that we consider points on the right/bottom edges of the
+    // rect to be outside the rect.  So technically one or both points will not be
+    // contained within the rect, because they will appear on one of these edges.
     public static RectF BoundingRect(in PointF p1, in PointF p2)
     {
-        float left = Math.Min(p1.x, p2.x);
-        float top = Math.Min(p1.y, p2.y);
-        float right = Math.Max(p1.x, p2.x);
-        float bottom = Math.Max(p1.y, p2.y);
+        float left = MathF.Min(p1.x, p2.x);
+        float top = MathF.Min(p1.y, p2.y);
+        float right = MathF.Max(p1.x, p2.x);
+        float bottom = MathF.Max(p1.y, p2.y);
         float width = right - left;
         float height = bottom - top;
 
+        // If the precision is lost during the calculation, always grow to the next
+        // value to include both ends.
         if (left + width != right)
         {
             width = MathF.BitIncrement(width);
+
+            if (float.IsInfinity(width))
+                width = float.MaxValue;
         }
+
         if (top + height != bottom)
         {
             height = MathF.BitIncrement(height);
+
+            if (float.IsInfinity(height))
+                height = float.MaxValue;
         }
 
         return new RectF(left, top, width, height);
     }
-    
+
+    // Return a maximum rectangle in which any point is covered by either a or b.
     public static RectF MaximumCoveredRect(in RectF a, in RectF b)
     {
+        // Check a or b by itself.
         RectF maximum = a;
         float maximum_area = a.size.GetArea();
         if (b.size.GetArea() > maximum_area)
@@ -346,22 +490,26 @@ public struct RectF : IEquatable<RectF>
             maximum = b;
             maximum_area = b.size.GetArea();
         }
-        
+
+        // Check the regions that include the intersection of a and b. This can be
+        // done by taking the intersection and expanding it vertically and
+        // horizontally. These expanded intersections will both still be covered by
+        // a or b.
         RectF intersection = a;
         intersection.InclusiveIntersect(b);
         if (!intersection.size.IsZero())
         {
             RectF vert_expanded_intersection = intersection;
-            vert_expanded_intersection.y = Math.Min(a.y, b.y);
-            vert_expanded_intersection.height = Math.Max(a.bottom(), b.bottom()) - vert_expanded_intersection.y;
+            vert_expanded_intersection.y = MathF.Min(a.y, b.y);
+            vert_expanded_intersection.height = MathF.Max(a.bottom(), b.bottom()) - vert_expanded_intersection.y;
             if (vert_expanded_intersection.size.GetArea() > maximum_area)
             {
                 maximum = vert_expanded_intersection;
                 maximum_area = vert_expanded_intersection.size.GetArea();
             }
             RectF horiz_expanded_intersection = intersection;
-            horiz_expanded_intersection.x = Math.Min(a.x, b.x);
-            horiz_expanded_intersection.width = Math.Max(a.right(), b.right()) - horiz_expanded_intersection.x;
+            horiz_expanded_intersection.x = MathF.Min(a.x, b.x);
+            horiz_expanded_intersection.width = MathF.Max(a.right(), b.right()) - horiz_expanded_intersection.x;
             if (horiz_expanded_intersection.size.GetArea() > maximum_area)
             {
                 maximum = horiz_expanded_intersection;
@@ -369,7 +517,9 @@ public struct RectF : IEquatable<RectF>
         }
         return maximum;
     }
-    
+
+    // Returns the rect in |dest_rect| corresponding to |r] in |src_rect| when
+    // |src_rect| is mapped to |dest_rect|.
     public static RectF MapRect(in RectF r, in RectF src_rect, in RectF dest_rect)
     {
         if (src_rect.IsEmpty())

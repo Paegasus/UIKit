@@ -110,11 +110,15 @@ public static class SafeConversions
     }
 
     // This performs a safe, absolute value via unsigned overflow.
-    public static uint SafeUnsignedAbs(int value)
-    {
-        // This works even for int.MinValue, because it uses unsigned wraparound.
-        return value < 0
-                    ? 0u - (uint)value
-                    : (uint)value;
-    }
+    public static uint SafeUnsignedAbs(int value) => value < 0 ? 0u - (uint)value : (uint)value; // // This works even for int.MinValue, because it uses unsigned wraparound.
+
+    public static bool IsValueInRangeForInt(long value) => value == (int)value;
+
+    public static bool IsValueInRangeForInt(double value) => value >= int.MinValue && value <= int.MaxValue && value == (int)value;
+
+    public static bool IsValueInRangeForInt(float value) => value >= int.MinValue && value <= int.MaxValue && value == (int)value;
+
+    public static bool IsValueInRangeForUInt(int value) => (uint)value <= uint.MaxValue; // always true for int >= 0, false otherwise
+
+    public static bool IsValueInRangeForUInt(long value) => (ulong)value <= uint.MaxValue;
 }
