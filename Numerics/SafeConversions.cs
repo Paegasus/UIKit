@@ -19,32 +19,27 @@ public interface ISaturationHandler<T> where T : INumber<T>
 }
 
 /// <summary>
-/// The default saturation handler, which clamps to the destination type's
+/// The default saturation handler for floating points, which clamps to the destination type's
 /// maximum, minimum, or infinity values.
 /// </summary>
-public struct SaturationDefaultLimits<T> : ISaturationHandler<T> where T : INumber<T>
+public struct SaturationDefaultLimitsFloat<T> : ISaturationHandler<T>
+    where T : IFloatingPointIeee754<T>
 {
-    public static T NaN()
-    {
-        // Replicates C++: NaN source to integer is 0.
-        if (T.IsNaN(T.Zero))
-            return T.CreateSaturating(double.NaN); // Returns NaN for float/double
-        return T.Zero;
-    }
+    public static T NaN() => T.NaN;
+    public static T Overflow() => T.PositiveInfinity;
+    public static T Underflow() => T.NegativeInfinity;
+}
 
-    public static T Overflow()
-    {
-        if (T.IsPositiveInfinity(T.Zero))
-            return T.PositiveInfinity;
-        return T.MaxValue;
-    }
-
-    public static T Underflow()
-    {
-        if (T.IsNegativeInfinity(T.Zero))
-            return T.NegativeInfinity;
-        return T.MinValue;
-    }
+/// <summary>
+/// The default saturation handler for integers, which clamps to the destination type's
+/// maximum, minimum, or infinity values.
+/// </summary>
+public struct SaturationDefaultLimitsInt<T> : ISaturationHandler<T>
+    where T : INumber<T>, IMinMaxValue<T>
+{
+    public static T NaN() => T.Zero;
+    public static T Overflow() => T.MaxValue;
+    public static T Underflow() => T.MinValue;
 }
 
 
