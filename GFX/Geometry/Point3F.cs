@@ -1,5 +1,3 @@
-using System;
-
 namespace UI.GFX.Geometry;
 
 // A point has an x, y and z coordinate.

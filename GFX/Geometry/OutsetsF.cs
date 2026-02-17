@@ -5,54 +5,36 @@ namespace UI.GFX.Geometry;
 /// </summary>
 public struct OutsetsF : IEquatable<OutsetsF>
 {
-    private float top_;
-    private float left_;
-    private float bottom_;
-    private float right_;
+    private float m_Top;
+    private float m_Left;
+    private float m_Bottom;
+    private float m_Right;
 
-    public float top() => top_;
-    public float left() => left_;
-    public float bottom() => bottom_;
-    public float right() => right_;
+    public readonly float Top => m_Top;
+    public readonly float Left => m_Left;
+    public readonly float Bottom => m_Bottom;
+    public readonly float Right => m_Right;
 
-    public OutsetsF(float all)
-    {
-        top_ = all;
-        left_ = all;
-        bottom_ = all;
-        right_ = all;
-    }
+    public OutsetsF(float all) => (m_Top, m_Left, m_Bottom, m_Right) = (all, all, all, all);
 
-    public OutsetsF(float vertical, float horizontal)
-    {
-        top_ = vertical;
-        left_ = horizontal;
-        bottom_ = vertical;
-        right_ = horizontal;
-    }
+    public OutsetsF(float vertical, float horizontal) => (m_Top, m_Left, m_Bottom, m_Right) = (vertical, horizontal, vertical, horizontal);
 
-    public OutsetsF(float top, float left, float bottom, float right)
-    {
-        top_ = top;
-        left_ = left;
-        bottom_ = bottom;
-        right_ = right;
-    }
+    public OutsetsF(float top, float left, float bottom, float right) => (m_Top, m_Left, m_Bottom, m_Right) = (top, left, bottom, right);
 
     // Returns the total width taken up by the insets/outsets, which is the sum of the left and right insets/outsets.
-    public readonly float width() => left_ + right_;
+    public readonly float Width => m_Left + m_Right;
 
     // Returns the total height taken up by the insets/outsets, which is the sum of the top and bottom insets/outsets.
-    public readonly float height() => top_ + bottom_;
+    public readonly float Height => m_Top + m_Bottom;
 
     // Returns true if the insets/outsets are empty.
-    public readonly bool IsEmpty() => width() == 0f && height() == 0f;
+    public readonly bool IsEmpty => Width == 0f && Height == 0f;
 
     // Flips x- and y-axes.
     public void Transpose()
     {
-        (top_, left_) = (left_, top_);
-        (bottom_, right_) = (right_, bottom_);
+        (m_Top, m_Left) = (m_Left, m_Top);
+        (m_Bottom, m_Right) = (m_Right, m_Bottom);
     }
 
     // These setters can be used together with the default constructor and the
@@ -62,27 +44,27 @@ public struct OutsetsF : IEquatable<OutsetsF>
     //   InsetsF b = InsetsF().set_left(2).set_bottom(3); // 0, 2, 3, 0
     //   InsetsF c = InsetsF(1).set_top(5);               // 5, 1, 1, 1
 
-    public OutsetsF set_top(float top)
+    public OutsetsF SetTop(float top)
     {
-        top_ = top;
+        m_Top = top;
         return this;
     }
 
-    public OutsetsF set_left(float left)
+    public OutsetsF SetLeft(float left)
     {
-        left_ = left;
+        m_Left = left;
         return this;
     }
 
-    public OutsetsF set_bottom(float bottom)
+    public OutsetsF SetBottom(float bottom)
     {
-        bottom_ = bottom;
+        m_Bottom = bottom;
         return this;
     }
 
-    public OutsetsF set_right(float right)
+    public OutsetsF SetRight(float right)
     {
-        right_ = right;
+        m_Right = right;
         return this;
     }
 
@@ -99,60 +81,59 @@ public struct OutsetsF : IEquatable<OutsetsF>
     // Sets each side to the maximum of the side and the corresponding side of |other|.
     public void SetToMax(in OutsetsF other)
     {
-        top_ = Math.Max(top_, other.top_);
-        left_ = Math.Max(left_, other.left_);
-        bottom_ = Math.Max(bottom_, other.bottom_);
-        right_ = Math.Max(right_, other.right_);
+        m_Top = Math.Max(m_Top, other.m_Top);
+        m_Left = Math.Max(m_Left, other.m_Left);
+        m_Bottom = Math.Max(m_Bottom, other.m_Bottom);
+        m_Right = Math.Max(m_Right, other.m_Right);
     }
 
     public void Scale(float x_scale, float y_scale)
     {
-        top_ *= y_scale;
-        left_ *= x_scale;
-        bottom_ *= y_scale;
-        right_ *= x_scale;
+        m_Top *= y_scale;
+        m_Left *= x_scale;
+        m_Bottom *= y_scale;
+        m_Right *= x_scale;
     }
 
     public void Scale(float scale) => Scale(scale, scale);
 
-    public InsetsF ToInsets() => new InsetsF(-top(), -left(), -bottom(), -right());
+    public readonly InsetsF ToInsets() => new (-Top, -Left, -Bottom, -Right);
 
-    public override readonly string ToString() => $"x:{left_},{right_} y:{top_},{bottom_}";
-    public override readonly int GetHashCode() => HashCode.Combine(top_, left_, bottom_, right_);
+    public override readonly string ToString() => $"x:{m_Left},{m_Right} y:{m_Top},{m_Bottom}";
+    public override readonly int GetHashCode() => HashCode.Combine(m_Top, m_Left, m_Bottom, m_Right);
     public override readonly bool Equals(object? obj) => obj is OutsetsF other && Equals(other);
-    public readonly bool Equals(OutsetsF other) =>
-        top_ == other.top_ && left_ == other.left_ && bottom_ == other.bottom_ && right_ == other.right_;
+    public readonly bool Equals(OutsetsF other) => m_Top == other.m_Top && m_Left == other.m_Left && m_Bottom == other.m_Bottom && m_Right == other.m_Right;
 
     public static bool operator ==(in OutsetsF left, in OutsetsF right) => left.Equals(right);
     public static bool operator !=(in OutsetsF left, in OutsetsF right) => !left.Equals(right);
 
     public void operator +=(in OutsetsF other)
     {
-        top_ += other.top_;
-        left_ += other.left_;
-        bottom_ += other.bottom_;
-        right_ += other.right_;
+        m_Top += other.m_Top;
+        m_Left += other.m_Left;
+        m_Bottom += other.m_Bottom;
+        m_Right += other.m_Right;
     }
 
     public void operator -=(in OutsetsF other)
     {
-        top_ -= other.top_;
-        left_ -= other.left_;
-        bottom_ -= other.bottom_;
-        right_ -= other.right_;
+        m_Top -= other.m_Top;
+        m_Left -= other.m_Left;
+        m_Bottom -= other.m_Bottom;
+        m_Right -= other.m_Right;
     }
 
-    public static OutsetsF operator +(OutsetsF lhs, in OutsetsF rhs)
+    public static OutsetsF operator +(OutsetsF a, in OutsetsF b)
     {
-        lhs += rhs;
-        return lhs;
+        a += b;
+        return a;
     }
 
-    public static OutsetsF operator -(OutsetsF lhs, in OutsetsF rhs)
+    public static OutsetsF operator -(OutsetsF a, in OutsetsF b)
     {
-        lhs -= rhs;
-        return lhs;
+        a -= b;
+        return a;
     }
 
-    public static OutsetsF operator -(in OutsetsF v) => new OutsetsF(-v.top_, -v.left_, -v.bottom_, -v.right_);
+    public static OutsetsF operator -(in OutsetsF outsets) => new (-outsets.m_Top, -outsets.m_Left, -outsets.m_Bottom, -outsets.m_Right);
 }

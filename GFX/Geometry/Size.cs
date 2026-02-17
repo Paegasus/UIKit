@@ -1,5 +1,3 @@
-using UI.Numerics;
-
 using static UI.Numerics.ClampedMath;
 using static UI.GFX.Geometry.SizeConversions;
 

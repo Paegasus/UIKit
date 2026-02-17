@@ -1,5 +1,3 @@
-using System;
-
 namespace UI.GFX.Geometry;
 
 //// <summary>
