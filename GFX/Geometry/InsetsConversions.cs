@@ -7,21 +7,21 @@ public static class InsetsConversions
     public static Insets ToFlooredInsets(in InsetsF insets)
     {
         return Insets.TLBR(
-            ClampFloor(insets.top()), ClampFloor(insets.left()),
-            ClampFloor(insets.bottom()), ClampFloor(insets.right()));
+            ClampFloor(insets.Top), ClampFloor(insets.Left),
+            ClampFloor(insets.Bottom), ClampFloor(insets.Right));
     }
 
     public static Insets ToCeiledInsets(in InsetsF insets)
     {
         return Insets.TLBR(
-            ClampCeil(insets.top()), ClampCeil(insets.left()),
-            ClampCeil(insets.bottom()), ClampCeil(insets.right()));
+            ClampCeil(insets.Top), ClampCeil(insets.Left),
+            ClampCeil(insets.Bottom), ClampCeil(insets.Right));
     }
 
     public static Insets ToRoundedInsets(in InsetsF insets)
     {
         return Insets.TLBR(
-            ClampRound(insets.top()), ClampRound(insets.left()),
-            ClampRound(insets.bottom()), ClampRound(insets.right()));
+            ClampRound(insets.Top), ClampRound(insets.Left),
+            ClampRound(insets.Bottom), ClampRound(insets.Right));
     }
 }

@@ -53,9 +53,9 @@ public struct RectF : IEquatable<RectF>
     // Shrinks the rectangle by the given |insets|.
     public void Inset(in InsetsF insets)
     {
-        m_Origin.Offset(insets.left(), insets.top());
-        Width -= insets.width();
-        Height -= insets.height();
+        m_Origin.Offset(insets.Left, insets.Top);
+        Width -= insets.Width;
+        Height -= insets.Height;
     }
 
     // Expands the rectangle by |outset| on all sides.
