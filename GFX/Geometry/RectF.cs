@@ -343,25 +343,20 @@ public struct RectF : IEquatable<RectF>
         size.InvScale(inv_x_scale, inv_y_scale);
     }
 
-    // This method reports if the RectF can be safely converted to an integer
-    // Rect. When it is false, some dimension of the RectF is outside the bounds
-    // of what an integer can represent, and converting it to a Rect will require clamping.
-    public readonly bool IsExpressibleAsRect() =>
-        IsValueInRangeForInt(x) &&
-        IsValueInRangeForInt(y) &&
-        IsValueInRangeForInt(width) &&
-        IsValueInRangeForInt(height) &&
-        IsValueInRangeForInt(right()) &&
-        IsValueInRangeForInt(bottom());
-/*
-    public readonly bool IsExpressibleAsRect() =>
-        x >= int.MinValue && x <= int.MaxValue &&
-        y >= int.MinValue && y <= int.MaxValue &&
-        width >= int.MinValue && width <= int.MaxValue &&
-        height >= int.MinValue && height <= int.MaxValue &&
-        right() >= int.MinValue && right() <= int.MaxValue &&
-        bottom() >= int.MinValue && bottom() <= int.MaxValue;
-*/
+    // This method reports if the RectF can be safely converted to an integer Rect.
+    // When it is false, some dimension of the RectF is outside the bounds of what an integer can represent,
+    // and converting it to a Rect will require clamping.
+    public readonly bool IsExpressibleAsRect()
+    {
+        static bool IsValueInRageForInt(float x) => x >= int.MinValue && x <= int.MaxValue;
+
+        return  IsValueInRageForInt(x) &&
+                IsValueInRageForInt(y) &&
+                IsValueInRageForInt(width) &&
+                IsValueInRageForInt(height) &&
+                IsValueInRageForInt(right()) &&
+                IsValueInRageForInt(bottom());
+    }
 
     public readonly bool ApproximatelyEqual(in RectF rect, float tolerance_x, float tolerance_y) =>
         MathF.Abs(x - rect.x) <= tolerance_x &&
