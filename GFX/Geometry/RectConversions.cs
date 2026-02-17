@@ -25,10 +25,10 @@ public static class RectConversions
     // the geometry values exceed int range and are clamped to int.
     public static Rect ToEnclosingRect(in RectF rect)
     {
-        int left = ClampFloor(rect.x);
-        int right = rect.width != 0f ? ClampCeil(rect.right()) : left;
-        int top = ClampFloor(rect.y);
-        int bottom = rect.height != 0f ? ClampCeil(rect.bottom()) : top;
+        int left = ClampFloor(rect.X);
+        int right = rect.Width != 0f ? ClampCeil(rect.Right) : left;
+        int top = ClampFloor(rect.Y);
+        int bottom = rect.Height != 0f ? ClampCeil(rect.Bottom) : top;
 
         Rect result = new();
         result.SetByBounds(left, top, right, bottom);
@@ -42,10 +42,10 @@ public static class RectConversions
     // non-integer rect. The default error is 0.001, which is used in cc/viz.
     public static Rect ToEnclosingRectIgnoringError(in RectF rect, float error = 0.001f)
     {
-        int left = FloorIgnoringError(rect.x, error);
-        int right = rect.width != 0f ? CeilIgnoringError(rect.right(), error) : left;
-        int top = FloorIgnoringError(rect.y, error);
-        int bottom = rect.height != 0f ? CeilIgnoringError(rect.bottom(), error) : top;
+        int left = FloorIgnoringError(rect.X, error);
+        int right = rect.Width != 0f ? CeilIgnoringError(rect.Right, error) : left;
+        int top = FloorIgnoringError(rect.Y, error);
+        int bottom = rect.Height != 0f ? CeilIgnoringError(rect.Bottom, error) : top;
 
         Rect result = new();
         result.SetByBounds(left, top, right, bottom);
@@ -59,9 +59,9 @@ public static class RectConversions
     public static Rect ToEnclosedRect(in RectF rect)
     {
         Rect result = new();
-        result.SetByBounds(ClampCeil(rect.x), ClampCeil(rect.y),
-                           ClampFloor(rect.right()),
-                           ClampFloor(rect.bottom()));
+        result.SetByBounds(ClampCeil(rect.X), ClampCeil(rect.Y),
+                           ClampFloor(rect.Right),
+                           ClampFloor(rect.Bottom));
         return result;
     }
 
@@ -72,10 +72,10 @@ public static class RectConversions
     // non-integer rect.
     public static Rect ToEnclosedRectIgnoringError(in RectF rect, float error)
     {
-        int left = CeilIgnoringError(rect.x, error);
-        int right = rect.width != 0f ? FloorIgnoringError(rect.right(), error) : left;
-        int top = CeilIgnoringError(rect.y, error);
-        int bottom = rect.height != 0f ? FloorIgnoringError(rect.bottom(), error) : top;
+        int left = CeilIgnoringError(rect.X, error);
+        int right = rect.Width != 0f ? FloorIgnoringError(rect.Right, error) : left;
+        int top = CeilIgnoringError(rect.Y, error);
+        int bottom = rect.Height != 0f ? FloorIgnoringError(rect.Bottom, error) : top;
 
         Rect result = new();
         result.SetByBounds(left, top, right, bottom);
@@ -88,10 +88,10 @@ public static class RectConversions
     // you should use a different method.
     public static Rect ToNearestRect(in RectF rect)
     {
-        float float_min_x = rect.x;
-        float float_min_y = rect.y;
-        float float_max_x = rect.right();
-        float float_max_y = rect.bottom();
+        float float_min_x = rect.X;
+        float float_min_y = rect.Y;
+        float float_max_x = rect.Right;
+        float float_max_y = rect.Bottom;
 
         int min_x = ClampRound(float_min_x);
         int min_y = ClampRound(float_min_y);
@@ -116,10 +116,10 @@ public static class RectConversions
     // to an integer grid is withing |distance|.
     public static bool IsNearestRectWithinDistance(in RectF rect, float distance)
     {
-        float float_min_x = rect.x;
-        float float_min_y = rect.y;
-        float float_max_x = rect.right();
-        float float_max_y = rect.bottom();
+        float float_min_x = rect.X;
+        float float_min_y = rect.Y;
+        float float_max_x = rect.Right;
+        float float_max_y = rect.Bottom;
 
         int min_x = ClampRound(float_min_x);
         int min_y = ClampRound(float_min_y);
@@ -135,10 +135,10 @@ public static class RectConversions
     // Returns the Rect after rounding the corners of the RectF to an integer grid.
     public static Rect ToRoundedRect(in RectF rect)
     {
-        int left = ClampRound(rect.x);
-        int top = ClampRound(rect.y);
-        int right = ClampRound(rect.right());
-        int bottom = ClampRound(rect.bottom());
+        int left = ClampRound(rect.X);
+        int top = ClampRound(rect.Y);
+        int right = ClampRound(rect.Right);
+        int bottom = ClampRound(rect.Bottom);
         Rect result = new();
         result.SetByBounds(left, top, right, bottom);
         return result;
@@ -148,7 +148,7 @@ public static class RectConversions
     // Please prefer the previous two functions in new code.
     public static Rect ToFlooredRectDeprecated(in RectF rect)
     {
-        return new Rect(ClampFloor(rect.x), ClampFloor(rect.y),
-              ClampFloor(rect.width), ClampFloor(rect.height));
+        return new Rect(ClampFloor(rect.X), ClampFloor(rect.Y),
+              ClampFloor(rect.Width), ClampFloor(rect.Height));
     }
 }

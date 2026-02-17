@@ -6,93 +6,109 @@ namespace UI.GFX.Geometry;
 
 public struct Rect : IEquatable<Rect>
 {
-    private Point origin_;
-    private Size size_;
+    private Point m_Origin;
+    private Size m_Size;
+
+    public int X
+    {
+        readonly get => m_Origin.X;
+        set
+        {
+            // Sets the X position while preserving the width.
+            m_Origin.X = value;
+            m_Size.Width = ClampWidthOrHeight(value, m_Size.Width);
+        }
+    }
+
+    public int Y
+    {
+        readonly get => m_Origin.Y;
+        set
+        {
+            // Sets the Y position while preserving the height.
+            m_Origin.Y = value;
+            m_Size.Height = ClampWidthOrHeight(value, m_Size.Height);
+        }
+    }
+
+    public int Width
+    {
+        readonly get => m_Size.Width;
+        set => m_Size.Width = ClampWidthOrHeight(m_Origin.X, value);
+    }
+
+    public int Height
+    {
+        readonly get => m_Size.Height;
+        set => m_Size.Height = ClampWidthOrHeight(m_Origin.Y, value);
+    }
+
+    public Point Origin
+    {
+        readonly get => m_Origin;
+        set
+        {
+            m_Origin = value;
+            // Ensure that width and height remain valid.
+            m_Size.Width = ClampWidthOrHeight(m_Origin.X, m_Size.Width);
+            m_Size.Height = ClampWidthOrHeight(m_Origin.Y, m_Size.Height);
+        }
+    }
+
+    public Size Size
+    {
+        readonly get => m_Size;
+        set
+        {
+            m_Size.Width = ClampWidthOrHeight(m_Origin.X, value.Width);
+            m_Size.Height = ClampWidthOrHeight(m_Origin.Y, value.Height);
+        }
+    }
+
+    public readonly int Right => X + Width;
+    public readonly int Bottom => Y + Height;
+
+    public readonly Point TopRight => new(Right, Y);
+    public readonly Point BottomLeft => new(X, Bottom);
+    public readonly Point BottomRight => new(Right, Bottom);
+
+    public readonly Point LeftCenter => new(X, Y + Height / 2);
+    public readonly Point TopCenter => new(X + Width / 2, Y);
+    public readonly Point RightCenter => new(Right, Y + Height / 2);
+    public readonly Point BottomCenter => new(X + Width / 2, Bottom);
 
     public Rect(int width, int height)
     {
-        origin_ = new Point();
-        size_ = new Size(width, height);
+        m_Origin = new Point();
+        m_Size = new Size(width, height);
     }
 
     public Rect(int x, int y, int width, int height)
     {
-        origin_ = new Point(x, y);
-        size_ = new Size(ClampWidthOrHeight(x, width), ClampWidthOrHeight(y, height));
+        m_Origin = new Point(x, y);
+        m_Size = new Size(ClampWidthOrHeight(x, width), ClampWidthOrHeight(y, height));
     }
 
     public Rect(Size size)
     {
-        origin_ = new Point();
-        size_ = size;
+        m_Origin = new Point();
+        m_Size = size;
     }
 
     public Rect(Point origin, Size size)
     {
-        origin_ = origin;
-        size_ = new Size(ClampWidthOrHeight(origin.x, size.width), ClampWidthOrHeight(origin.y, size.height));
+        m_Origin = origin;
+        m_Size = new Size(ClampWidthOrHeight(origin.X, size.Width), ClampWidthOrHeight(origin.Y, size.Height));
     }
 
-    public readonly int x() => origin_.x;
-
-    // Sets the X position while preserving the width.
-    public void set_x(int x)
-    {
-        origin_.x = x;
-        size_.width = ClampWidthOrHeight(x, width());
-    }
-
-    public readonly int y() => origin_.y;
-
-    // Sets the Y position while preserving the height.
-    public void set_y(int y)
-    {
-        origin_.y = y;
-        size_.height = ClampWidthOrHeight(y, height());
-    }
-
-    public readonly int width() => size_.width;
-    public void set_width(int width) => size_.width = ClampWidthOrHeight(x(), width);
-
-    public readonly int height() => size_.height;
-    public void set_height(int height) => size_.height = ClampWidthOrHeight(y(), height);
-
-    public readonly Point origin() => origin_;
-    public void set_origin(Point origin)
-    {
-        origin_ = origin;
-        // Ensure that width and height remain valid.
-        set_width(width());
-        set_height(height());
-    }
-
-    public readonly Size size() => size_;
-    public void set_size(Size size)
-    {
-        set_width(size.width);
-        set_height(size.height);
-    }
-
-    public readonly int right() => x() + width();
-    public readonly int bottom() => y() + height();
-
-    public readonly Point top_right() => new Point(right(), y());
-    public readonly Point bottom_left() => new Point(x(), bottom());
-    public readonly Point bottom_right() => new Point(right(), bottom());
-
-    public readonly Point left_center() => new Point(x(), y() + height() / 2);
-    public readonly Point top_center() => new Point(x() + width() / 2, y());
-    public readonly Point right_center() => new Point(right(), y() + height() / 2);
-    public readonly Point bottom_center() => new Point(x() + width() / 2, bottom());
-
-    public readonly Vector2D OffsetFromOrigin() => new Vector2D(x(), y());
+    public readonly Vector2D OffsetFromOrigin() => new (X, Y);
 
     public void SetRect(int x, int y, int width, int height)
     {
-        origin_.SetPoint(x, y);
+        m_Origin.SetPoint(x, y);
         // Ensure that width and height remain valid.
-        set_width(width);
-        set_height(height);
+        m_Size.Width = ClampWidthOrHeight(x, width);
+        m_Size.Height = ClampWidthOrHeight(x, height);
     }
 
     // Use in place of SetRect() when you know the edges of the rectangle instead
@@ -106,9 +122,9 @@ public struct Rect : IEquatable<Rect>
 
     public void SetHorizontalBounds(int left, int right)
     {
-        set_x(left);
-        set_width(ClampSub(right, left));
-        if (this.right() != right)
+        X = left;
+        Width = ClampSub(right, left);
+        if (this.Right != right)
         {
             AdjustForSaturatedRight(right);
         }
@@ -116,9 +132,9 @@ public struct Rect : IEquatable<Rect>
 
     public void SetVerticalBounds(int top, int bottom)
     {
-        set_y(top);
-        set_height(ClampSub(bottom, top));
-        if (this.bottom() != bottom)
+        Y = top;
+        Height = ClampSub(bottom, top);
+        if (this.Bottom != bottom)
         {
             AdjustForSaturatedBottom(bottom);
         }
@@ -130,9 +146,9 @@ public struct Rect : IEquatable<Rect>
     // Shrink the rectangle by the given |insets|
     public void Inset(in Insets insets)
     {
-        origin_ += new Vector2D(insets.left(), insets.top());
-        set_width(ClampSub(width(), insets.width()));
-        set_height(ClampSub(height(), insets.height()));
+        m_Origin += new Vector2D(insets.left(), insets.top());
+        Width = ClampSub(Width, insets.width());
+        Height = ClampSub(Height, insets.height());
     }
 
     // Expand the rectangle by |outset| on all sides.
@@ -145,43 +161,43 @@ public struct Rect : IEquatable<Rect>
     public void Offset(int horizontal, int vertical) => Offset(new Vector2D(horizontal, vertical));
     public void Offset(in Vector2D distance)
     {
-        origin_ += distance;
+        m_Origin += distance;
         // Ensure that width and height remain valid.
-        set_width(width());
-        set_height(height());
+        m_Size.Width = ClampWidthOrHeight(X, Width);
+        m_Size.Height = ClampWidthOrHeight(X, Height);
     }
 
-    public static Rect operator +(Rect lhs, in Vector2D rhs)
+    public static Rect operator +(Rect rect, in Vector2D vector)
     {
-        lhs.Offset(rhs);
-        return lhs;
+        rect.Offset(vector);
+        return rect;
     }
 
-    public static Rect operator -(Rect lhs, in Vector2D rhs)
+    public static Rect operator -(Rect rect, in Vector2D vector)
     {
-        lhs.Offset(-rhs);
-        return lhs;
+        rect.Offset(-vector);
+        return rect;
     }
 
-    public readonly Insets InsetsFrom(in Rect inner) => Insets.TLBR(inner.y() - y(), inner.x() - x(), bottom() - inner.bottom(), right() - inner.right());
+    public readonly Insets InsetsFrom(in Rect inner) => Insets.TLBR(inner.Y - Y, inner.X - X, Bottom - inner.Bottom, Right - inner.Right);
 
     // Returns true if the area of the rectangle is zero.
-    public readonly bool IsEmpty() => size_.IsEmpty();
+    public readonly bool IsEmpty() => m_Size.IsEmpty();
 
     // Returns true if the point identified by point_x and point_y falls inside
     // this rectangle.  The point (x, y) is inside the rectangle, but the
     // point (x + width, y + height) is not.
-    public readonly bool Contains(int point_x, int point_y) => (point_x >= x()) && (point_x < right()) && (point_y >= y()) && (point_y < bottom());
+    public readonly bool Contains(int point_x, int point_y) => (point_x >= X) && (point_x < Right) && (point_y >= Y) && (point_y < Bottom);
 
     // Returns true if the specified point is contained by this rectangle.
-    public readonly bool Contains(in Point point) => Contains(point.x, point.y);
+    public readonly bool Contains(in Point point) => Contains(point.X, point.Y);
 
     // Returns true if this rectangle contains the specified rectangle.
-    public readonly bool Contains(in Rect rect) => rect.x() >= x() && rect.right() <= right() && rect.y() >= y() && rect.bottom() <= bottom();
+    public readonly bool Contains(in Rect rect) => rect.X >= X && rect.Right <= Right && rect.Y >= Y && rect.Bottom <= Bottom;
 
     // Returns true if this rectangle intersects the specified rectangle.
     // An empty rectangle doesn't intersect any rectangle.
-    public readonly bool Intersects(in Rect rect) => !(IsEmpty() || rect.IsEmpty() || rect.x() >= right() || rect.right() <= x() || rect.y() >= bottom() || rect.bottom() <= y());
+    public readonly bool Intersects(in Rect rect) => !(IsEmpty() || rect.IsEmpty() || rect.X >= Right || rect.Right <= X || rect.Y >= Bottom || rect.Bottom <= Y);
 
     // Sets this rect to be the intersection of this rectangle with the given rectangle.
     public void Intersect(in Rect rect)
@@ -192,10 +208,10 @@ public struct Rect : IEquatable<Rect>
             return;
         }
 
-        int left = Math.Max(x(), rect.x());
-        int top = Math.Max(y(), rect.y());
-        int new_right = Math.Min(right(), rect.right());
-        int new_bottom = Math.Min(bottom(), rect.bottom());
+        int left = Math.Max(X, rect.X);
+        int top = Math.Max(Y, rect.Y);
+        int new_right = Math.Min(Right, rect.Right);
+        int new_bottom = Math.Min(Bottom, rect.Bottom);
 
         if (left >= new_right || top >= new_bottom)
         {
@@ -215,10 +231,10 @@ public struct Rect : IEquatable<Rect>
     // isEmpty() is not conclusive.
     public bool InclusiveIntersect(in Rect rect)
     {
-        int left = Math.Max(x(), rect.x());
-        int top = Math.Max(y(), rect.y());
-        int new_right = Math.Min(right(), rect.right());
-        int new_bottom = Math.Min(bottom(), rect.bottom());
+        int left = Math.Max(X, rect.X);
+        int top = Math.Max(Y, rect.Y);
+        int new_right = Math.Min(Right, rect.Right);
+        int new_bottom = Math.Min(Bottom, rect.Bottom);
 
         // Return a clean empty rectangle for non-intersecting cases.
         if (left > new_right || top > new_bottom)
@@ -252,9 +268,9 @@ public struct Rect : IEquatable<Rect>
     // (200, 200, 50x0) is (100, 100, 150x100).
     public void UnionEvenIfEmpty(in Rect rect)
     {
-        SetByBounds(Math.Min(x(), rect.x()), Math.Min(y(), rect.y()),
-                    Math.Max(right(), rect.right()),
-                    Math.Max(bottom(), rect.bottom()));
+        SetByBounds(Math.Min(X, rect.X), Math.Min(Y, rect.Y),
+                    Math.Max(Right, rect.Right),
+                    Math.Max(Bottom, rect.Bottom));
     }
 
     // Sets this rect to be the rectangle resulting from subtracting |rect| from
@@ -270,33 +286,33 @@ public struct Rect : IEquatable<Rect>
             return;
         }
 
-        int rx = x();
-        int ry = y();
-        int rr = right();
-        int rb = bottom();
+        int rx = X;
+        int ry = Y;
+        int rr = Right;
+        int rb = Bottom;
 
-        if (rect.y() <= y() && rect.bottom() >= bottom())
+        if (rect.Y <= Y && rect.Bottom >= Bottom)
         {
             // complete intersection in the y-direction
-            if (rect.x() <= x())
+            if (rect.X <= X)
             {
-                rx = rect.right();
+                rx = rect.Right;
             }
-            else if (rect.right() >= right())
+            else if (rect.Right >= Right)
             {
-                rr = rect.x();
+                rr = rect.X;
             }
         }
-        else if (rect.x() <= x() && rect.right() >= right())
+        else if (rect.X <= X && rect.Right >= Right)
         {
             // complete intersection in the x-direction
-            if (rect.y() <= y())
+            if (rect.Y <= Y)
             {
-                ry = rect.bottom();
+                ry = rect.Bottom;
             }
-            else if (rect.bottom() >= bottom())
+            else if (rect.Bottom >= Bottom)
             {
-                rb = rect.y();
+                rb = rect.Y;
             }
         }
 
@@ -310,60 +326,60 @@ public struct Rect : IEquatable<Rect>
     // an x-location of 1 with a width of 4.
     public void AdjustToFit(in Rect rect)
     {
-        int new_x = x();
-        int new_y = y();
-        int new_width = width();
-        int new_height = height();
-        AdjustAlongAxis(rect.x(), rect.width(), ref new_x, ref new_width);
-        AdjustAlongAxis(rect.y(), rect.height(), ref new_y, ref new_height);
+        int new_x = X;
+        int new_y = Y;
+        int new_width = Width;
+        int new_height = Height;
+        AdjustAlongAxis(rect.X, rect.Width, ref new_x, ref new_width);
+        AdjustAlongAxis(rect.Y, rect.Height, ref new_y, ref new_height);
         SetRect(new_x, new_y, new_width, new_height);
     }
 
     // Returns the center of this rectangle.
-    public readonly Point CenterPoint() => new Point(x() + width() / 2, y() + height() / 2);
+    public readonly Point CenterPoint() => new Point(X + Width / 2, Y + Height / 2);
 
     // Becomes a rectangle that has the same center point but with a |size|.
     public void ToCenteredSize(in Size size)
     {
-        int new_x = x() + (width() - size.width) / 2;
-        int new_y = y() + (height() - size.height) / 2;
-        SetRect(new_x, new_y, size.width, size.height);
+        int new_x = X + (Width - size.Width) / 2;
+        int new_y = Y + (Height - size.Height) / 2;
+        SetRect(new_x, new_y, size.Width, size.Height);
     }
 
     // Becomes a rectangle that has the same center point but with a size capped at given |size|.
     public void ClampToCenteredSize(in Size to_size)
     {
-        Size new_size = size();
+        Size new_size = Size;
         new_size.SetToMin(to_size);
         ToCenteredSize(new_size);
     }
 
     // Transpose x and y axis.
-    public void Transpose() => SetRect(y(), x(), height(), width());
+    public void Transpose() => SetRect(Y, X, Height, Width);
 
     // Splits `this` in two halves, `left_half` and `right_half`.
-    public void SplitVertically(out Rect left_half, out Rect right_half)
+    public readonly void SplitVertically(out Rect left_half, out Rect right_half)
     {
-        left_half = new Rect(x(), y(), width() / 2, height());
-        right_half = new Rect(left_half.right(), y(), width() - left_half.width(), height());
+        left_half = new Rect(X, Y, Width / 2, Height);
+        right_half = new Rect(left_half.Right, Y, Width - left_half.Width, Height);
     }
 
     // Splits `this` in two halves, `top_half` and `bottom_half`.
-    public void SplitHorizontally(out Rect top_half, out Rect bottom_half)
+    public readonly void SplitHorizontally(out Rect top_half, out Rect bottom_half)
     {
-        top_half = new Rect(x(), y(), width(), height() / 2);
-        bottom_half = new Rect(x(), top_half.bottom(), width(), height() - top_half.height());
+        top_half = new Rect(X, Y, Width, Height / 2);
+        bottom_half = new Rect(X, top_half.Bottom, Width, Height - top_half.Height);
     }
 
     // Returns true if this rectangle shares an entire edge (i.e., same width or same height)
     // with the given rectangle, and the rectangles do not overlap.
-    public readonly bool SharesEdgeWith(in Rect rect) => (y() == rect.y() && height() == rect.height() && (x() == rect.right() || right() == rect.x())) || (x() == rect.x() && width() == rect.width() && (y() == rect.bottom() || bottom() == rect.y()));
+    public readonly bool SharesEdgeWith(in Rect rect) => (Y == rect.Y && Height == rect.Height && (X == rect.Right || Right == rect.X)) || (X == rect.X && Width == rect.Width && (Y == rect.Bottom || Bottom == rect.Y));
 
     // Returns the manhattan distance from the rect to the point. If the point is inside the rect, returns 0.
     public readonly int ManhattanDistanceToPoint(in Point point)
     {
-        int x_distance = Math.Max(0, Math.Max(x() - point.x, point.x - right()));
-        int y_distance = Math.Max(0, Math.Max(y() - point.y, point.y - bottom()));
+        int x_distance = Math.Max(0, Math.Max(X - point.X, point.X - Right));
+        int y_distance = Math.Max(0, Math.Max(Y - point.Y, point.Y - Bottom));
 
         return x_distance + y_distance;
     }
@@ -377,21 +393,22 @@ public struct Rect : IEquatable<Rect>
         Rect c = this;
         c.Union(rect);
 
-        int x = Math.Max(0, c.width() - width() - rect.width() + 1);
-        int y = Math.Max(0, c.height() - height() - rect.height() + 1);
+        int x = Math.Max(0, c.Width - Width - rect.Width + 1);
+        int y = Math.Max(0, c.Height - Height - rect.Height + 1);
         
         return x + y;
     }
 
-    public override readonly string ToString() => $"{origin_} {size_}";
+    public override readonly string ToString() => $"{m_Origin} {m_Size}";
 
-    public readonly bool ApproximatelyEqual(in Rect rect, int tolerance) => Math.Abs(x() - rect.x()) <= tolerance && Math.Abs(y() - rect.y()) <= tolerance && Math.Abs(right() - rect.right()) <= tolerance && Math.Abs(bottom() - rect.bottom()) <= tolerance;
+    public readonly bool ApproximatelyEqual(in Rect rect, int tolerance) => Math.Abs(X - rect.X) <= tolerance && Math.Abs(Y - rect.Y) <= tolerance && Math.Abs(Right - rect.Right) <= tolerance && Math.Abs(Bottom - rect.Bottom) <= tolerance;
 
-    public readonly bool Equals(Rect other) => origin_.Equals(other.origin_) && size_.Equals(other.size_);
+    public readonly bool Equals(Rect other) => m_Origin.Equals(other.m_Origin) && m_Size.Equals(other.m_Size);
     public override readonly bool Equals(object? obj) => obj is Rect other && Equals(other);
-    public override readonly int GetHashCode() => HashCode.Combine(origin_, size_);
-    public static bool operator ==(in Rect lhs, in Rect rhs) => lhs.Equals(rhs);
-    public static bool operator !=(in Rect lhs, in Rect rhs) => !lhs.Equals(rhs);
+    public override readonly int GetHashCode() => HashCode.Combine(m_Origin, m_Size);
+
+    public static bool operator ==(in Rect left, in Rect right) => left.Equals(right);
+    public static bool operator !=(in Rect left, in Rect right) => !left.Equals(right);
 
     // Clamp the width/height to avoid integer overflow in bottom() and right().
     // This returns the clamped width/height given an |x_or_y| and a
@@ -400,18 +417,16 @@ public struct Rect : IEquatable<Rect>
 
     private void AdjustForSaturatedRight(int right)
     {
-        int new_x, width;
-        SaturatedClampRange(x(), right, out new_x, out width);
-        set_x(new_x);
-        size_.width = width;
+        SaturatedClampRange(X, right, out int new_x, out int width);
+        X = new_x;
+        m_Size.Width = width;
     }
 
     private void AdjustForSaturatedBottom(int bottom)
     {
-        int new_y, height;
-        SaturatedClampRange(y(), bottom, out new_y, out height);
-        set_y(new_y);
-        size_.height = height;
+        SaturatedClampRange(Y, bottom, out int new_y, out int height);
+        Y = new_y;
+        m_Size.Height = height;
     }
     
     private static void AdjustAlongAxis(int dst_origin, int dst_size, ref int origin, ref int size)
@@ -487,7 +502,7 @@ public struct Rect : IEquatable<Rect>
     // Note: This originally uses base::span<const Rect> in C++, consider using a C# Span type
     public static Rect UnionRects(IEnumerable<Rect> rects)
     {
-        Rect result = new Rect();
+        Rect result = new ();
         foreach (var rect in rects)
         {
             result.Union(rect);
@@ -518,8 +533,12 @@ public struct Rect : IEquatable<Rect>
     public static Rect BoundingRect(in Point p1, in Point p2)
     {
         Rect result = new();
-        result.SetByBounds(Math.Min(p1.x, p2.x), Math.Min(p1.y, p2.y),
-                         Math.Max(p1.x, p2.x), Math.Max(p1.y, p2.y));
+
+        result.SetByBounds(Math.Min(p1.X, p2.X),
+                           Math.Min(p1.Y, p2.Y),
+                           Math.Max(p1.X, p2.X),
+                           Math.Max(p1.Y, p2.Y));
+
         return result;
     }
 
@@ -528,10 +547,10 @@ public struct Rect : IEquatable<Rect>
     {
         if (x_scale == 1f && y_scale == 1f)
             return rect;
-        int x = ClampFloor(rect.x() * x_scale);
-        int y = ClampFloor(rect.y() * y_scale);
-        int r = rect.width() == 0 ? x : ClampCeil(rect.right() * x_scale);
-        int b = rect.height() == 0 ? y : ClampCeil(rect.bottom() * y_scale);
+        int x = ClampFloor(rect.X * x_scale);
+        int y = ClampFloor(rect.Y * y_scale);
+        int r = rect.Width == 0 ? x : ClampCeil(rect.Right * x_scale);
+        int b = rect.Height == 0 ? y : ClampCeil(rect.Bottom * y_scale);
         Rect result = new();
         result.SetByBounds(x, y, r, b);
         return result;
@@ -543,10 +562,10 @@ public struct Rect : IEquatable<Rect>
     {
         if (x_scale == 1f && y_scale == 1f)
             return rect;
-        int x = ClampCeil(rect.x() * x_scale);
-        int y = ClampCeil(rect.y() * y_scale);
-        int r = rect.width() == 0 ? x : ClampFloor(rect.right() * x_scale);
-        int b = rect.height() == 0 ? y : ClampFloor(rect.bottom() * y_scale);
+        int x = ClampCeil(rect.X * x_scale);
+        int y = ClampCeil(rect.Y * y_scale);
+        int r = rect.Width == 0 ? x : ClampFloor(rect.Right * x_scale);
+        int b = rect.Height == 0 ? y : ClampFloor(rect.Bottom * y_scale);
         Rect result = new();
         result.SetByBounds(x, y, r, b);
         return result;
@@ -564,10 +583,10 @@ public struct Rect : IEquatable<Rect>
     {
         if (x_scale == 1f && y_scale == 1f)
             return rect;
-        int x = ClampRound(rect.x() * x_scale);
-        int y = ClampRound(rect.y() * y_scale);
-        int r = rect.width() == 0 ? x : ClampRound(rect.right() * x_scale);
-        int b = rect.height() == 0 ? y : ClampRound(rect.bottom() * y_scale);
+        int x = ClampRound(rect.X * x_scale);
+        int y = ClampRound(rect.Y * y_scale);
+        int r = rect.Width == 0 ? x : ClampRound(rect.Right * x_scale);
+        int b = rect.Height == 0 ? y : ClampRound(rect.Bottom * y_scale);
         Rect result = new Rect();
         result.SetByBounds(x, y, r, b);
         return result;
@@ -581,7 +600,7 @@ public struct Rect : IEquatable<Rect>
     // , which is used by cc/viz. Use this when scaling the window/layer size.
     public static Rect ScaleToEnclosingRectIgnoringError(in Rect rect, float scale, float epsilon = 0.001f)
     {
-        RectF rect_f = new RectF(rect);
+        RectF rect_f = new (rect);
         rect_f.Scale(scale);
         return ToEnclosingRectIgnoringError(rect_f, epsilon);
     }
@@ -591,11 +610,11 @@ public struct Rect : IEquatable<Rect>
     {
         // Check a or b by itself.
         Rect maximum = a;
-        ulong maximum_area = (ulong)a.size().Area64();
-        if ((ulong)b.size().Area64() > maximum_area)
+        ulong maximum_area = (ulong)a.Size.Area64();
+        if ((ulong)b.Size.Area64() > maximum_area)
         {
             maximum = b;
-            maximum_area = (ulong) b.size().Area64();
+            maximum_area = (ulong) b.Size.Area64();
         }
         // Check the regions that include the intersection of a and b. This can be
         // done by taking the intersection and expanding it vertically and
@@ -604,25 +623,27 @@ public struct Rect : IEquatable<Rect>
         Rect intersection = a;
         intersection.InclusiveIntersect(b);
 
-        if (!intersection.size().IsZero())
+        if (!intersection.Size.IsZero())
         {
             Rect vert_expanded_intersection = intersection;
-            vert_expanded_intersection.SetVerticalBounds(Math.Min(a.y(), b.y()), Math.Max(a.bottom(), b.bottom()));
+            vert_expanded_intersection.SetVerticalBounds(Math.Min(a.Y, b.Y), Math.Max(a.Bottom, b.Bottom));
 
-            if ((ulong)vert_expanded_intersection.size().Area64() > maximum_area)
+            if ((ulong)vert_expanded_intersection.Size.Area64() > maximum_area)
             {
                 maximum = vert_expanded_intersection;
-                maximum_area = (ulong) vert_expanded_intersection.size().Area64();
+                maximum_area = (ulong) vert_expanded_intersection.Size.Area64();
             }
 
             Rect horiz_expanded_intersection = intersection;
 
-            horiz_expanded_intersection.SetHorizontalBounds(Math.Min(a.x(), b.x()), Math.Max(a.right(), b.right()));
+            horiz_expanded_intersection.SetHorizontalBounds(Math.Min(a.X, b.X), Math.Max(a.Right, b.Right));
             
-            if ((ulong)horiz_expanded_intersection.size().Area64() > maximum_area)
+            if ((ulong)horiz_expanded_intersection.Size.Area64() > maximum_area)
             {
                 maximum = horiz_expanded_intersection;
-                maximum_area = (ulong)horiz_expanded_intersection.size().Area64();
+
+                // This line is unnecessary since maximum_area is a local variable and it won't be used further
+                //maximum_area = (ulong)horiz_expanded_intersection.size.Area64();
             }
         }
 

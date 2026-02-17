@@ -1,31 +1,21 @@
-namespace UI.GFX.Geometry;
-
 using System.Runtime.CompilerServices;
-using static Numerics.ClampedMath;
+
+namespace UI.GFX.Geometry;
 
 // Contains the components of a factored transform.
 // These components may be blended and recomposed.
 public struct Quaternion
 {
-    private double x_ = 0.0;
-    private double y_ = 0.0;
-    private double z_ = 0.0;
-    private double w_ = 1.0;
-
-    public double x { readonly get => x_; set => x_ = value; }
-    public double y { readonly get => y_; set => y_ = value; }
-    public double z { readonly get => z_; set => z_ = value; }
-    public double w { readonly get => w_; set => w_ = value; }
+    public double X;
+    public double Y;
+    public double Z;
+    public double W;
 
     const double kEpsilon = 1e-5;
 
-    public Quaternion(double x, double y, double z, double w)
-    {
-        x_ = x;
-        y_ = y;
-        z_ = z;
-        w_ = w;
-    }
+    public Quaternion() => (X, Y, Z, W) = (0.0, 0.0, 0.0, 1.0);
+
+    public Quaternion(double x, double y, double z, double w) => (X, Y, Z, W) = (x, y, z, w);
 
     public Quaternion(in Vector3DF axis, double angle)
     {
@@ -39,10 +29,10 @@ public struct Quaternion
 
         angle *= 0.5;
         double s = Math.Sin(angle);
-        x_ = normalized.x * s;
-        y_ = normalized.y * s;
-        z_ = normalized.z * s;
-        w_ = Math.Cos(angle);
+        X = normalized.X * s;
+        Y = normalized.Y * s;
+        Z = normalized.Z * s;
+        W = Math.Cos(angle);
     }
 
     // Constructs a quaternion representing a rotation between |from| and |to|.
@@ -55,18 +45,18 @@ public struct Quaternion
         if (real < kEpsilon * norm)
         {
             real = 0.0f;
-            axis =  MathF.Abs(from.x) > MathF.Abs(from.z) ?
-                    new Vector3DF( -from.y, from.x, 0f) :
-                    new Vector3DF(0f, -from.z, from.y);
+            axis =  MathF.Abs(from.X) > MathF.Abs(from.Z) ?
+                    new Vector3DF( -from.Y, from.X, 0f) :
+                    new Vector3DF(0f, -from.Z, from.Y);
         }
         else
         {
             axis = Vector3DF.CrossProduct(from, to);
         }
-        x_ = axis.x;
-        y_ = axis.y;
-        z_ = axis.z;
-        w_ = real;
+        X = axis.X;
+        Y = axis.Y;
+        Z = axis.Z;
+        W = real;
         this = this.Normalized();
     }
 
@@ -84,12 +74,12 @@ public struct Quaternion
 
     public readonly Quaternion inverse()
     {
-        return new Quaternion(-x_, -y_, -z_, w_);
+        return new Quaternion(-X, -Y, -Z, W);
     }
 
     public readonly Quaternion flip()
     {
-        return new Quaternion(-x_, -y_, -z_, -w_);
+        return new Quaternion(-X, -Y, -Z, -W);
     }
 
     // Adapted from https://www.euclideanspace.com/maths/algebra/realNormedAlgebra/
@@ -101,7 +91,7 @@ public struct Quaternion
     {
         Quaternion from = this;
 
-        double cos_half_angle = from.x_ * to.x_ + from.y_ * to.y_ + from.z_ * to.z_ + from.w_ * to.w_;
+        double cos_half_angle = from.X * to.X + from.Y * to.Y + from.Z * to.Z + from.W * to.W;
 
         if (cos_half_angle < 0)
         {
@@ -146,7 +136,7 @@ public struct Quaternion
 
     public readonly double Length()
     {
-        return x_ * x_ + y_ * y_ + z_ * z_ + w_ * w_;
+        return X * X + Y * Y + Z * Z + W * W;
     }
 
     public readonly Quaternion Normalized()
@@ -159,47 +149,52 @@ public struct Quaternion
         return this / Math.Sqrt(length);
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static Quaternion operator +(in Quaternion a, in Quaternion b)
     {
-        return new Quaternion(a.x_ + b.x_, a.y_ + b.y_, a.z_ + b.z_, a.w_ + b.w_);
+        return new Quaternion(a.X + b.X, a.Y + b.Y, a.Z + b.Z, a.W + b.W);
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static Quaternion operator *(in Quaternion a, in Quaternion b)
     {
         return new Quaternion(
-            a.w_ * b.x_ + a.x_ * b.w_ + a.y_ * b.z_ - a.z_ * b.y_,
-            a.w_ * b.y_ - a.x_ * b.z_ + a.y_ * b.w_ + a.z_ * b.x_,
-            a.w_ * b.z_ + a.x_ * b.y_ - a.y_ * b.x_ + a.z_ * b.w_,
-            a.w_ * b.w_ - a.x_ * b.x_ - a.y_ * b.y_ - a.z_ * b.z_
+            a.W * b.X + a.X * b.W + a.Y * b.Z - a.Z * b.Y,
+            a.W * b.Y - a.X * b.Z + a.Y * b.W + a.Z * b.X,
+            a.W * b.Z + a.X * b.Y - a.Y * b.X + a.Z * b.W,
+            a.W * b.W - a.X * b.X - a.Y * b.Y - a.Z * b.Z
         );
     }
 
     // |s| is an arbitrary, real constant.
-    public static Quaternion operator *(in Quaternion q, double s)
+    public static Quaternion operator *(in Quaternion q, double scalar)
     {
-        return new Quaternion(q.x * s, q.y * s, q.z * s, q.w * s);
+        return new Quaternion(q.X * scalar, q.Y * scalar, q.Z * scalar, q.W * scalar);
     }
 
     // |s| is an arbitrary, real constant.
-    public static Quaternion operator *(double s, in Quaternion q)
+    public static Quaternion operator *(double scalar, in Quaternion quaternion)
     {
-        return new Quaternion(q.x * s, q.y * s, q.z * s, q.w * s);
+        return new Quaternion(quaternion.X * scalar,
+                              quaternion.Y * scalar, 
+                              quaternion.Z * scalar, 
+                              quaternion.W * scalar);
     }
 
     // |s| is an arbitrary, real constant.
-    public static Quaternion operator /(in Quaternion q, double s)
+    public static Quaternion operator /(in Quaternion quaternion, double scalar)
     {
-        double inv = 1.0 / s;
-        return q * inv;
+        double inv = 1.0 / scalar;
+        return quaternion * inv;
     }
 
     public override readonly string ToString()
     {
         // q = (con(abs(v_theta)/2), v_theta/abs(v_theta) * sin(abs(v_theta)/2))
-        float abs_theta = (float)Math.Acos(w_) * 2;
+        float abs_theta = (float)Math.Acos(W) * 2;
         float scale = 1.0f / MathF.Sin(abs_theta * 0.5f);
-        Vector3DF v = new((float)x_, (float)y_, (float)z_);
+        Vector3DF v = new((float)X, (float)Y, (float)Z);
         v.Scale(scale);
-        return $"[{x_} {y_} {z_} {w_}], v:{v}, θ:{abs_theta / MathF.PI}π";
+        return $"[{X} {Y} {Z} {W}], v:{v}, θ:{abs_theta / MathF.PI}π";
     }
 }

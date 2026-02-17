@@ -11,41 +11,29 @@ public struct Vector3DF : IEquatable<Vector3DF>
 {
     private const double Epsilon = 1.0e-6;
 
-    private float x_, y_, z_;
+    public float X;
+    public float Y;
+    public float Z;
 
-    public float x { readonly get => x_; set => x_ = value; }
-    public float y { readonly get => y_; set => y_ = value; }
-    public float z { readonly get => z_; set => z_ = value; }
+    public Vector3DF() => (X, Y, Z) = (0f, 0f, 0f);
 
-    public Vector3DF() : this(0f, 0f, 0f) { }
-
-    public Vector3DF(float x, float y, float z)
-    {
-        x_ = x;
-        y_ = y;
-        z_ = z;
-    }
+    public Vector3DF(float x, float y, float z) => (X, Y, Z) = (x, y, z);
     
-    public Vector3DF(in Vector2DF vector)
-    {
-        x_ = vector.x;
-        y_ = vector.y;
-        z_ = 0;
-    }
+    public Vector3DF(in Vector2DF vector) => (X, Y, Z) = (vector.X, vector.Y, 0f);
 
     /// <summary>
     /// Checks if all components of the vector are zero.
     /// </summary>
-    public readonly bool IsZero() => x_ == 0.0f && y_ == 0.0f && z_ == 0.0f;
+    public readonly bool IsZero() => X == 0f && Y == 0f && Z == 0f;
 
     /// <summary>
     /// Adds the components of the other vector to this vector.
     /// </summary>
     public void Add(in Vector3DF other)
     {
-        x_ += other.x_;
-        y_ += other.y_;
-        z_ += other.z_;
+        X += other.X;
+        Y += other.Y;
+        Z += other.Z;
     }
 
     /// <summary>
@@ -53,29 +41,29 @@ public struct Vector3DF : IEquatable<Vector3DF>
     /// </summary>
     public void Subtract(in Vector3DF other)
     {
-        x_ -= other.x_;
-        y_ -= other.y_;
-        z_ -= other.z_;
+        X -= other.X;
+        Y -= other.Y;
+        Z -= other.Z;
     }
 
     public void SetToMin(in Vector3DF other)
     {
-        x_ = Math.Min(x_, other.x_);
-        y_ = Math.Min(y_, other.y_);
-        z_ = Math.Min(z_, other.z_);
+        X = Math.Min(X, other.X);
+        Y = Math.Min(Y, other.Y);
+        Z = Math.Min(Z, other.Z);
     }
 
     public void SetToMax(in Vector3DF other)
     {
-        x_ = Math.Max(x_, other.x_);
-        y_ = Math.Max(y_, other.y_);
-        z_ = Math.Max(z_, other.z_);
+        X = Math.Max(X, other.X);
+        Y = Math.Max(Y, other.Y);
+        Z = Math.Max(Z, other.Z);
     }
 
     /// <summary>
     /// Returns the square of the vector's length.
     /// </summary>
-    public readonly double LengthSquared() => (double)x_ * x_ + (double)y_ * y_ + (double)z_ * z_;
+    public readonly double LengthSquared() => (double)X * X + (double)Y * Y + (double)Z * Z;
     
     /// <summary>
     /// Returns the vector's length.
@@ -92,9 +80,9 @@ public struct Vector3DF : IEquatable<Vector3DF>
     /// </summary>
     public void Scale(float x_scale, float y_scale, float z_scale)
     {
-        x_ *= x_scale;
-        y_ *= y_scale;
-        z_ *= z_scale;
+        X *= x_scale;
+        Y *= y_scale;
+        Z *= z_scale;
     }
     
     /// <summary>
@@ -107,9 +95,9 @@ public struct Vector3DF : IEquatable<Vector3DF>
     /// </summary>
     public void InvScale(float inv_x_scale, float inv_y_scale, float inv_z_scale)
     {
-        x_ /= inv_x_scale;
-        y_ /= inv_y_scale;
-        z_ /= inv_z_scale;
+        X /= inv_x_scale;
+        Y /= inv_y_scale;
+        Z /= inv_z_scale;
     }
     
     /// <summary>
@@ -117,15 +105,15 @@ public struct Vector3DF : IEquatable<Vector3DF>
     /// </summary>
     public void Cross(in Vector3DF other)
     {
-        double dx = x_;
-        double dy = y_;
-        double dz = z_;
-        float new_x = (float)(dy * other.z_ - dz * other.y_);
-        float new_y = (float)(dz * other.x_ - dx * other.z_);
-        float new_z = (float)(dx * other.y_ - dy * other.x_);
-        x_ = new_x;
-        y_ = new_y;
-        z_ = new_z;
+        double dx = X;
+        double dy = Y;
+        double dz = Z;
+        float new_x = (float)(dy * other.Z - dz * other.Y);
+        float new_y = (float)(dz * other.X - dx * other.Z);
+        float new_z = (float)(dx * other.Y - dy * other.X);
+        X = new_x;
+        Y = new_y;
+        Z = new_z;
     }
 
     /// <summary>
@@ -143,13 +131,13 @@ public struct Vector3DF : IEquatable<Vector3DF>
         return true;
     }
     
-    public override readonly string ToString() => $"[{x_} {y_} {z_}]";
+    public override readonly string ToString() => $"[{X} {Y} {Z}]";
 
-    public override readonly int GetHashCode() => HashCode.Combine(x_, y_, z_);
+    public override readonly int GetHashCode() => HashCode.Combine(X, Y, Z);
 
     public override readonly bool Equals(object? obj) => obj is Vector3DF other && Equals(other);
 
-    public readonly bool Equals(Vector3DF other) => x_ == other.x_ && y_ == other.y_ && z_ == other.z_;
+    public readonly bool Equals(Vector3DF other) => X == other.X && Y == other.Y && Z == other.Z;
 
     public static bool operator ==(in Vector3DF left, in Vector3DF right) => left.Equals(right);
     public static bool operator !=(in Vector3DF left, in Vector3DF right) => !left.Equals(right);
@@ -166,7 +154,7 @@ public struct Vector3DF : IEquatable<Vector3DF>
 
     public static Vector3DF operator -(in Vector3DF v)
     {
-        return new Vector3DF(-v.x, -v.y, -v.z);
+        return new Vector3DF(-v.X, -v.Y, -v.Z);
     }
 
     public static Vector3DF operator +(in Vector3DF lhs, in Vector3DF rhs)
@@ -199,7 +187,7 @@ public struct Vector3DF : IEquatable<Vector3DF>
     /// </summary>
     public static float DotProduct(in Vector3DF lhs, in Vector3DF rhs)
     {
-        return lhs.x_ * rhs.x_ + lhs.y_ * rhs.y_ + lhs.z_ * rhs.z_;
+        return lhs.X * rhs.X + lhs.Y * rhs.Y + lhs.Z * rhs.Z;
     }
 
     /// <summary>
@@ -208,7 +196,7 @@ public struct Vector3DF : IEquatable<Vector3DF>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static Vector3DF ScaleVector(in Vector3DF v, in Vector3DF s)
     {
-        return new Vector3DF(v.x_ * s.x_, v.y_ * s.y_, v.z_ * s.z_);
+        return new Vector3DF(v.X * s.X, v.Y * s.Y, v.Z * s.Z);
     }
     
     /// <summary>
@@ -217,7 +205,7 @@ public struct Vector3DF : IEquatable<Vector3DF>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static Vector3DF ScaleVector(in Vector3DF v, float x_scale, float y_scale, float z_scale)
     {
-        return new Vector3DF(v.x_ * x_scale, v.y_ * y_scale, v.z_ * z_scale);
+        return new Vector3DF(v.X * x_scale, v.Y * y_scale, v.Z * z_scale);
     }
 
     /// <summary>

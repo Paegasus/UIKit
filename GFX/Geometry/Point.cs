@@ -6,65 +6,55 @@ using static Numerics.ClampedMath;
 // A point has an x and y coordinate.
 public struct Point : IComparable<Point>, IEquatable<Point>
 {
-    private int x_, y_;
+    public int X;
+    public int Y;
 
-    public int x { readonly get => x_; set => x_ = value; }
-    public int y { readonly get => y_; set => y_ = value; }
-
-    public Point() : this(0, 0) { }
+    public Point() => (X, Y) = (0, 0);
     
-    public Point(int x, int y)
-    {
-        x_ = x;
-        y_ = y;
-    }
+    public Point(int x, int y) => (X, Y) = (x, y);
 
-    public void SetPoint(int x, int y)
-    {
-        x_ = x;
-        y_ = y;
-    }
+    public void SetPoint(int x, int y) => (X, Y) = (x, y);
 
     public void Offset(int delta_x, int delta_y)
     {
-        x_ = ClampAdd(x_, delta_x);
-        y_ = ClampAdd(y_, delta_y);
+        X = ClampAdd(X, delta_x);
+        Y = ClampAdd(Y, delta_y);
     }
 
     public void SetToMin(in Point other)
     {
-        x_ = Math.Min(x_, other.x_);
-        y_ = Math.Min(y_, other.y_);
+        X = Math.Min(X, other.X);
+        Y = Math.Min(Y, other.Y);
     }
 
     public void SetToMax(in Point other)
     {
-        x_ = Math.Max(x_, other.x_);
-        y_ = Math.Max(y_, other.y_);
+        X = Math.Max(X, other.X);
+        Y = Math.Max(Y, other.Y);
     }
 
-    public readonly bool IsOrigin() => x_ == 0 && y_ == 0;
+    public readonly bool IsOrigin() => X == 0 && Y == 0;
 
-    public readonly Vector2D OffsetFromOrigin() => new(x_, y_);
+    public readonly Vector2D OffsetFromOrigin() => new(X, Y);
 
-    public void Transpose() => (x_, y_) = (y_, x_); // Swap x_ and y_ (using tuple deconstruction swap)
+    public void Transpose() => (X, Y) = (Y, X); // Swap x_ and y_ (using tuple deconstruction swap)
 
     public readonly int CompareTo(Point other)
     {
-        int yComparison = y_.CompareTo(other.y_);
-        return yComparison != 0 ? yComparison : x_.CompareTo(other.x_);
+        int yComparison = Y.CompareTo(other.Y);
+        return yComparison != 0 ? yComparison : X.CompareTo(other.X);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static Point PointAtOffsetFromOrigin(in Vector2D offset_from_origin)
     {
-        return new Point(offset_from_origin.x, offset_from_origin.y);
+        return new Point(offset_from_origin.X, offset_from_origin.Y);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static Point TransposePoint(in Point p)
     {
-        return new Point(p.y_, p.x_);
+        return new Point(p.Y, p.X);
     }
 
     // Helper methods to scale a Point to a new Point.
@@ -111,14 +101,14 @@ public struct Point : IComparable<Point>, IEquatable<Point>
         return PointConversions.ToRoundedPoint(PointF.ScalePoint(new PointF(point), scale, scale));
     }
 
-    public override readonly string ToString() => $"{x_},{y_}";
+    public override readonly string ToString() => $"{X},{Y}";
 
     // For use in collections (SortedSet, Dictionary keys, etc.)
-    public override readonly int GetHashCode() => HashCode.Combine(y_, x_);
+    public override readonly int GetHashCode() => HashCode.Combine(Y, X);
 
     public override readonly bool Equals(object? obj) => obj is Point other && Equals(other);
 
-    public readonly bool Equals(Point other) => x_ == other.x_ && y_ == other.y_;
+    public readonly bool Equals(Point other) => X == other.X && Y == other.Y;
 
     // A point is less than another point if its y-value is closer to the origin.
     // If the y-values are the same, then point with the x-value closer to the origin is considered less than the other.
@@ -134,14 +124,14 @@ public struct Point : IComparable<Point>, IEquatable<Point>
 
     public void operator +=(in Vector2D vector)
     {
-        x_ = ClampAdd(x_, vector.x);
-        y_ = ClampAdd(y_, vector.y);
+        X = ClampAdd(X, vector.X);
+        Y = ClampAdd(Y, vector.Y);
     }
 
     public void operator -=(in Vector2D vector)
     {
-        x_ = ClampSub(x_, vector.x);
-        y_ = ClampSub(y_, vector.y);
+        X = ClampSub(X, vector.X);
+        Y = ClampSub(Y, vector.Y);
     }
 
     public static Point operator +(in Point lhs, in Vector2D rhs)
@@ -160,6 +150,6 @@ public struct Point : IComparable<Point>, IEquatable<Point>
 
     public static Vector2D operator -(in Point lhs, in Point rhs)
     {
-        return new Vector2D(ClampSub(lhs.x, rhs.x), ClampSub(lhs.y, rhs.y));
+        return new Vector2D(ClampSub(lhs.X, rhs.X), ClampSub(lhs.Y, rhs.Y));
     }
 }

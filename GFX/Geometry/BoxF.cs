@@ -50,9 +50,9 @@ public struct BoxF : IEquatable<BoxF>
 
     public override readonly string ToString() => $"{origin_} {width_}x{height_}x{depth_}";
 
-    public float x { readonly get => origin_.x; set => origin_.x = value; }
-    public float y { readonly get => origin_.y; set => origin_.y = value; }
-    public float z { readonly get => origin_.z; set => origin_.z = value; }
+    public float x { readonly get => origin_.X; set => origin_.X = value; }
+    public float y { readonly get => origin_.Y; set => origin_.Y = value; }
+    public float z { readonly get => origin_.Z; set => origin_.Z = value; }
 
     public float width { readonly get => width_; set => width_ = value < 0 ? 0 : value; }
     public float height { readonly get => height_; set => height_ = value < 0 ? 0 : value; }
@@ -90,16 +90,16 @@ public struct BoxF : IEquatable<BoxF>
     private void ExpandTo(in Point3F min, in Point3F max)
     {
 #if DEBUG
-        Debug.Assert(min.x <= max.x);
-        Debug.Assert(min.y <= max.y);
-        Debug.Assert(min.z <= max.z);
+        Debug.Assert(min.X <= max.X);
+        Debug.Assert(min.Y <= max.Y);
+        Debug.Assert(min.Z <= max.Z);
 #endif
-        float min_x = Math.Min(x, min.x);
-        float min_y = Math.Min(y, min.y);
-        float min_z = Math.Min(z, min.z);
-        float max_x = Math.Max(right(), max.x);
-        float max_y = Math.Max(bottom(), max.y);
-        float max_z = Math.Max(front(), max.z);
+        float min_x = Math.Min(x, min.X);
+        float min_y = Math.Min(y, min.Y);
+        float min_z = Math.Min(z, min.Z);
+        float max_x = Math.Max(right(), max.X);
+        float max_y = Math.Max(bottom(), max.Y);
+        float max_z = Math.Max(front(), max.Z);
 
         origin_.SetPoint(min_x, min_y, min_z);
         width_ = max_x - min_x;
@@ -116,7 +116,7 @@ public struct BoxF : IEquatable<BoxF>
     public static bool operator ==(in BoxF lhs, in BoxF rhs) => lhs.Equals(rhs);
     public static bool operator !=(in BoxF lhs, in BoxF rhs) => !lhs.Equals(rhs);
 
-    public static BoxF operator +(in BoxF b, in Vector3DF v) => new BoxF(b.x + v.x, b.y + v.y, b.z + v.z, b.width, b.height, b.depth);
+    public static BoxF operator +(in BoxF b, in Vector3DF v) => new BoxF(b.x + v.X, b.y + v.Y, b.z + v.Z, b.width, b.height, b.depth);
 
     // Moves the box by the specified distance in each dimension.
     public void operator +=(in Vector3DF offset)

@@ -154,8 +154,8 @@ public struct Insets : IEquatable<Insets>
     /// </summary>
     public void Offset(in Vector2D vector)
     {
-        set_left_right(ClampAdd(left(), vector.x), ClampSub(right(), vector.x));
-        set_top_bottom(ClampAdd(top(), vector.y), ClampSub(bottom(), vector.y));
+        set_left_right(ClampAdd(left(), vector.X), ClampSub(right(), vector.X));
+        set_top_bottom(ClampAdd(top(), vector.Y), ClampSub(bottom(), vector.Y));
     }
     
     public static explicit operator InsetsF(in Insets i) => new InsetsF(i.top(), i.left(), i.bottom(), i.right());
