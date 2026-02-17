@@ -4,26 +4,26 @@ namespace UI.GFX.Geometry;
 // These components may be blended and recomposed.
 public struct DecomposedTransform
 {
-    public Vector3D translate;
-    public Vector3D scale;
-    public Vector3D skew;
-    public Vector4D perspective;
-    public Quaternion quaternion;
+    public Vector3D Translate;
+    public Vector3D Scale;
+    public Vector3D Skew;
+    public Vector4D Perspective;
+    public Quaternion Quaternion;
 
     // The default constructor initializes the components in such a way
     // that will compose the identity transform.
     public DecomposedTransform()
     {
-        translate = new Vector3D(0, 0, 0);
-        scale = new Vector3D(1, 1, 1);
-        skew = new Vector3D(0, 0, 0);
-        perspective = new Vector4D(0, 0, 0, 1);
-        quaternion = new Quaternion();
+        Translate = new Vector3D(0, 0, 0);
+        Scale = new Vector3D(1, 1, 1);
+        Skew = new Vector3D(0, 0, 0);
+        Perspective = new Vector4D(0, 0, 0, 1);
+        Quaternion = new Quaternion();
     }
 
     public override readonly string ToString()
     {
-      return $"translate: {translate.X} {translate.Y} {translate.Z}\nscale: {scale.X} {scale.Y} {scale.Z}\nskew: {skew.X} {skew.Y} {skew.Z}\nperspective: {perspective.X} {perspective.Y} {perspective.Z} {perspective.W}\nquaternion: {quaternion.X} {quaternion.Y} {quaternion.Z} {quaternion.W}\n";
+      return $"translate: {Translate.X} {Translate.Y} {Translate.Z}\nscale: {Scale.X} {Scale.Y} {Scale.Z}\nskew: {Skew.X} {Skew.Y} {Skew.Z}\nperspective: {Perspective.X} {Perspective.Y} {Perspective.Z} {Perspective.W}\nquaternion: {Quaternion.X} {Quaternion.Y} {Quaternion.Z} {Quaternion.W}\n";
     }
 }
 

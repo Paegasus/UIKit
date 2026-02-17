@@ -146,9 +146,9 @@ public struct Rect : IEquatable<Rect>
     // Shrink the rectangle by the given |insets|
     public void Inset(in Insets insets)
     {
-        m_Origin += new Vector2D(insets.left(), insets.top());
-        Width = ClampSub(Width, insets.width());
-        Height = ClampSub(Height, insets.height());
+        m_Origin += new Vector2D(insets.Left, insets.Top);
+        Width = ClampSub(Width, insets.Width);
+        Height = ClampSub(Height, insets.Height);
     }
 
     // Expand the rectangle by |outset| on all sides.
