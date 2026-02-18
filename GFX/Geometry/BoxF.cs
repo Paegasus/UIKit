@@ -112,16 +112,13 @@ public struct BoxF : IEquatable<BoxF>
 
     public readonly bool Equals(BoxF other) => m_Origin.Equals(other.m_Origin) && m_Width == other.m_Width && m_Height == other.m_Height && m_Depth == other.m_Depth;
 
-    public static bool operator ==(in BoxF lhs, in BoxF rhs) => lhs.Equals(rhs);
-    public static bool operator !=(in BoxF lhs, in BoxF rhs) => !lhs.Equals(rhs);
+    public static bool operator ==(in BoxF left, in BoxF right) => left.Equals(right);
+    public static bool operator !=(in BoxF left, in BoxF right) => !left.Equals(right);
 
-    public static BoxF operator +(in BoxF b, in Vector3DF v) => new BoxF(b.X + v.X, b.Y + v.Y, b.Z + v.Z, b.Width, b.Height, b.Depth);
+    public static BoxF operator +(in BoxF a, in Vector3DF b) => new (a.X + b.X, a.Y + b.Y, a.Z + b.Z, a.Width, a.Height, a.Depth);
 
     // Moves the box by the specified distance in each dimension.
-    public void operator +=(in Vector3DF offset)
-    {
-        m_Origin += offset;
-    }
+    public void operator +=(in Vector3DF offset) => m_Origin += offset;
 
     public static BoxF UnionBoxes(in BoxF a, in BoxF b)
     {
@@ -130,7 +127,7 @@ public struct BoxF : IEquatable<BoxF>
         return result;
     }
 
-    public static BoxF ScaleBox(in BoxF b, float x_scale, float y_scale, float z_scale) => new BoxF(b.X * x_scale, b.Y * y_scale, b.Z * z_scale, b.Width * x_scale, b.Height * y_scale, b.Depth * z_scale);
+    public static BoxF ScaleBox(in BoxF box, float x_scale, float y_scale, float z_scale) => new (box.X * x_scale, box.Y * y_scale, box.Z * z_scale, box.Width * x_scale, box.Height * y_scale, box.Depth * z_scale);
 
-    public static BoxF ScaleBox(in BoxF b, float scale) => ScaleBox(b, scale, scale, scale);
+    public static BoxF ScaleBox(in BoxF box, float scale) => ScaleBox(box, scale, scale, scale);
 }
