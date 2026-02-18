@@ -23,7 +23,7 @@ namespace UI.Geometry;
 // this results in unwanted anti-aliasing.
 // When aligning to device pixels the edges are aligned to the nearest pixel and then the size is adjusted accordingly.
 // This ensures that the bottom/right edge and the total width/height is at most off-by-one.
-public struct LayoutUnit : IFixedPoint<int, uint>, IEquatable<LayoutUnit>, IComparable<LayoutUnit>
+public struct LayoutUnit : IEquatable<LayoutUnit>, IComparable<LayoutUnit>
 {
 	public const int FractionalBits = 6;
     public const int IntegralBits = sizeof(int) * 8 - FractionalBits;
@@ -130,21 +130,22 @@ public struct LayoutUnit : IFixedPoint<int, uint>, IEquatable<LayoutUnit>, IComp
 		return (double)m_Value / FixedPointDenominator;
 	}
 
-	// Note: Original C++ has this function here as well, but since it's static and only calls Conversion.SaturatedCast(),
-	// I'm not sure if we should keep it in LayoutUnit, there might be a better place for it.
-	public static int ClampRawValue<T>(T value) where T : IBinaryInteger<T>
-	{
-        return SaturatedCast<int, T>(value);
-	}
-
     public static int ClampRawValue(float value)
     {
-        return SaturatedCast<int, float>(value);
+        if (float.IsNaN(value)) return 0;
+        if (value > int.MaxValue) return int.MaxValue;
+        if (value < int.MinValue) return int.MinValue;
+
+        return (int)value;
     }
 
     public static int ClampRawValue(double value)
     {
-        return SaturatedCast<int, double>(value);
+        if (double.IsNaN(value)) return 0;
+        if (value > int.MaxValue) return int.MaxValue;
+        if (value < int.MinValue) return int.MinValue;
+
+        return (int)value;
     }
 
 	public static LayoutUnit FromRawValue(int value)
@@ -157,11 +158,18 @@ public struct LayoutUnit : IFixedPoint<int, uint>, IEquatable<LayoutUnit>, IComp
 		return unit;
 	}
 	
-	public static LayoutUnit FromRawValueWithClamp<T>(T raw_value) where T : IBinaryInteger<T>
+	public static LayoutUnit FromRawValueWithClamp(float raw_value)
 	{
 		// Note: Might be better to just call Conversion.SaturatedCast() directly and avoid the indirect call to ClampRawValue()
 		// return FromRawValue(Conversion.SaturatedCast<int, T>(raw_value));
-		return FromRawValue(ClampRawValue<T>(raw_value));
+		return FromRawValue(ClampRawValue(raw_value));
+	}
+
+    public static LayoutUnit FromRawValueWithClamp(double raw_value)
+	{
+		// Note: Might be better to just call Conversion.SaturatedCast() directly and avoid the indirect call to ClampRawValue()
+		// return FromRawValue(Conversion.SaturatedCast<int, T>(raw_value));
+		return FromRawValue(ClampRawValue(raw_value));
 	}
 
     // The specified `value` is rounded up to a multiple of `Epsilon()`, and is
