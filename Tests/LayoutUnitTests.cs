@@ -1,6 +1,8 @@
 using System.Diagnostics;
 using UI.Geometry;
 
+namespace UI.Tests;
+
 public static class LayoutUnitTests
 {
     public static void RunAllTests()
