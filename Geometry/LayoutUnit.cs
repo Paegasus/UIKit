@@ -378,23 +378,21 @@ public struct LayoutUnit : IEquatable<LayoutUnit>, IComparable<LayoutUnit>
 
     public static LayoutUnit operator -(in LayoutUnit a, in LayoutUnit b)
     {
-        ClampedNumeric<int> result = new ClampedNumeric<int>(a.RawValue()) - new ClampedNumeric<int>(b.RawValue());
-        return FromRawValue(result.RawValue);
+        return FromRawValue(ClampSub(a.RawValue(), b.RawValue()));
     }
 
     public static LayoutUnit operator *(in LayoutUnit a, int b)
     {
-        ClampedNumeric<int> result = new ClampedNumeric<int>(a.RawValue()) * new ClampedNumeric<int>(b);
-        return FromRawValue(result.RawValue);
+        return FromRawValue(ClampMul(a.RawValue(), b));
     }
-
-    public static LayoutUnit operator *(int a, in LayoutUnit b) => b * a;
 
     public static LayoutUnit operator /(in LayoutUnit a, int b)
     {
-        ClampedNumeric<int> result = new ClampedNumeric<int>(a.RawValue()) / new ClampedNumeric<int>(b);
-        return FromRawValue(result.RawValue);
+        return FromRawValue(ClampDiv(a.RawValue(), b));
     }
+
+    public static LayoutUnit operator *(int a, in LayoutUnit b) => b * a;
+    
 
     public static LayoutUnit operator /(int a, in LayoutUnit b) => new LayoutUnit(a) / b;
 

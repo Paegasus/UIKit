@@ -33,4 +33,28 @@ public static class ClampedMath
         // The result is within the valid range for an int.
         return (int)result;
     }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static int ClampMul(int x, int y)
+    {
+        long result = (long)x * y;
+
+        if (result > int.MaxValue) return int.MaxValue;
+        if (result < int.MinValue) return int.MinValue;
+
+        return (int)result;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static int ClampDiv(int x, int y)
+    {
+        if (y == 0)
+            return x >= 0 ? int.MaxValue : int.MinValue;
+
+        // Only overflow case in signed division.
+        if (x == int.MinValue && y == -1)
+            return int.MaxValue;
+
+        return x / y;
+    }
 }
