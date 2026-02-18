@@ -1,8 +1,7 @@
 using System.Diagnostics;
-using System.Numerics;
 using UI.Numerics;
 
-using static UI.Numerics.SafeConversions;
+using static UI.Numerics.ClampedMath;
 
 namespace UI.Geometry;
 
@@ -374,8 +373,7 @@ public struct LayoutUnit : IEquatable<LayoutUnit>, IComparable<LayoutUnit>
 
     public static LayoutUnit operator +(in LayoutUnit a, in LayoutUnit b)
     {
-        ClampedNumeric<int> result = new ClampedNumeric<int>(a.RawValue()) + new ClampedNumeric<int>(b.RawValue());
-        return FromRawValue(result.RawValue);
+        return FromRawValue(ClampAdd(a.RawValue(), b.RawValue()));
     }
 
     public static LayoutUnit operator -(in LayoutUnit a, in LayoutUnit b)
