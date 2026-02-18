@@ -1,32 +1,29 @@
 using System.Numerics;
+using System.Runtime.CompilerServices;
 
 namespace UI.Numerics;
 
 // Note: Verify that the behavior of the clamping functions is the same as the C++ versions in wtf/MathExtras.h
 public static class MathExtras
 {
-    public static T ClampTo<T>(float value)
-        where T : unmanaged, INumber<T>, IMinMaxValue<T>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static int ClampToInt(float value)
     {
-        var max = double.CreateChecked(T.MaxValue);
-        var min = double.CreateChecked(T.MinValue);
+        if (float.IsNaN(value)) return 0;
+        if (value >= int.MaxValue) return int.MaxValue;
+        if (value <= int.MinValue) return int.MinValue;
 
-        if (value >= max) return T.MaxValue;
-        if (value <= min) return T.MinValue;
-
-        return T.CreateChecked(value);
+        return (int)value;
     }
 
-    public static T ClampTo<T>(double value)
-        where T : unmanaged, INumber<T>, IMinMaxValue<T>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static int ClampToInt(double value)
     {
-        var max = double.CreateChecked(T.MaxValue);
-        var min = double.CreateChecked(T.MinValue);
+        if (double.IsNaN(value)) return 0;
+        if (value >= int.MaxValue) return int.MaxValue;
+        if (value <= int.MinValue) return int.MinValue;
 
-        if (value >= max) return T.MaxValue;
-        if (value <= min) return T.MinValue;
-
-        return T.CreateChecked(value);
+        return (int)value;
     }
 
     public static bool IsWithinIntRange(float x)
