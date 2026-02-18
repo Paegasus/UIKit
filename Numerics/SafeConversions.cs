@@ -7,6 +7,7 @@ namespace UI.Numerics;
 /// </summary>
 public static class SafeConversions
 {
+    /*
     public static TDest CheckedCast<TDest, TSrc>(TSrc value) where TDest : INumber<TDest> where TSrc : INumber<TSrc>
     {
         return TDest.CreateChecked(value);
@@ -16,7 +17,8 @@ public static class SafeConversions
     {
         return TDest.CreateTruncating(value);
     }
-
+    */
+    
     // floating point -> integral conversions
 
     public static int ClampFloor(float value)
