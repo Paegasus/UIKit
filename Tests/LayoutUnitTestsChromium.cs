@@ -549,12 +549,41 @@ public static class LayoutUnitTestsChromium
 
     private static void LayoutUnitRaw64FromInt32()
     {
-        
+        int int32_max_plus = LayoutUnit.IntegerMax + 10;
+        LayoutUnit int32_max_plus_32 = new(int32_max_plus);
+        Debug.Assert(int32_max_plus_32.ToInteger() != int32_max_plus);
+        InlineLayoutUnit int32_max_plus_64 = new(int32_max_plus);
+        Debug.Assert(int32_max_plus_64.ToInteger() == int32_max_plus);
+
+        int int32_min_minus = LayoutUnit.IntegerMin - 10;
+        LayoutUnit int32_min_minus_32 = new(int32_min_minus);
+        Debug.Assert(int32_min_minus_32.ToInteger() != int32_min_minus);
+        InlineLayoutUnit int32_min_minus_64 = new(int32_min_minus);
+        Debug.Assert(int32_min_minus_64.ToInteger() == int32_min_minus);
+
+        long raw32_max_plus = (long) LayoutUnit.RawValueMax + 10;
+        LayoutUnit raw32_max_plus_32 = new(raw32_max_plus);
+        Debug.Assert(raw32_max_plus_32.ToInteger() != raw32_max_plus);
+        InlineLayoutUnit raw32_max_plus_64 = new(raw32_max_plus);
+        Debug.Assert(raw32_max_plus_64.ToInteger() == raw32_max_plus);
+
+        long raw32_min_minus = (long)LayoutUnit.RawValueMin - 10;
+        LayoutUnit raw32_min_minus_32 = new(raw32_min_minus);
+        Debug.Assert(raw32_min_minus_32.ToInteger() != raw32_min_minus);
+        InlineLayoutUnit raw32_min_minus_64 = new(raw32_min_minus);
+        Debug.Assert(raw32_min_minus_64.ToInteger() == raw32_min_minus);
     }
 
     private static void LayoutUnitRaw64FromRaw32()
     {
-        
+        float value = 1.0f + LayoutUnit.Epsilon() * 234;
+        LayoutUnit value32_6 = new(value);
+        Debug.Assert(new InlineLayoutUnit(value32_6) == new InlineLayoutUnit(value));
+        TextRunLayoutUnit value32_16 = new(value);
+        Debug.Assert(new InlineLayoutUnit(value32_16) == new InlineLayoutUnit(value));
+
+        // The following code should fail to compile.
+        // TextRunLayoutUnit back_to_32{InlineLayoutUnit(value)};
     }
 
     private static void LayoutUnitTo()
