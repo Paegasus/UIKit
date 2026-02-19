@@ -29,6 +29,7 @@ public static class LayoutUnitTestsChromium
         LayoutUnitFloat();
         LayoutUnitFromFloatCeil();
         LayoutUnitFromFloatFloor();
+        LayoutUnitFromFloatRound();
         LayoutUnitCeil();
         LayoutUnitFloor();
         LayoutUnitRounding();
@@ -102,7 +103,7 @@ public static class LayoutUnitTestsChromium
     public static void LayoutUnitFloat()
     {
         const float Tolerance = 1.0f / FixedPointDenominator;
-        
+
         Debug.Assert(1.0f == new LayoutUnit(1.0f).ToFloat());
         Debug.Assert(1.25f == new LayoutUnit(1.25f).ToFloat());
         Debug.Assert(new LayoutUnit(1.25f) == new LayoutUnit(1.25f + Tolerance / 2));
@@ -160,6 +161,25 @@ public static class LayoutUnitTestsChromium
         Debug.Assert(MinValue == FromFloatFloor(float.NegativeInfinity));
 
         Debug.Assert(new LayoutUnit() == FromFloatFloor(float.NaN));
+    }
+
+    public static void LayoutUnitFromFloatRound()
+    {
+        const float Tolerance = 1.0f / FixedPointDenominator;
+
+        Debug.Assert(new LayoutUnit(1.25f) == FromFloatRound(1.25f));
+        Debug.Assert(new LayoutUnit(1.25f) == FromFloatRound(1.25f + Tolerance / 4));
+        Debug.Assert(new LayoutUnit(1.25f + Tolerance) == FromFloatRound(1.25f + Tolerance * 3 / 4));
+        Debug.Assert(new LayoutUnit(-Tolerance) == FromFloatRound(-Tolerance * 3 / 4));
+
+        // Larger than Max()
+        Debug.Assert(MaxValue == FromFloatRound(float.MaxValue));
+        Debug.Assert(MaxValue == FromFloatRound(float.PositiveInfinity));
+        // Smaller than Min()
+        Debug.Assert(MinValue == FromFloatRound(float.MinValue));
+        Debug.Assert(MinValue == FromFloatRound(float.NegativeInfinity));
+
+        Debug.Assert(new LayoutUnit() == FromFloatRound(float.NaN));
     }
 
     private static void LayoutUnitCeil()
