@@ -530,12 +530,21 @@ public static class LayoutUnitTestsChromium
 
     private static void LayoutUnitFixedConsts()
     {
-        
+        Debug.Assert(LayoutUnit.FractionalBits == 6u);
+        Debug.Assert(LayoutUnit.IntegralBits == 26u);
+        Debug.Assert(TextRunLayoutUnit.FractionalBits == 16u);
+        Debug.Assert(TextRunLayoutUnit.IntegralBits == 16u);
+        Debug.Assert(InlineLayoutUnit.FractionalBits == 16u);
+        Debug.Assert(InlineLayoutUnit.IntegralBits == 48u);
     }
 
     private static void LayoutUnitFixed()
     {
-        
+        int raw_value16 = 0x12345678;
+        int raw_value6 = raw_value16 >> 10;
+        var value16 = TextRunLayoutUnit.FromRawValue(raw_value16);
+        var value6 = LayoutUnit.FromRawValue(raw_value6);
+        //Debug.Assert(value16.To<LayoutUnit>(), value6);
     }
 
     private static void LayoutUnitRaw64FromInt32()
