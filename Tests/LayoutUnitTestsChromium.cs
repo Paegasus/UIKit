@@ -7,13 +7,6 @@ namespace UI.Tests;
 
 public static class LayoutUnitTestsChromium
 {
-    private static bool AreNear(double val1, double val2, double abs_error)
-    {
-        double diff = Math.Abs(val1 - val2);
-        
-        return diff <= abs_error;
-    }
-
     private static bool AreNear(float val1, float val2, float abs_error)
     {
         float diff = MathF.Abs(val1 - val2);
@@ -25,7 +18,7 @@ public static class LayoutUnitTestsChromium
     {
         LayoutUnitInt();
         LayoutUnitUnsigned();
-        Int64();
+        LayoutUniInt64();
         LayoutUnitFloat();
         LayoutUnitFromFloatCeil();
         LayoutUnitFromFloatFloor();
@@ -34,15 +27,26 @@ public static class LayoutUnitTestsChromium
         LayoutUnitFromFloatEncompassRound();
         LayoutUnitSnapSizeToPixel();
         LayoutUnitMultiplication();
-        MultiplicationByInt();
+        LayoutUniMultiplicationByInt();
         LayoutUnitDivision();
         LayoutUnitDivisionByInt();
         LayoutUnitMulDiv();
         LayoutUnitCeil();
         LayoutUnitFloor();
         LayoutUnitFloatOverflow();
-        UnaryMinus();
-
+        LayoutUnitUnaryMinus();
+        LayoutUnitPlusPlus();
+        LayoutUnitIntMod();
+        LayoutUnitFraction();
+        LayoutUnitFixedConsts();
+        LayoutUnitFixed();
+        LayoutUnitRaw64FromInt32();
+        LayoutUnitRaw64FromRaw32();
+        LayoutUnitTo();
+        LayoutUnitToClampSameFractional64To32();
+        LayoutUnitToClampLessFractional64To32();
+        LayoutUnitToClampMoreFractional();
+        LayoutUnitRaw64Ceil();
 
         Debug.WriteLine("All LayoutUnit tests passed!");
     }
@@ -98,7 +102,7 @@ public static class LayoutUnitTestsChromium
         Debug.Assert((IntegerMax - 100) << FractionalBits == new LayoutUnit(kNotOverflowed).RawValue());
     }
 
-    public static void Int64()
+    public static void LayoutUniInt64()
     {
         const int raw_min = int.MinValue;
         const int raw_max = int.MaxValue;
@@ -325,7 +329,7 @@ public static class LayoutUnitTestsChromium
         }
     }
 
-    private static void MultiplicationByInt()
+    private static void LayoutUniMultiplicationByInt()
     {
         var quarter_max = IntegerMax / 4;
         Debug.Assert(new LayoutUnit(quarter_max * 2) == new LayoutUnit(quarter_max) * 2);
@@ -457,7 +461,7 @@ public static class LayoutUnitTestsChromium
         Debug.Assert(IntegerMin == new LayoutUnit(-176972000.0).ToInteger());
     }
 
-    private static void UnaryMinus()
+    private static void LayoutUnitUnaryMinus()
     {
         Debug.Assert(new LayoutUnit() == -new LayoutUnit());
         Debug.Assert(new LayoutUnit(999) == -new LayoutUnit(-999));
@@ -470,5 +474,102 @@ public static class LayoutUnitTestsChromium
 
         // -LayoutUnit::min() is saturated to LayoutUnit::max()
         Debug.Assert(LayoutUnit.MaxValue == -LayoutUnit.MinValue); // 2147483647 == -2147483648
+    }
+
+    private static void LayoutUnitPlusPlus()
+    {
+        var val1 = new LayoutUnit(-2);
+        var val2 = new LayoutUnit(-1);
+        var val3 = new LayoutUnit(0);
+        var val4 = new LayoutUnit(1);
+        var val5 = new LayoutUnit(MaxValue);
+        
+
+        Debug.Assert(new LayoutUnit(-1) == ++val1);
+        Debug.Assert(new LayoutUnit(0) == ++val2);
+        Debug.Assert(new LayoutUnit(1) == ++val3);
+        Debug.Assert(new LayoutUnit(2) == ++val4);
+        
+        Debug.Assert(MaxValue == ++val5);
+    }
+
+    private static void LayoutUnitIntMod()
+    {
+        Debug.Assert(new LayoutUnit(5) == IntMod(new LayoutUnit(55), new LayoutUnit(10)));
+        Debug.Assert(new LayoutUnit(5) == IntMod(new LayoutUnit(55), new LayoutUnit(-10)));
+        Debug.Assert(new LayoutUnit(-5) == IntMod(new LayoutUnit(-55), new LayoutUnit(10)));
+        Debug.Assert(new LayoutUnit(-5) == IntMod(new LayoutUnit(-55), new LayoutUnit(-10)));
+        Debug.Assert(new LayoutUnit(1.5) == IntMod(new LayoutUnit(7.5), new LayoutUnit(3)));
+        Debug.Assert(new LayoutUnit(1.25) == IntMod(new LayoutUnit(7.5), new LayoutUnit(3.125)));
+        Debug.Assert(new LayoutUnit() == IntMod(new LayoutUnit(7.5), new LayoutUnit(2.5)));
+        Debug.Assert(new LayoutUnit() == IntMod(new LayoutUnit(), new LayoutUnit(123)));
+    }
+
+    private static void LayoutUnitFraction()
+    {
+        Debug.Assert(new LayoutUnit(-1.9f).HasFraction);
+        Debug.Assert(new LayoutUnit(-1.6f).HasFraction);
+        Debug.Assert(FromFloatRound(-1.51f).HasFraction);
+        Debug.Assert(FromFloatRound(-1.5f).HasFraction);
+        Debug.Assert(FromFloatRound(-1.49f).HasFraction);
+        Debug.Assert(!new LayoutUnit(-1.0f).HasFraction);
+        Debug.Assert(FromFloatRound(-0.95f).HasFraction);
+        Debug.Assert(FromFloatRound(-0.51f).HasFraction);
+        Debug.Assert(FromFloatRound(-0.50f).HasFraction);
+        Debug.Assert(FromFloatRound(-0.49f).HasFraction);
+        Debug.Assert(new LayoutUnit(-0.1f).HasFraction);
+        Debug.Assert(!new LayoutUnit(-1.0f).HasFraction);
+        Debug.Assert(!new LayoutUnit(0.0f).HasFraction);
+        Debug.Assert(new LayoutUnit(0.1f).HasFraction);
+        Debug.Assert(FromFloatRound(0.49f).HasFraction);
+        Debug.Assert(FromFloatRound(0.50f).HasFraction);
+        Debug.Assert(FromFloatRound(0.51f).HasFraction);
+        Debug.Assert(new LayoutUnit(0.95f).HasFraction);
+        Debug.Assert(!new LayoutUnit(1.0f).HasFraction);
+    }
+
+    private static void LayoutUnitFixedConsts()
+    {
+        
+    }
+
+    private static void LayoutUnitFixed()
+    {
+        
+    }
+
+    private static void LayoutUnitRaw64FromInt32()
+    {
+        
+    }
+
+    private static void LayoutUnitRaw64FromRaw32()
+    {
+        
+    }
+
+    private static void LayoutUnitTo()
+    {
+        
+    }
+
+    private static void LayoutUnitToClampSameFractional64To32()
+    {
+        
+    }
+
+    private static void LayoutUnitToClampLessFractional64To32()
+    {
+        
+    }
+
+    private static void LayoutUnitToClampMoreFractional()
+    {
+        
+    }
+
+    private static void LayoutUnitRaw64Ceil()
+    {
+        
     }
 }
