@@ -402,15 +402,15 @@ public struct LayoutUnit : IEquatable<LayoutUnit>, IComparable<LayoutUnit>
     public static float operator /(float a, LayoutUnit b) => a / b.ToFloat();
     public static double operator /(double a, LayoutUnit b) => a / b.ToDouble();
 
+    // Saturating negation: -MinValue clamps to MaxValue to preserve domain invariants.
     public static LayoutUnit operator -(in LayoutUnit a)
     {
-        // This is implemented to match the C++ behavior of two's complement
-        // integer negation, where -int.MinValue is int.MinValue. The unchecked
-        // block prevents an OverflowException.
-        unchecked
-        {
-            return FromRawValue(-a.RawValue());
-        }
+        int raw = a.RawValue();
+
+        if (raw == int.MinValue)
+            return FromRawValue(int.MaxValue);
+
+        return FromRawValue(-raw);
     }
 
     public static LayoutUnit operator ++(in LayoutUnit a)

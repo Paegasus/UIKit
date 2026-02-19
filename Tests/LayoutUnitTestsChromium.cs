@@ -38,9 +38,11 @@ public static class LayoutUnitTestsChromium
         LayoutUnitDivision();
         LayoutUnitDivisionByInt();
         LayoutUnitMulDiv();
-
         LayoutUnitCeil();
         LayoutUnitFloor();
+        LayoutUnitFloatOverflow();
+        UnaryMinus();
+
 
         Debug.WriteLine("All LayoutUnit tests passed!");
     }
@@ -446,4 +448,27 @@ public static class LayoutUnitTestsChromium
         Debug.Assert(IntegerMin + 1 == (new LayoutUnit(IntegerMin) + new LayoutUnit(1)).Floor());
     }
 
+    private static void LayoutUnitFloatOverflow()
+    {
+        // These should overflow to the max/min according to their sign.
+        Debug.Assert(IntegerMax == new LayoutUnit(176972000.0f).ToInteger());
+        Debug.Assert(IntegerMin == new LayoutUnit(-176972000.0f).ToInteger());
+        Debug.Assert(IntegerMax == new LayoutUnit(176972000.0).ToInteger());
+        Debug.Assert(IntegerMin == new LayoutUnit(-176972000.0).ToInteger());
+    }
+
+    private static void UnaryMinus()
+    {
+        Debug.Assert(new LayoutUnit() == -new LayoutUnit());
+        Debug.Assert(new LayoutUnit(999) == -new LayoutUnit(-999));
+        Debug.Assert(new LayoutUnit(-999) == -new LayoutUnit(999));
+
+        LayoutUnit negative_max = new();
+        negative_max.SetRawValue(MinValue.RawValue() + 1);
+        Debug.Assert(negative_max == -MaxValue);
+        Debug.Assert(MaxValue == -negative_max);
+
+        // -LayoutUnit::min() is saturated to LayoutUnit::max()
+        Debug.Assert(LayoutUnit.MaxValue == -LayoutUnit.MinValue); // 2147483647 == -2147483648
+    }
 }
