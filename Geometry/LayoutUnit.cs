@@ -128,6 +128,13 @@ public struct LayoutUnit : IEquatable<LayoutUnit>, IComparable<LayoutUnit>
 		return (double)m_Value / FixedPointDenominator;
 	}
 
+    public static int ClampRawValue(long value)
+    {
+        if (value > int.MaxValue) return int.MaxValue;
+        if (value < int.MinValue) return int.MinValue;
+        return (int)value;
+    }
+
     public static int ClampRawValue(float value)
     {
         if (float.IsNaN(value)) return 0;

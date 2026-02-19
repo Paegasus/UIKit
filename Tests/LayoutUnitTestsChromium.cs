@@ -30,12 +30,15 @@ public static class LayoutUnitTestsChromium
         LayoutUnitFromFloatCeil();
         LayoutUnitFromFloatFloor();
         LayoutUnitFromFloatRound();
-        LayoutUnitCeil();
-        LayoutUnitFloor();
         LayoutUnitRounding();
         LayoutUnitFromFloatEncompassRound();
-        LayoutUnitMultiplication();
         LayoutUnitSnapSizeToPixel();
+        LayoutUnitMultiplication();
+        MultiplicationByInt();
+
+
+        LayoutUnitCeil();
+        LayoutUnitFloor();
 
         Debug.WriteLine("All LayoutUnit tests passed!");
     }
@@ -231,13 +234,6 @@ public static class LayoutUnitTestsChromium
         Debug.Assert(new LayoutUnit(55.156250f) == second);
     }
 
-    private static void LayoutUnitMultiplication()
-    {
-        Debug.Assert(333 == (new LayoutUnit(100) * new LayoutUnit(3.33)).Round());
-        Debug.Assert(-333 == (new LayoutUnit(-100) * new LayoutUnit(3.33)).Round());
-        Debug.Assert(333 == (new LayoutUnit(-100) * new LayoutUnit(-3.33)).Round());
-    }
-
     private static void LayoutUnitSnapSizeToPixel()
     {
         Debug.Assert(1 == SnapSizeToPixel(new(1), new(0)));
@@ -272,7 +268,68 @@ public static class LayoutUnitTestsChromium
         Debug.Assert(IntegerMin == SnapSizeToPixel(new(IntegerMin), new(-0.3)));
     }
 
-    
+    private static void LayoutUnitMultiplication()
+    {
+        Debug.Assert(1 == (new LayoutUnit(1) * new LayoutUnit(1)).ToInteger());
+        Debug.Assert(2 == (new LayoutUnit(1) * new LayoutUnit(2)).ToInteger());
+        Debug.Assert(2 == (new LayoutUnit(2) * new LayoutUnit(1)).ToInteger());
+        Debug.Assert(1 == (new LayoutUnit(2) * new LayoutUnit(0.5)).ToInteger());
+        Debug.Assert(1 == (new LayoutUnit(0.5) * new LayoutUnit(2)).ToInteger());
+        Debug.Assert(100 == (new LayoutUnit(100) * new LayoutUnit(1)).ToInteger());
+
+        Debug.Assert(-1 == (new LayoutUnit(-1) * new LayoutUnit(1)).ToInteger());
+        Debug.Assert(-2 == (new LayoutUnit(-1) * new LayoutUnit(2)).ToInteger());
+        Debug.Assert(-2 == (new LayoutUnit(-2) * new LayoutUnit(1)).ToInteger());
+        Debug.Assert(-1 == (new LayoutUnit(-2) * new LayoutUnit(0.5)).ToInteger());
+        Debug.Assert(-1 == (new LayoutUnit(-0.5) * new LayoutUnit(2)).ToInteger());
+        Debug.Assert(-100 == (new LayoutUnit(-100) * new LayoutUnit(1)).ToInteger());
+
+        Debug.Assert(1 == (new LayoutUnit(-1) * new LayoutUnit(-1)).ToInteger());
+        Debug.Assert(2 == (new LayoutUnit(-1) * new LayoutUnit(-2)).ToInteger());
+        Debug.Assert(2 == (new LayoutUnit(-2) * new LayoutUnit(-1)).ToInteger());
+        Debug.Assert(1 == (new LayoutUnit(-2) * new LayoutUnit(-0.5)).ToInteger());
+        Debug.Assert(1 == (new LayoutUnit(-0.5) * new LayoutUnit(-2)).ToInteger());
+        Debug.Assert(100 == (new LayoutUnit(-100) * new LayoutUnit(-1)).ToInteger());
+
+        Debug.Assert(333 == (new LayoutUnit(100) * new LayoutUnit(3.33)).Round());
+        Debug.Assert(-333 == (new LayoutUnit(-100) * new LayoutUnit(3.33)).Round());
+        Debug.Assert(333 == (new LayoutUnit(-100) * new LayoutUnit(-3.33)).Round());
+
+        int a_hundred_size_t = 100;
+        Debug.Assert(100 == (new LayoutUnit(a_hundred_size_t) * new LayoutUnit(1)).ToInteger());
+        Debug.Assert(400 == (a_hundred_size_t * new LayoutUnit(4)).ToInteger());
+        Debug.Assert(400 == (new LayoutUnit(4) * a_hundred_size_t).ToInteger());
+
+        int quarter_max = IntegerMax / 4;
+        Debug.Assert(quarter_max * 2 == (new LayoutUnit(quarter_max) * new LayoutUnit(2)).ToInteger());
+        Debug.Assert(quarter_max * 3 == (new LayoutUnit(quarter_max) * new LayoutUnit(3)).ToInteger());
+        Debug.Assert(quarter_max * 4 == (new LayoutUnit(quarter_max) * new LayoutUnit(4)).ToInteger());
+        Debug.Assert(IntegerMax == (new LayoutUnit(quarter_max) * new LayoutUnit(5)).ToInteger());
+
+        int overflow_int_size_t = IntegerMax * 4;
+        Debug.Assert(IntegerMax == (new LayoutUnit(overflow_int_size_t) * new LayoutUnit(2)).ToInteger());
+        Debug.Assert(IntegerMax == (overflow_int_size_t * new LayoutUnit(4)).ToInteger());
+        Debug.Assert(IntegerMax == (new LayoutUnit(4) * overflow_int_size_t).ToInteger());
+
+        {
+            // Multiple by float 1.0 can produce a different value.
+            LayoutUnit source = FromRawValue(2147483009);
+            Debug.Assert(source != new LayoutUnit(source * 1.0f));
+            LayoutUnit updated = source;
+            updated *= 1.0f;
+            Debug.Assert(source != updated);
+        }
+    }
+
+    private static void MultiplicationByInt()
+    {
+        var quarter_max = IntegerMax / 4;
+        Debug.Assert(new LayoutUnit(quarter_max * 2) == new LayoutUnit(quarter_max) * 2);
+        Debug.Assert(new LayoutUnit(quarter_max * 3) ==  new LayoutUnit(quarter_max) * 3);
+        Debug.Assert(new LayoutUnit(quarter_max * 4) ==  new LayoutUnit(quarter_max) * 4);
+        Debug.Assert(MaxValue == new LayoutUnit(quarter_max) * 5);
+    }
+
     private static void LayoutUnitCeil()
     {
         Debug.Assert(0 == new LayoutUnit(0).Ceil());
