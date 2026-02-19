@@ -10,6 +10,7 @@ public static class LayoutUnitTestsChromium
     public static void RunAllTests()
     {
         LayoutUnitInt();
+        LayoutUnitUnsigned();
         LayoutUnitCeil();
         LayoutUnitFloor();
         LayoutUnitRounding();
@@ -57,6 +58,17 @@ public static class LayoutUnitTestsChromium
         // Shifting negative numbers left has undefined behavior, so use
         // multiplication instead of direct shifting here.
         Debug.Assert((IntegerMin + 100) * (1 << FractionalBits) == new LayoutUnit(IntegerMin + 100).RawValue());
+    }
+
+    public static void LayoutUnitUnsigned()
+    {
+        // Test the raw unsaturated value
+        Debug.Assert(0 == new LayoutUnit((uint)0).RawValue());
+        Debug.Assert(RawValueMax == new LayoutUnit((uint)IntegerMax).RawValue());
+        const uint kOverflowed = IntegerMax + 100;
+        Debug.Assert(RawValueMax == new LayoutUnit(kOverflowed).RawValue());
+        const uint kNotOverflowed = IntegerMax - 100;
+        Debug.Assert((IntegerMax - 100) << FractionalBits == new LayoutUnit(kNotOverflowed).RawValue());
     }
 
     private static void LayoutUnitCeil()
