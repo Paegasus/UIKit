@@ -20,6 +20,17 @@ public static class ClampedMath
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static long ClampAdd(long x, long y)
+    {
+        long result = x + y;
+
+        if (result > long.MaxValue) return long.MaxValue;
+        if (result < long.MinValue) return long.MinValue;
+
+        return result;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static int ClampSub(int x, int y)
     {
         // Use 'long' to perform the subtraction, as it can hold any result
@@ -35,6 +46,17 @@ public static class ClampedMath
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static long ClampSub(long x, long y)
+    {
+        long result = x - y;
+
+        if (result > long.MaxValue) return long.MaxValue;
+        if (result < long.MinValue) return long.MinValue;
+
+        return result;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static int ClampMul(int x, int y)
     {
         long result = (long)x * y;
@@ -46,6 +68,17 @@ public static class ClampedMath
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static long ClampMul(long x, long y)
+    {
+        long result = x * y;
+
+        if (result > long.MaxValue) return long.MaxValue;
+        if (result < long.MinValue) return long.MinValue;
+
+        return result;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static int ClampDiv(int x, int y)
     {
         if (y == 0)
@@ -54,6 +87,19 @@ public static class ClampedMath
         // Only overflow case in signed division.
         if (x == int.MinValue && y == -1)
             return int.MaxValue;
+
+        return x / y;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static long ClampDiv(long x, long y)
+    {
+        if (y == 0)
+            return x >= 0 ? long.MaxValue : long.MinValue;
+
+        // Only overflow case in signed division.
+        if (x == long.MinValue && y == -1)
+            return long.MaxValue;
 
         return x / y;
     }

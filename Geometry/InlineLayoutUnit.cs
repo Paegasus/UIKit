@@ -10,12 +10,12 @@ namespace UI.Geometry;
 public struct InlineLayoutUnit : IEquatable<InlineLayoutUnit>, IComparable<InlineLayoutUnit>
 {
 	public const int FractionalBits = 16;
-    public const int IntegralBits = sizeof(int) * 8 - FractionalBits;
+    public const int IntegralBits = sizeof(long) * 8 - FractionalBits;
     public const int FixedPointDenominator = 1 << FractionalBits;
-	public const int RawValueMax = int.MaxValue;
-    public const int RawValueMin = int.MinValue;
-    public const int IntegerMax = RawValueMax / FixedPointDenominator;
-    public const int IntegerMin = RawValueMin / FixedPointDenominator;
+	public const long RawValueMax = long.MaxValue;
+    public const long RawValueMin = long.MinValue;
+    public const long IntegerMax = RawValueMax / FixedPointDenominator;
+    public const long IntegerMin = RawValueMin / FixedPointDenominator;
 
     // kIndefiniteSize is a special value used within layout code.
     // It is typical within layout to have sizes which are only allowed to be non-negative or "indefinite".
@@ -27,7 +27,7 @@ public struct InlineLayoutUnit : IEquatable<InlineLayoutUnit>, IComparable<Inlin
     public static readonly InlineLayoutUnit NearlyMaxValue = FromRawValue(RawValueMax - FixedPointDenominator / 2);
     public static readonly InlineLayoutUnit NearlyMinValue = FromRawValue(RawValueMin + FixedPointDenominator / 2);
 	
-	private int m_Value;
+	private long m_Value;
 
 	public InlineLayoutUnit() { m_Value = 0; }
 
@@ -49,19 +49,11 @@ public struct InlineLayoutUnit : IEquatable<InlineLayoutUnit>, IComparable<Inlin
     public InlineLayoutUnit(float value) { m_Value = ClampRawValue(value * FixedPointDenominator); }
     public InlineLayoutUnit(double value) { m_Value = ClampRawValue(value * FixedPointDenominator); }
 
-    public readonly int RawValue() => m_Value;
+    public readonly long RawValue() => m_Value;
 
-	public void SetRawValue(int value) => m_Value = value;
+	public void SetRawValue(long value) => m_Value = value;
 
-	public void SetRawValue(long value)
-	{
-#if DEBUG
-        Debug.WriteLineIf(value > int.MaxValue || value < int.MinValue, $"InlineLayoutUnit overflow: {value} is out of range for a 32-bit integer.");
-#endif
-		m_Value = (int)value;
-	}
-
-    public void SaturatedSet(int value)
+    public void SaturatedSet(long value)
     {
         if (value > IntegerMax)
         {
@@ -77,10 +69,10 @@ public struct InlineLayoutUnit : IEquatable<InlineLayoutUnit>, IComparable<Inlin
         }
     }
 
-    public void SaturatedSet(uint value)
+    public void SaturatedSet(ulong value)
     {
         // Unsigned values can't be negative, so we only need to check the upper bound.
-        if (value >= (uint)IntegerMax)
+        if (value >= (ulong)IntegerMax)
         {
             m_Value = RawValueMax;
         }
@@ -90,17 +82,17 @@ public struct InlineLayoutUnit : IEquatable<InlineLayoutUnit>, IComparable<Inlin
         }
     }
 
-	public readonly int ToInteger()
+	public readonly long ToInteger()
 	{
 		return m_Value / FixedPointDenominator;
 	}
 
-	public readonly uint ToUnsignedInteger()
+	public readonly ulong ToUnsignedInteger()
 	{
         // unchecked is necessary here to handle the conversion of negative values correctly
 		unchecked
 		{
-			return (uint)(m_Value / FixedPointDenominator);
+			return (ulong)(m_Value / FixedPointDenominator);
 		}
 	}
 
@@ -139,7 +131,7 @@ public struct InlineLayoutUnit : IEquatable<InlineLayoutUnit>, IComparable<Inlin
         return (int)value;
     }
 
-	public static InlineLayoutUnit FromRawValue(int value)
+	public static InlineLayoutUnit FromRawValue(long value)
 	{
 		InlineLayoutUnit unit = new()
 		{
@@ -243,7 +235,7 @@ public struct InlineLayoutUnit : IEquatable<InlineLayoutUnit>, IComparable<Inlin
         return FromRawValue(m_Value < RawValueMax ? m_Value + 1 : m_Value);
     }
 
-    public readonly int Ceil()
+    public readonly long Ceil()
     {
         if (m_Value >= RawValueMax - FixedPointDenominator + 1)
             return IntegerMax;
@@ -254,12 +246,12 @@ public struct InlineLayoutUnit : IEquatable<InlineLayoutUnit>, IComparable<Inlin
         return ToInteger();
     }
 
-    public readonly int Round()
+    public readonly long Round()
     {
         return ToInteger() + ((Fraction().RawValue() + (FixedPointDenominator / 2)) >> FractionalBits);
     }
 
-    public readonly int Floor() 
+    public readonly long Floor() 
     {
         if (m_Value <= RawValueMin + FixedPointDenominator - 1)
             return IntegerMin;
@@ -420,7 +412,7 @@ public struct InlineLayoutUnit : IEquatable<InlineLayoutUnit>, IComparable<Inlin
 
     public static InlineLayoutUnit operator *(in InlineLayoutUnit a, in InlineLayoutUnit b)
     {
-        long result = ((long)a.RawValue() * b.RawValue()) >> FractionalBits;
+        long result = a.RawValue() * b.RawValue() >> FractionalBits;
         return FromRawValue(ClampRawValue(result));
     }
 
@@ -429,7 +421,7 @@ public struct InlineLayoutUnit : IEquatable<InlineLayoutUnit>, IComparable<Inlin
         if (b.RawValue() == 0)
             return FromRawValue(a.RawValue() >= 0 ? RawValueMax : RawValueMin);
         
-        long result = ((long)a.RawValue() << FractionalBits) / b.RawValue();
+        long result = (a.RawValue() << FractionalBits) / b.RawValue();
         return FromRawValue(ClampRawValue(result));
     }
 
@@ -443,11 +435,11 @@ public struct InlineLayoutUnit : IEquatable<InlineLayoutUnit>, IComparable<Inlin
         return FromRawValue(a.RawValue() % b.RawValue());
     }
 
-    public static int SnapSizeToPixel(in InlineLayoutUnit size, in InlineLayoutUnit location)
+    public static long SnapSizeToPixel(in InlineLayoutUnit size, in InlineLayoutUnit location)
     {
         InlineLayoutUnit fraction = location.Fraction();
         
-        int result = (fraction + size).Round() - fraction.Round();
+        long result = (fraction + size).Round() - fraction.Round();
 
         // This check handles cases where a InlineLayoutUnit is small but non-zero.
         // The C++ version uses [[unlikely]] which is a hint for branch prediction.
@@ -460,7 +452,7 @@ public struct InlineLayoutUnit : IEquatable<InlineLayoutUnit>, IComparable<Inlin
         return result;
     }
 
-    public static int SnapSizeToPixelAllowingZero(in InlineLayoutUnit size, in InlineLayoutUnit location)
+    public static long SnapSizeToPixelAllowingZero(in InlineLayoutUnit size, in InlineLayoutUnit location)
     {
         InlineLayoutUnit fraction = location.Fraction();
         return (fraction + size).Round() - fraction.Round();
@@ -473,7 +465,7 @@ public struct InlineLayoutUnit : IEquatable<InlineLayoutUnit>, IComparable<Inlin
     {
         if (c.RawValue() == 0) return FromRawValue(a.RawValue() >= 0 ? RawValueMax : RawValueMin);
 
-        long result = ((long)a.RawValue() * b.RawValue()) / c.RawValue();
+        long result = a.RawValue() * b.RawValue() / c.RawValue();
         return FromRawValue(ClampRawValue(result));
     }
 
@@ -484,7 +476,7 @@ public struct InlineLayoutUnit : IEquatable<InlineLayoutUnit>, IComparable<Inlin
     {
         if (c == 0) return FromRawValue(a.RawValue() >= 0 ? RawValueMax : RawValueMin);
 
-        long result = ((long)a.RawValue() * b) / c;
+        long result = a.RawValue() * b / c;
         return FromRawValue(ClampRawValue(result));
     }
 
