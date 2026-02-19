@@ -35,6 +35,8 @@ public static class LayoutUnitTestsChromium
         LayoutUnitSnapSizeToPixel();
         LayoutUnitMultiplication();
         MultiplicationByInt();
+        LayoutUnitDivision();
+        LayoutUnitDivisionByInt();
 
 
         LayoutUnitCeil();
@@ -328,6 +330,58 @@ public static class LayoutUnitTestsChromium
         Debug.Assert(new LayoutUnit(quarter_max * 3) ==  new LayoutUnit(quarter_max) * 3);
         Debug.Assert(new LayoutUnit(quarter_max * 4) ==  new LayoutUnit(quarter_max) * 4);
         Debug.Assert(MaxValue == new LayoutUnit(quarter_max) * 5);
+    }
+
+    private static void LayoutUnitDivision()
+    {
+        Debug.Assert(1 == (new LayoutUnit(1) / new LayoutUnit(1)).ToInteger());
+        Debug.Assert(0 == (new LayoutUnit(1) / new LayoutUnit(2)).ToInteger());
+        Debug.Assert(2 == (new LayoutUnit(2) / new LayoutUnit(1)).ToInteger());
+        Debug.Assert(4 == (new LayoutUnit(2) / new LayoutUnit(0.5)).ToInteger());
+        Debug.Assert(0 == (new LayoutUnit(0.5) / new LayoutUnit(2)).ToInteger());
+        Debug.Assert(10 == (new LayoutUnit(100) / new LayoutUnit(10)).ToInteger());
+        Debug.Assert(0.5f == (new LayoutUnit(1) / new LayoutUnit(2)).ToFloat());
+        Debug.Assert(0.25f == (new LayoutUnit(0.5) / new LayoutUnit(2)).ToFloat());
+
+        Debug.Assert(-1 == (new LayoutUnit(-1) / new LayoutUnit(1)).ToInteger());
+        Debug.Assert(0 == (new LayoutUnit(-1) / new LayoutUnit(2)).ToInteger());
+        Debug.Assert(-2 == (new LayoutUnit(-2) / new LayoutUnit(1)).ToInteger());
+        Debug.Assert(-4 == (new LayoutUnit(-2) / new LayoutUnit(0.5)).ToInteger());
+        Debug.Assert(0 == (new LayoutUnit(-0.5) / new LayoutUnit(2)).ToInteger());
+        Debug.Assert(-10 == (new LayoutUnit(-100) / new LayoutUnit(10)).ToInteger());
+        Debug.Assert(-0.5f == (new LayoutUnit(-1) / new LayoutUnit(2)).ToFloat());
+        Debug.Assert(-0.25f == (new LayoutUnit(-0.5) / new LayoutUnit(2)).ToFloat());
+
+        Debug.Assert(1 == (new LayoutUnit(-1) / new LayoutUnit(-1)).ToInteger());
+        Debug.Assert(0 == (new LayoutUnit(-1) / new LayoutUnit(-2)).ToInteger());
+        Debug.Assert(2 == (new LayoutUnit(-2) / new LayoutUnit(-1)).ToInteger());
+        Debug.Assert(4 == (new LayoutUnit(-2) / new LayoutUnit(-0.5)).ToInteger());
+        Debug.Assert(0 == (new LayoutUnit(-0.5) / new LayoutUnit(-2)).ToInteger());
+        Debug.Assert(10 == (new LayoutUnit(-100) / new LayoutUnit(-10)).ToInteger());
+        Debug.Assert(0.5f == (new LayoutUnit(-1) / new LayoutUnit(-2)).ToFloat());
+        Debug.Assert(0.25f == (new LayoutUnit(-0.5) / new LayoutUnit(-2)).ToFloat());
+
+        int a_hundred_size_t = 100;
+        Debug.Assert(50 == (new LayoutUnit(a_hundred_size_t) / new LayoutUnit(2)).ToInteger());
+        Debug.Assert(25 == (a_hundred_size_t / new LayoutUnit(4)).ToInteger());
+        Debug.Assert(4 == (new LayoutUnit(400) / a_hundred_size_t).ToInteger());
+
+        Debug.Assert(IntegerMax / 2 == (new LayoutUnit(IntegerMax) / new LayoutUnit(2)).ToInteger());
+        Debug.Assert(IntegerMax == (new LayoutUnit(IntegerMax) / new LayoutUnit(0.5)).ToInteger());
+    }
+
+    private static void LayoutUnitDivisionByInt()
+    {
+        Debug.Assert(new LayoutUnit(1) == new LayoutUnit(1) / 1);
+        Debug.Assert(new LayoutUnit(0.5) == new LayoutUnit(1) / 2);
+        Debug.Assert(new LayoutUnit(-0.5) == new LayoutUnit(1) / -2);
+        Debug.Assert(new LayoutUnit(-0.5) == new LayoutUnit(-1) / 2);
+        Debug.Assert(new LayoutUnit(0.5) == new LayoutUnit(-1) / -2);
+
+        Debug.Assert(IntegerMax / 2.0 == (new LayoutUnit(IntegerMax) / 2).ToDouble());
+        Debug.Assert(
+            InlineLayoutUnit::kIntMax / 2.0,
+            (InlineLayoutUnit(InlineLayoutUnit::kIntMax) / 2).ToDouble());
     }
 
     private static void LayoutUnitCeil()
