@@ -28,6 +28,7 @@ public static class LayoutUnitTestsChromium
         Int64();
         LayoutUnitFloat();
         LayoutUnitFromFloatCeil();
+        LayoutUnitFromFloatFloor();
         LayoutUnitCeil();
         LayoutUnitFloor();
         LayoutUnitRounding();
@@ -101,6 +102,7 @@ public static class LayoutUnitTestsChromium
     public static void LayoutUnitFloat()
     {
         const float Tolerance = 1.0f / FixedPointDenominator;
+        
         Debug.Assert(1.0f == new LayoutUnit(1.0f).ToFloat());
         Debug.Assert(1.25f == new LayoutUnit(1.25f).ToFloat());
         Debug.Assert(new LayoutUnit(1.25f) == new LayoutUnit(1.25f + Tolerance / 2));
@@ -127,6 +129,7 @@ public static class LayoutUnitTestsChromium
     public static void LayoutUnitFromFloatCeil()
     {
         const float Tolerance = 1.0f / FixedPointDenominator;
+
         Debug.Assert(new LayoutUnit(1.25f) == FromFloatCeil(1.25f));
         Debug.Assert(new LayoutUnit(1.25f + Tolerance) == FromFloatCeil(1.25f + Tolerance / 2));
         Debug.Assert(new LayoutUnit() == FromFloatCeil(-Tolerance / 2));
@@ -139,6 +142,24 @@ public static class LayoutUnitTestsChromium
         Debug.Assert(MinValue == FromFloatCeil(float.NegativeInfinity));
 
         Debug.Assert(new LayoutUnit() == FromFloatCeil(float.NaN));
+    }
+
+    public static void LayoutUnitFromFloatFloor()
+    {
+        const float Tolerance = 1.0f / FixedPointDenominator;
+
+        Debug.Assert(new LayoutUnit(1.25f) == FromFloatFloor(1.25f));
+        Debug.Assert(new LayoutUnit(1.25f) == FromFloatFloor(1.25f + Tolerance / 2));
+        Debug.Assert(new LayoutUnit(-Tolerance) == FromFloatFloor(-Tolerance / 2));
+
+        // Larger than Max()
+        Debug.Assert(MaxValue == FromFloatFloor(float.MaxValue));
+        Debug.Assert(MaxValue == FromFloatFloor(float.PositiveInfinity));
+        // Smaller than Min()
+        Debug.Assert(MinValue == FromFloatFloor(float.MinValue));
+        Debug.Assert(MinValue == FromFloatFloor(float.NegativeInfinity));
+
+        Debug.Assert(new LayoutUnit() == FromFloatFloor(float.NaN));
     }
 
     private static void LayoutUnitCeil()
