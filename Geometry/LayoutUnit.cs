@@ -128,6 +128,13 @@ public struct LayoutUnit : IEquatable<LayoutUnit>, IComparable<LayoutUnit>
 		return (double)m_Value / FixedPointDenominator;
 	}
 
+    public static int ClampRawValue(int value)
+    {
+        if (value > int.MaxValue) return int.MaxValue;
+        if (value < int.MinValue) return int.MinValue;
+        return value;
+    }
+
     public static int ClampRawValue(long value)
     {
         if (value > int.MaxValue) return int.MaxValue;
@@ -161,6 +168,20 @@ public struct LayoutUnit : IEquatable<LayoutUnit>, IComparable<LayoutUnit>
 		};
 		
 		return unit;
+	}
+
+    public static LayoutUnit FromRawValueWithClamp(int raw_value)
+	{
+		// Note: Might be better to just call Conversion.SaturatedCast() directly and avoid the indirect call to ClampRawValue()
+		// return FromRawValue(Conversion.SaturatedCast<int, T>(raw_value));
+		return FromRawValue(ClampRawValue(raw_value));
+	}
+
+    public static LayoutUnit FromRawValueWithClamp(long raw_value)
+	{
+		// Note: Might be better to just call Conversion.SaturatedCast() directly and avoid the indirect call to ClampRawValue()
+		// return FromRawValue(Conversion.SaturatedCast<int, T>(raw_value));
+		return FromRawValue(ClampRawValue(raw_value));
 	}
 	
 	public static LayoutUnit FromRawValueWithClamp(float raw_value)
@@ -480,6 +501,14 @@ public struct LayoutUnit : IEquatable<LayoutUnit>, IComparable<LayoutUnit>
         return (fraction + size).Round() - fraction.Round();
     }
 
+
+    public readonly LayoutUnit MulDiv(in LayoutUnit m, in LayoutUnit d)
+    {
+        long n = (long)RawValue() * m.RawValue();
+        long q = n / d.RawValue();
+        return FromRawValueWithClamp(q);
+    }
+
     /// <summary>
     /// Returns (a * b) / c.
     /// </summary>
@@ -487,7 +516,7 @@ public struct LayoutUnit : IEquatable<LayoutUnit>, IComparable<LayoutUnit>
     {
         if (c.RawValue() == 0) return FromRawValue(a.RawValue() >= 0 ? RawValueMax : RawValueMin);
 
-        long result = ((long)a.RawValue() * b.RawValue()) / c.RawValue();
+        long result = (long)a.RawValue() * b.RawValue() / c.RawValue();
         return FromRawValue(ClampRawValue(result));
     }
 
@@ -498,7 +527,7 @@ public struct LayoutUnit : IEquatable<LayoutUnit>, IComparable<LayoutUnit>
     {
         if (c == 0) return FromRawValue(a.RawValue() >= 0 ? RawValueMax : RawValueMin);
 
-        long result = ((long)a.RawValue() * b) / c;
+        long result = (long)a.RawValue() * b / c;
         return FromRawValue(ClampRawValue(result));
     }
 

@@ -37,7 +37,7 @@ public static class LayoutUnitTestsChromium
         MultiplicationByInt();
         LayoutUnitDivision();
         LayoutUnitDivisionByInt();
-
+        LayoutUnitMulDiv();
 
         LayoutUnitCeil();
         LayoutUnitFloor();
@@ -379,8 +379,29 @@ public static class LayoutUnitTestsChromium
         Debug.Assert(new LayoutUnit(0.5) == new LayoutUnit(-1) / -2);
 
         Debug.Assert(IntegerMax / 2.0 == (new LayoutUnit(IntegerMax) / 2).ToDouble());
-        
+
         Debug.Assert(InlineLayoutUnit.IntegerMax / 2.0 == (new InlineLayoutUnit(InlineLayoutUnit.IntegerMax) / 2).ToDouble());
+    }
+
+    private static void LayoutUnitMulDiv()
+    {
+        LayoutUnit kMaxValue = MaxValue;
+        LayoutUnit kMinValue = MinValue;
+        LayoutUnit kEpsilon = new LayoutUnit().AddEpsilon();
+
+        Debug.Assert(kMaxValue == kMaxValue.MulDiv(kMaxValue, kMaxValue));
+        Debug.Assert(kMinValue == kMinValue.MulDiv(kMinValue, kMinValue));
+        Debug.Assert(kMinValue == kMaxValue.MulDiv(kMinValue, kMaxValue));
+        Debug.Assert(kMaxValue == kMinValue.MulDiv(kMinValue, kMaxValue));
+        Debug.Assert(kMinValue + kEpsilon * 2 == kMaxValue.MulDiv(kMaxValue, kMinValue));
+
+        Debug.Assert(kMaxValue == kMaxValue.MulDiv(new LayoutUnit(2), kEpsilon));
+        Debug.Assert(kMinValue == kMinValue.MulDiv(new LayoutUnit(2), kEpsilon));
+
+        LayoutUnit kLargerInt = new(16384);
+        LayoutUnit kLargerInt2 = new(32768);
+
+        Debug.Assert(new LayoutUnit(8192)== kLargerInt.MulDiv(kLargerInt, kLargerInt2));
     }
 
     private static void LayoutUnitCeil()
