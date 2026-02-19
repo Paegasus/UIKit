@@ -33,6 +33,7 @@ public static class LayoutUnitTestsChromium
         LayoutUnitCeil();
         LayoutUnitFloor();
         LayoutUnitRounding();
+        LayoutUnitFromFloatEncompassRound();
         LayoutUnitMultiplication();
         LayoutUnitSnapSizeToPixel();
 
@@ -182,48 +183,6 @@ public static class LayoutUnitTestsChromium
         Debug.Assert(new LayoutUnit() == FromFloatRound(float.NaN));
     }
 
-    private static void LayoutUnitCeil()
-    {
-        Debug.Assert(0 == new LayoutUnit(0).Ceil());
-        Debug.Assert(1 == new LayoutUnit(0.1).Ceil());
-        Debug.Assert(1 == new LayoutUnit(0.5).Ceil());
-        Debug.Assert(1 == new LayoutUnit(0.9).Ceil());
-        Debug.Assert(1 == new LayoutUnit(1.0).Ceil());
-        Debug.Assert(2 == new LayoutUnit(1.1).Ceil());
-
-        Debug.Assert(0 == new LayoutUnit(-0.1).Ceil());
-        Debug.Assert(0 == new LayoutUnit(-0.5).Ceil());
-        Debug.Assert(0 == new LayoutUnit(-0.9).Ceil());
-        Debug.Assert(-1 == new LayoutUnit(-1.0).Ceil());
-
-        Debug.Assert(IntegerMax == new LayoutUnit(IntegerMax).Ceil());
-        Debug.Assert(IntegerMax == (new LayoutUnit(IntegerMax) - new LayoutUnit(0.5)).Ceil());
-        Debug.Assert(IntegerMax - 1 == (new LayoutUnit(IntegerMax) - new LayoutUnit(1)).Ceil());
-
-        Debug.Assert(IntegerMin == new LayoutUnit(IntegerMin).Ceil());
-    }
-
-    private static void LayoutUnitFloor()
-    {
-        Debug.Assert(0 == new LayoutUnit(0).Floor());
-        Debug.Assert(0 == new LayoutUnit(0.1).Floor());
-        Debug.Assert(0 == new LayoutUnit(0.5).Floor());
-        Debug.Assert(0 == new LayoutUnit(0.9).Floor());
-        Debug.Assert(1 == new LayoutUnit(1.0).Floor());
-        Debug.Assert(1 == new LayoutUnit(1.1).Floor());
-
-        Debug.Assert(-1 == new LayoutUnit(-0.1).Floor());
-        Debug.Assert(-1 == new LayoutUnit(-0.5).Floor());
-        Debug.Assert(-1 == new LayoutUnit(-0.9).Floor());
-        Debug.Assert(-1 == new LayoutUnit(-1.0).Floor());
-
-        Debug.Assert(IntegerMax == new LayoutUnit(IntegerMax).Floor());
-
-        Debug.Assert(IntegerMin == new LayoutUnit(IntegerMin).Floor());
-        Debug.Assert(IntegerMin == (new LayoutUnit(IntegerMin) + new LayoutUnit(0.5)).Floor());
-        Debug.Assert(IntegerMin + 1 == (new LayoutUnit(IntegerMin) + new LayoutUnit(1)).Floor());
-    }
-
     private static void LayoutUnitRounding()
     {
         Debug.Assert(-2 == new LayoutUnit(-1.9f).Round());
@@ -254,6 +213,22 @@ public static class LayoutUnitTestsChromium
         LayoutUnit epsilon = new();
         epsilon.SetRawValue(1);
         Debug.Assert((int.MinValue / FixedPointDenominator) == (MinValue + epsilon).Round());
+    }
+
+    private static void LayoutUnitFromFloatEncompassRound()
+    {
+        var (first, second) = FromFloatEncompassRound(55.152481f, 55.152481f);
+
+        Debug.Assert(new LayoutUnit(55.140625f) == first);
+        Debug.Assert(new LayoutUnit(55.140625f) == second);
+
+        (first, second) = FromFloatEncompassRound(55.152481f, 56.25f);
+        Debug.Assert(new LayoutUnit(55.140625f) == first);
+        Debug.Assert(new LayoutUnit(56.25f) == second);
+
+        (first, second) = FromFloatEncompassRound(54.25f, 55.152481f);
+        Debug.Assert(new LayoutUnit(54.25f) == first);
+        Debug.Assert(new LayoutUnit(55.156250f) == second);
     }
 
     private static void LayoutUnitMultiplication()
@@ -296,4 +271,48 @@ public static class LayoutUnitTestsChromium
         Debug.Assert(IntegerMax == SnapSizeToPixel(new(IntegerMax), new(0.3)));
         Debug.Assert(IntegerMin == SnapSizeToPixel(new(IntegerMin), new(-0.3)));
     }
+
+    
+    private static void LayoutUnitCeil()
+    {
+        Debug.Assert(0 == new LayoutUnit(0).Ceil());
+        Debug.Assert(1 == new LayoutUnit(0.1).Ceil());
+        Debug.Assert(1 == new LayoutUnit(0.5).Ceil());
+        Debug.Assert(1 == new LayoutUnit(0.9).Ceil());
+        Debug.Assert(1 == new LayoutUnit(1.0).Ceil());
+        Debug.Assert(2 == new LayoutUnit(1.1).Ceil());
+
+        Debug.Assert(0 == new LayoutUnit(-0.1).Ceil());
+        Debug.Assert(0 == new LayoutUnit(-0.5).Ceil());
+        Debug.Assert(0 == new LayoutUnit(-0.9).Ceil());
+        Debug.Assert(-1 == new LayoutUnit(-1.0).Ceil());
+
+        Debug.Assert(IntegerMax == new LayoutUnit(IntegerMax).Ceil());
+        Debug.Assert(IntegerMax == (new LayoutUnit(IntegerMax) - new LayoutUnit(0.5)).Ceil());
+        Debug.Assert(IntegerMax - 1 == (new LayoutUnit(IntegerMax) - new LayoutUnit(1)).Ceil());
+
+        Debug.Assert(IntegerMin == new LayoutUnit(IntegerMin).Ceil());
+    }
+
+    private static void LayoutUnitFloor()
+    {
+        Debug.Assert(0 == new LayoutUnit(0).Floor());
+        Debug.Assert(0 == new LayoutUnit(0.1).Floor());
+        Debug.Assert(0 == new LayoutUnit(0.5).Floor());
+        Debug.Assert(0 == new LayoutUnit(0.9).Floor());
+        Debug.Assert(1 == new LayoutUnit(1.0).Floor());
+        Debug.Assert(1 == new LayoutUnit(1.1).Floor());
+
+        Debug.Assert(-1 == new LayoutUnit(-0.1).Floor());
+        Debug.Assert(-1 == new LayoutUnit(-0.5).Floor());
+        Debug.Assert(-1 == new LayoutUnit(-0.9).Floor());
+        Debug.Assert(-1 == new LayoutUnit(-1.0).Floor());
+
+        Debug.Assert(IntegerMax == new LayoutUnit(IntegerMax).Floor());
+
+        Debug.Assert(IntegerMin == new LayoutUnit(IntegerMin).Floor());
+        Debug.Assert(IntegerMin == (new LayoutUnit(IntegerMin) + new LayoutUnit(0.5)).Floor());
+        Debug.Assert(IntegerMin + 1 == (new LayoutUnit(IntegerMin) + new LayoutUnit(1)).Floor());
+    }
+
 }

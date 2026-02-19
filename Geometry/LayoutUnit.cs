@@ -170,6 +170,31 @@ public struct LayoutUnit : IEquatable<LayoutUnit>, IComparable<LayoutUnit>
 		return FromRawValue(ClampRawValue(raw_value));
 	}
 
+    // Example usage: var (start, end) = LayoutUnit.FromFloatEncompassRound(a, b);
+    public static (LayoutUnit Start, LayoutUnit End) FromFloatEncompassRound(float startValue, float endValue)
+    {
+        LayoutUnit startPosition;
+        LayoutUnit endPosition;
+
+        if (startValue < endValue)
+        {
+            startPosition = FromFloatFloor(startValue);
+            endPosition = FromFloatCeil(endValue);
+        }
+        else if (startValue > endValue)
+        {
+            startPosition = FromFloatCeil(startValue);
+            endPosition = FromFloatFloor(endValue);
+        }
+        else
+        {
+            startPosition = FromFloatFloor(startValue);
+            endPosition = startPosition;
+        }
+
+        return (startPosition, endPosition);
+    }
+
     // The specified `value` is rounded up to a multiple of `Epsilon()`, and is
     // clamped by `Min()` and `Max()`. A NaN `value` produces `FixedPoint(0)`.
     public static LayoutUnit FromFloatCeil(float value)
