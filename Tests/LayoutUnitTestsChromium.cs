@@ -7,10 +7,26 @@ namespace UI.Tests;
 
 public static class LayoutUnitTestsChromium
 {
+    private static bool DoubleNear(double val1, double val2, double abs_error)
+    {
+        double diff = Math.Abs(val1 - val2);
+        
+        return diff <= abs_error;
+    }
+
+    private static bool FloatNear(float val1, float val2, float abs_error)
+    {
+        float diff = MathF.Abs(val1 - val2);
+        
+        return diff <= abs_error;
+    }
+
     public static void RunAllTests()
     {
         LayoutUnitInt();
         LayoutUnitUnsigned();
+        Int64();
+        LayoutUnitFloat();
         LayoutUnitCeil();
         LayoutUnitFloor();
         LayoutUnitRounding();
@@ -69,6 +85,42 @@ public static class LayoutUnitTestsChromium
         Debug.Assert(RawValueMax == new LayoutUnit(kOverflowed).RawValue());
         const uint kNotOverflowed = IntegerMax - 100;
         Debug.Assert((IntegerMax - 100) << FractionalBits == new LayoutUnit(kNotOverflowed).RawValue());
+    }
+
+    public static void Int64()
+    {
+        const int raw_min = int.MinValue;
+        const int raw_max = int.MaxValue;
+
+        Debug.Assert(new LayoutUnit((long)raw_min - 100) == MinValue);
+        Debug.Assert(new LayoutUnit((long)raw_max + 100) == MaxValue);
+        Debug.Assert(new LayoutUnit((long)raw_max + 100) == MaxValue);
+    }
+
+    public static void LayoutUnitFloat()
+    {
+        const float Tolerance = 1.0f / FixedPointDenominator;
+        Debug.Assert(1.0f == new LayoutUnit(1.0f).ToFloat());
+        Debug.Assert(1.25f == new LayoutUnit(1.25f).ToFloat());
+        Debug.Assert(new LayoutUnit(1.25f) == new LayoutUnit(1.25f + Tolerance / 2));
+        Debug.Assert(new LayoutUnit(-2.0f) == new LayoutUnit(-2.0f - Tolerance / 2));
+        Debug.Assert(FloatNear(new LayoutUnit(1.1f).ToFloat(), 1.1f, Tolerance));
+        Debug.Assert(FloatNear(new LayoutUnit(1.33f).ToFloat(), 1.33f, Tolerance));
+        Debug.Assert(FloatNear(new LayoutUnit(1.3333f).ToFloat(), 1.3333f, Tolerance));
+        Debug.Assert(FloatNear(new LayoutUnit(1.53434f).ToFloat(), 1.53434f, Tolerance));
+        Debug.Assert(FloatNear(new LayoutUnit(345634).ToFloat(), 345634.0f, Tolerance));
+        Debug.Assert(FloatNear(new LayoutUnit(345634.12335f).ToFloat(), 345634.12335f, Tolerance));
+        Debug.Assert(FloatNear(new LayoutUnit(-345634.12335f).ToFloat(), -345634.12335f, Tolerance));
+        Debug.Assert(FloatNear(new LayoutUnit(-345634).ToFloat(), -345634.0f, Tolerance));
+
+        // Larger than Max()
+        Debug.Assert(MaxValue == new LayoutUnit(float.MaxValue));
+        Debug.Assert(MaxValue == new LayoutUnit(float.PositiveInfinity));
+        // Smaller than Min()
+        Debug.Assert(MinValue == new LayoutUnit(float.MinValue));
+        Debug.Assert(MinValue == new LayoutUnit(float.NegativeInfinity));
+
+        Debug.Assert(new LayoutUnit() == Clamp(float.NaN));
     }
 
     private static void LayoutUnitCeil()
