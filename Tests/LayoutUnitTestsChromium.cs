@@ -27,6 +27,7 @@ public static class LayoutUnitTestsChromium
         LayoutUnitUnsigned();
         Int64();
         LayoutUnitFloat();
+        LayoutUnitFromFloatCeil();
         LayoutUnitCeil();
         LayoutUnitFloor();
         LayoutUnitRounding();
@@ -121,6 +122,23 @@ public static class LayoutUnitTestsChromium
         Debug.Assert(MinValue == new LayoutUnit(float.NegativeInfinity));
 
         Debug.Assert(new LayoutUnit() == Clamp(float.NaN));
+    }
+
+    public static void LayoutUnitFromFloatCeil()
+    {
+        const float Tolerance = 1.0f / FixedPointDenominator;
+        Debug.Assert(new LayoutUnit(1.25f) == FromFloatCeil(1.25f));
+        Debug.Assert(new LayoutUnit(1.25f + Tolerance) == FromFloatCeil(1.25f + Tolerance / 2));
+        Debug.Assert(new LayoutUnit() == FromFloatCeil(-Tolerance / 2));
+
+        // Larger than Max()
+        Debug.Assert(MaxValue == FromFloatCeil(float.MaxValue));
+        Debug.Assert(MaxValue == FromFloatCeil(float.PositiveInfinity));
+        // Smaller than Min()
+        Debug.Assert(MinValue == FromFloatCeil(float.MinValue));
+        Debug.Assert(MinValue == FromFloatCeil(float.NegativeInfinity));
+
+        Debug.Assert(new LayoutUnit() == FromFloatCeil(float.NaN));
     }
 
     private static void LayoutUnitCeil()
