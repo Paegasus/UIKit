@@ -105,30 +105,30 @@ public struct InlineLayoutUnit : IEquatable<InlineLayoutUnit>, IComparable<Inlin
 	{
 		return (double)m_Value / FixedPointDenominator;
 	}
-
-    public static int ClampRawValue(long value)
+    
+    public static long ClampRawValue(long value)
     {
-        if (value > int.MaxValue) return int.MaxValue;
-        if (value < int.MinValue) return int.MinValue;
-        return (int)value;
+        if (value > long.MaxValue) return long.MaxValue;
+        if (value < long.MinValue) return long.MinValue;
+        return value;
     }
 
-    public static int ClampRawValue(float value)
+    public static long ClampRawValue(float value)
     {
         if (float.IsNaN(value)) return 0;
-        if (value > int.MaxValue) return int.MaxValue;
-        if (value < int.MinValue) return int.MinValue;
+        if (value > long.MaxValue) return long.MaxValue;
+        if (value < long.MinValue) return long.MinValue;
 
-        return (int)value;
+        return (long)value;
     }
 
-    public static int ClampRawValue(double value)
+    public static long ClampRawValue(double value)
     {
         if (double.IsNaN(value)) return 0;
-        if (value > int.MaxValue) return int.MaxValue;
-        if (value < int.MinValue) return int.MinValue;
+        if (value > long.MaxValue) return long.MaxValue;
+        if (value < long.MinValue) return long.MinValue;
 
-        return (int)value;
+        return (long)value;
     }
 
 	public static InlineLayoutUnit FromRawValue(long value)

@@ -379,6 +379,7 @@ public static class LayoutUnitTestsChromium
         Debug.Assert(new LayoutUnit(0.5) == new LayoutUnit(-1) / -2);
 
         Debug.Assert(IntegerMax / 2.0 == (new LayoutUnit(IntegerMax) / 2).ToDouble());
+        
         Debug.Assert(InlineLayoutUnit.IntegerMax / 2.0 == (new InlineLayoutUnit(InlineLayoutUnit.IntegerMax) / 2).ToDouble());
     }
 
