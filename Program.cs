@@ -9,6 +9,7 @@ public static class Program
 {
     public static void Main(string[] args)
     {
-        LayoutUnitTests.RunAllTests();
+        //LayoutUnitTests.RunAllTests();
+        LayoutUnitTestsChromium.RunAllTests();
     }
 }

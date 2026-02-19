@@ -9,6 +9,7 @@ public static class LayoutUnitTestsChromium
 {
     public static void RunAllTests()
     {
+        LayoutUnitInt();
         LayoutUnitCeil();
         LayoutUnitFloor();
         LayoutUnitRounding();
@@ -16,6 +17,46 @@ public static class LayoutUnitTestsChromium
         LayoutUnitSnapSizeToPixel();
 
         Debug.WriteLine("All LayoutUnit tests passed!");
+    }
+
+    public static void LayoutUnitInt()
+    {
+        Debug.Assert(IntegerMin == new LayoutUnit(int.MinValue).ToInteger());
+        Debug.Assert(IntegerMin == new LayoutUnit(int.MinValue / 2).ToInteger());
+        Debug.Assert(IntegerMin == new LayoutUnit(IntegerMin - 1).ToInteger());
+        Debug.Assert(IntegerMin == new LayoutUnit(IntegerMin).ToInteger());
+        Debug.Assert(IntegerMin + 1 == new LayoutUnit(IntegerMin + 1).ToInteger());
+        Debug.Assert(IntegerMin / 2 == new LayoutUnit(IntegerMin / 2).ToInteger());
+        Debug.Assert(-10000 ==  new LayoutUnit(-10000).ToInteger());
+        Debug.Assert(-1000 ==  new LayoutUnit(-1000).ToInteger());
+        Debug.Assert(-100 ==  new LayoutUnit(-100).ToInteger());
+        Debug.Assert(-10 ==  new LayoutUnit(-10).ToInteger());
+        Debug.Assert(-1 ==  new LayoutUnit(-1).ToInteger());
+        Debug.Assert(0 ==  new LayoutUnit(0).ToInteger());
+        Debug.Assert(1 ==  new LayoutUnit(1).ToInteger());
+        Debug.Assert(100 ==  new LayoutUnit(100).ToInteger());
+        Debug.Assert(1000 ==  new LayoutUnit(1000).ToInteger());
+        Debug.Assert(10000 ==  new LayoutUnit(10000).ToInteger());
+        Debug.Assert(IntegerMax / 2 == new LayoutUnit(IntegerMax / 2).ToInteger());
+        Debug.Assert(IntegerMax - 1 == new LayoutUnit(IntegerMax - 1).ToInteger());
+        Debug.Assert(IntegerMax ==  new LayoutUnit(IntegerMax).ToInteger());
+        Debug.Assert(IntegerMax ==  new LayoutUnit(IntegerMax + 1).ToInteger());
+        Debug.Assert(IntegerMax ==  new LayoutUnit(int.MaxValue / 2).ToInteger());
+        Debug.Assert(IntegerMax ==  new LayoutUnit(int.MaxValue).ToInteger());
+
+        // Test the raw unsaturated value
+        Debug.Assert(0 == new LayoutUnit(0).RawValue());
+        // Internally the max number we can represent (without saturating)
+        // is all the (non-sign) bits set except for the bottom n fraction bits
+        const int max_internal_representation = int.MaxValue ^ ((1 << FractionalBits) - 1);
+        Debug.Assert(max_internal_representation == new LayoutUnit(IntegerMax).RawValue());
+        Debug.Assert(RawValueMax == new LayoutUnit(IntegerMax + 100).RawValue());
+        Debug.Assert((IntegerMax - 100) << FractionalBits == new LayoutUnit(IntegerMax - 100).RawValue());
+        Debug.Assert(RawValueMin == new LayoutUnit(IntegerMin).RawValue());
+        Debug.Assert(RawValueMin == new LayoutUnit(IntegerMin - 100).RawValue());
+        // Shifting negative numbers left has undefined behavior, so use
+        // multiplication instead of direct shifting here.
+        Debug.Assert((IntegerMin + 100) * (1 << FractionalBits) == new LayoutUnit(IntegerMin + 100).RawValue());
     }
 
     private static void LayoutUnitCeil()
