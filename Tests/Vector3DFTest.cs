@@ -194,19 +194,57 @@ public static class Vector3DFTest
 
     public static void TestDotProduct()
     {
-        
+        (float, Vector3DF, Vector3DF)[] tests =
+        [
+            (0, new Vector3DF(1, 0, 0), new Vector3DF(0, 1, 1)),
+            (0, new Vector3DF(0, 1, 0), new Vector3DF(1, 0, 1)),
+            (0, new Vector3DF(0, 0, 1), new Vector3DF(1, 1, 0)),
+
+            (3, new Vector3DF(1, 1, 1), new Vector3DF(1, 1, 1)),
+
+            (1.2f, new Vector3DF(1.2f, -1.2f, 1.2f), new Vector3DF(1, 1, 1)),
+            (1.2f, new Vector3DF(1, 1, 1), new Vector3DF(1.2f, -1.2f, 1.2f)),
+
+            (38.72f, new Vector3DF(1.1f, 2.2f, 3.3f), new Vector3DF(4.4f, 5.5f, 6.6f))
+        ];
+
+        foreach (var (expected, input1, input2) in tests)
+        {
+            float actual = Vector3DF.DotProduct(input1, input2);
+            Debug.Assert(expected == actual);
+        }
     }
 
     public static void TestCrossProduct()
     {
-        
+        (Vector3DF, Vector3DF, Vector3DF)[] tests =
+        [
+            (new Vector3DF(), new Vector3DF(), new Vector3DF(1, 1, 1)),
+            (new Vector3DF(), new Vector3DF(1, 1, 1), new Vector3DF()),
+            (new Vector3DF(), new Vector3DF(1, 1, 1), new Vector3DF(1, 1, 1)),
+            (new Vector3DF(), new Vector3DF(1.6f, 10.6f, -10.6f), new Vector3DF(1.6f, 10.6f, -10.6f)),
+
+            (new Vector3DF(1, -1, 0), new Vector3DF(1, 1, 1), new Vector3DF(0, 0, 1)),
+            (new Vector3DF(-1, 0, 1), new Vector3DF(1, 1, 1), new Vector3DF(0, 1, 0)),
+            (new Vector3DF(0, 1, -1), new Vector3DF(1, 1, 1), new Vector3DF(1, 0, 0)),
+
+            (new Vector3DF(-1, 1, 0), new Vector3DF(0, 0, 1), new Vector3DF(1, 1, 1)),
+            (new Vector3DF(1, 0, -1), new Vector3DF(0, 1, 0), new Vector3DF(1, 1, 1)),
+            (new Vector3DF(0, -1, 1), new Vector3DF(1, 0, 0), new Vector3DF(1, 1, 1))
+        ];
+
+        foreach (var (expected, input1, input2) in tests)
+        {
+            Vector3DF actual = Vector3DF.CrossProduct(input1, input2);
+            Debug.Assert(expected.ToString() == actual.ToString());
+        }
     }
 
     public static void TestClampVector3dF()
     {
         
     }
-    
+
     public static void TestAngleBetweenVectorsInDegress()
     {
         
