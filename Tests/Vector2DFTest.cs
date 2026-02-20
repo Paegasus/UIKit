@@ -7,26 +7,26 @@ public static class Vector2DFTest
 {
     public static void Run()
     {
-        Vector2DFTestVector2DToVector2DF();
-        Vector2DFTestIsZero();
-        Vector2DFTestAdd();
-        Vector2DFTestNegative();
-        Vector2DFTestLength();
-        Vector2DFTestSetToMinMax();
-        Vector2DFTestIntegerOverflow();
-        Vector2DFTestTranspose();
+        TestVector2DToVector2DF();
+        TestIsZero();
+        TestAdd();
+        TestNegative();
+        TestLength();
+        TestSetToMinMax();
+        TestIntegerOverflow();
+        TestTranspose();
 
         Debug.WriteLine("All Vector2DF tests passed!");
     }
 
-    public static void Vector2DFTestVector2DToVector2DF()
+    public static void TestVector2DToVector2DF()
     {
         Vector2D i = new(3, 4);
         Vector2DF f = i;
         Debug.Assert(i == f);
     }
 
-    public static void Vector2DFTestIsZero()
+    public static void TestIsZero()
     {
         Debug.Assert(new Vector2DF().IsZero());
         Debug.Assert(new Vector2DF(0, 0).IsZero());
@@ -35,32 +35,32 @@ public static class Vector2DFTest
         Debug.Assert(!new Vector2DF(0.1f, -0.1f).IsZero());
     }
 
-    public static void Vector2DFTestAdd()
+    public static void TestAdd()
     {
         
     }
 
-    public static void Vector2DFTestNegative()
+    public static void TestNegative()
     {
         
     }
 
-    public static void Vector2DFTestLength()
+    public static void TestLength()
     {
         
     }
 
-    public static void Vector2DFTestSetToMinMax()
+    public static void TestSetToMinMax()
     {
         
     }
 
-    public static void Vector2DFTestIntegerOverflow()
+    public static void TestIntegerOverflow()
     {
         
     }
 
-    public static void Vector2DFTestTranspose()
+    public static void TestTranspose()
     {
         
     }

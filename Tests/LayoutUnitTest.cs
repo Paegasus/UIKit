@@ -16,42 +16,42 @@ public static class LayoutUnitTest
 
     public static void Run()
     {
-        LayoutUnitInt();
-        LayoutUnitUnsigned();
-        LayoutUniInt64();
-        LayoutUnitFloat();
-        LayoutUnitFromFloatCeil();
-        LayoutUnitFromFloatFloor();
-        LayoutUnitFromFloatRound();
-        LayoutUnitRounding();
-        LayoutUnitFromFloatEncompassRound();
-        LayoutUnitSnapSizeToPixel();
-        LayoutUnitMultiplication();
-        LayoutUniMultiplicationByInt();
-        LayoutUnitDivision();
-        LayoutUnitDivisionByInt();
-        LayoutUnitMulDiv();
-        LayoutUnitCeil();
-        LayoutUnitFloor();
-        LayoutUnitFloatOverflow();
-        LayoutUnitUnaryMinus();
-        LayoutUnitPlusPlus();
-        LayoutUnitIntMod();
-        LayoutUnitFraction();
-        LayoutUnitFixedConsts();
-        LayoutUnitFixed();
-        LayoutUnitRaw64FromInt32();
-        LayoutUnitRaw64FromRaw32();
-        LayoutUnitTo();
-        LayoutUnitToClampSameFractional64To32();
-        LayoutUnitToClampLessFractional64To32();
-        LayoutUnitToClampMoreFractional();
-        LayoutUnitRaw64Ceil();
+        TestInt();
+        TestUnsigned();
+        TestInt64();
+        TestFloat();
+        TestFromFloatCeil();
+        TestFromFloatFloor();
+        TestFromFloatRound();
+        TestRounding();
+        TestFromFloatEncompassRound();
+        TestSnapSizeToPixel();
+        TestMultiplication();
+        TestMultiplicationByInt();
+        TestDivision();
+        TestDivisionByInt();
+        TestMulDiv();
+        TestCeil();
+        TestFloor();
+        TestFloatOverflow();
+        TestUnaryMinus();
+        TestPlusPlus();
+        TestIntMod();
+        TestFraction();
+        TestFixedConsts();
+        TestFixed();
+        TestRaw64FromInt32();
+        TestRaw64FromRaw32();
+        TestTo();
+        TestToClampSameFractional64To32();
+        TestToClampLessFractional64To32();
+        TestToClampMoreFractional();
+        TestRaw64Ceil();
 
         Debug.WriteLine("All LayoutUnit tests passed!");
     }
 
-    public static void LayoutUnitInt()
+    public static void TestInt()
     {
         Debug.Assert(IntegerMin == new LayoutUnit(int.MinValue).ToInteger());
         Debug.Assert(IntegerMin == new LayoutUnit(int.MinValue / 2).ToInteger());
@@ -91,7 +91,7 @@ public static class LayoutUnitTest
         Debug.Assert((IntegerMin + 100) * (1 << FractionalBits) == new LayoutUnit(IntegerMin + 100).RawValue());
     }
 
-    public static void LayoutUnitUnsigned()
+    public static void TestUnsigned()
     {
         // Test the raw unsaturated value
         Debug.Assert(0 == new LayoutUnit((uint)0).RawValue());
@@ -102,7 +102,7 @@ public static class LayoutUnitTest
         Debug.Assert((IntegerMax - 100) << FractionalBits == new LayoutUnit(kNotOverflowed).RawValue());
     }
 
-    public static void LayoutUniInt64()
+    public static void TestInt64()
     {
         const int raw_min = int.MinValue;
         const int raw_max = int.MaxValue;
@@ -112,7 +112,7 @@ public static class LayoutUnitTest
         Debug.Assert(new LayoutUnit((long)raw_max + 100) == MaxValue);
     }
 
-    public static void LayoutUnitFloat()
+    public static void TestFloat()
     {
         const float Tolerance = 1.0f / FixedPointDenominator;
 
@@ -139,7 +139,7 @@ public static class LayoutUnitTest
         Debug.Assert(new LayoutUnit() == Clamp(float.NaN));
     }
 
-    public static void LayoutUnitFromFloatCeil()
+    public static void TestFromFloatCeil()
     {
         const float Tolerance = 1.0f / FixedPointDenominator;
 
@@ -157,7 +157,7 @@ public static class LayoutUnitTest
         Debug.Assert(new LayoutUnit() == FromFloatCeil(float.NaN));
     }
 
-    public static void LayoutUnitFromFloatFloor()
+    public static void TestFromFloatFloor()
     {
         const float Tolerance = 1.0f / FixedPointDenominator;
 
@@ -175,7 +175,7 @@ public static class LayoutUnitTest
         Debug.Assert(new LayoutUnit() == FromFloatFloor(float.NaN));
     }
 
-    public static void LayoutUnitFromFloatRound()
+    public static void TestFromFloatRound()
     {
         const float Tolerance = 1.0f / FixedPointDenominator;
 
@@ -194,7 +194,7 @@ public static class LayoutUnitTest
         Debug.Assert(new LayoutUnit() == FromFloatRound(float.NaN));
     }
 
-    private static void LayoutUnitRounding()
+    private static void TestRounding()
     {
         Debug.Assert(-2 == new LayoutUnit(-1.9f).Round());
         Debug.Assert(-2 == new LayoutUnit(-1.6f).Round());
@@ -226,7 +226,7 @@ public static class LayoutUnitTest
         Debug.Assert((int.MinValue / FixedPointDenominator) == (MinValue + epsilon).Round());
     }
 
-    private static void LayoutUnitFromFloatEncompassRound()
+    private static void TestFromFloatEncompassRound()
     {
         var (first, second) = FromFloatEncompassRound(55.152481f, 55.152481f);
 
@@ -242,7 +242,7 @@ public static class LayoutUnitTest
         Debug.Assert(new LayoutUnit(55.156250f) == second);
     }
 
-    private static void LayoutUnitSnapSizeToPixel()
+    private static void TestSnapSizeToPixel()
     {
         Debug.Assert(1 == SnapSizeToPixel(new(1), new(0)));
         Debug.Assert(1 == SnapSizeToPixel(new(1), new(0.5)));
@@ -276,7 +276,7 @@ public static class LayoutUnitTest
         Debug.Assert(IntegerMin == SnapSizeToPixel(new(IntegerMin), new(-0.3)));
     }
 
-    private static void LayoutUnitMultiplication()
+    private static void TestMultiplication()
     {
         Debug.Assert(1 == (new LayoutUnit(1) * new LayoutUnit(1)).ToInteger());
         Debug.Assert(2 == (new LayoutUnit(1) * new LayoutUnit(2)).ToInteger());
@@ -329,7 +329,7 @@ public static class LayoutUnitTest
         }
     }
 
-    private static void LayoutUniMultiplicationByInt()
+    private static void TestMultiplicationByInt()
     {
         var quarter_max = IntegerMax / 4;
         Debug.Assert(new LayoutUnit(quarter_max * 2) == new LayoutUnit(quarter_max) * 2);
@@ -338,7 +338,7 @@ public static class LayoutUnitTest
         Debug.Assert(MaxValue == new LayoutUnit(quarter_max) * 5);
     }
 
-    private static void LayoutUnitDivision()
+    private static void TestDivision()
     {
         Debug.Assert(1 == (new LayoutUnit(1) / new LayoutUnit(1)).ToInteger());
         Debug.Assert(0 == (new LayoutUnit(1) / new LayoutUnit(2)).ToInteger());
@@ -376,7 +376,7 @@ public static class LayoutUnitTest
         Debug.Assert(IntegerMax == (new LayoutUnit(IntegerMax) / new LayoutUnit(0.5)).ToInteger());
     }
 
-    private static void LayoutUnitDivisionByInt()
+    private static void TestDivisionByInt()
     {
         Debug.Assert(new LayoutUnit(1) == new LayoutUnit(1) / 1);
         Debug.Assert(new LayoutUnit(0.5) == new LayoutUnit(1) / 2);
@@ -389,7 +389,7 @@ public static class LayoutUnitTest
         Debug.Assert(InlineLayoutUnit.IntegerMax / 2.0 == (new InlineLayoutUnit(InlineLayoutUnit.IntegerMax) / 2).ToDouble());
     }
 
-    private static void LayoutUnitMulDiv()
+    private static void TestMulDiv()
     {
         LayoutUnit kMaxValue = MaxValue;
         LayoutUnit kMinValue = MinValue;
@@ -410,7 +410,7 @@ public static class LayoutUnitTest
         Debug.Assert(new LayoutUnit(8192)== kLargerInt.MulDiv(kLargerInt, kLargerInt2));
     }
 
-    private static void LayoutUnitCeil()
+    private static void TestCeil()
     {
         Debug.Assert(0 == new LayoutUnit(0).Ceil());
         Debug.Assert(1 == new LayoutUnit(0.1).Ceil());
@@ -431,7 +431,7 @@ public static class LayoutUnitTest
         Debug.Assert(IntegerMin == new LayoutUnit(IntegerMin).Ceil());
     }
 
-    private static void LayoutUnitFloor()
+    private static void TestFloor()
     {
         Debug.Assert(0 == new LayoutUnit(0).Floor());
         Debug.Assert(0 == new LayoutUnit(0.1).Floor());
@@ -452,7 +452,7 @@ public static class LayoutUnitTest
         Debug.Assert(IntegerMin + 1 == (new LayoutUnit(IntegerMin) + new LayoutUnit(1)).Floor());
     }
 
-    private static void LayoutUnitFloatOverflow()
+    private static void TestFloatOverflow()
     {
         // These should overflow to the max/min according to their sign.
         Debug.Assert(IntegerMax == new LayoutUnit(176972000.0f).ToInteger());
@@ -461,7 +461,7 @@ public static class LayoutUnitTest
         Debug.Assert(IntegerMin == new LayoutUnit(-176972000.0).ToInteger());
     }
 
-    private static void LayoutUnitUnaryMinus()
+    private static void TestUnaryMinus()
     {
         Debug.Assert(new LayoutUnit() == -new LayoutUnit());
         Debug.Assert(new LayoutUnit(999) == -new LayoutUnit(-999));
@@ -476,7 +476,7 @@ public static class LayoutUnitTest
         Debug.Assert(LayoutUnit.MaxValue == -LayoutUnit.MinValue); // 2147483647 == -2147483648
     }
 
-    private static void LayoutUnitPlusPlus()
+    private static void TestPlusPlus()
     {
         var val1 = new LayoutUnit(-2);
         var val2 = new LayoutUnit(-1);
@@ -493,7 +493,7 @@ public static class LayoutUnitTest
         Debug.Assert(MaxValue == ++val5);
     }
 
-    private static void LayoutUnitIntMod()
+    private static void TestIntMod()
     {
         Debug.Assert(new LayoutUnit(5) == IntMod(new LayoutUnit(55), new LayoutUnit(10)));
         Debug.Assert(new LayoutUnit(5) == IntMod(new LayoutUnit(55), new LayoutUnit(-10)));
@@ -505,7 +505,7 @@ public static class LayoutUnitTest
         Debug.Assert(new LayoutUnit() == IntMod(new LayoutUnit(), new LayoutUnit(123)));
     }
 
-    private static void LayoutUnitFraction()
+    private static void TestFraction()
     {
         Debug.Assert(new LayoutUnit(-1.9f).HasFraction);
         Debug.Assert(new LayoutUnit(-1.6f).HasFraction);
@@ -528,7 +528,7 @@ public static class LayoutUnitTest
         Debug.Assert(!new LayoutUnit(1.0f).HasFraction);
     }
 
-    private static void LayoutUnitFixedConsts()
+    private static void TestFixedConsts()
     {
         Debug.Assert(LayoutUnit.FractionalBits == 6u);
         Debug.Assert(LayoutUnit.IntegralBits == 26u);
@@ -538,7 +538,7 @@ public static class LayoutUnitTest
         Debug.Assert(InlineLayoutUnit.IntegralBits == 48u);
     }
 
-    private static void LayoutUnitFixed()
+    private static void TestFixed()
     {
         int raw_value16 = 0x12345678;
         int raw_value6 = raw_value16 >> 10;
@@ -547,7 +547,7 @@ public static class LayoutUnitTest
         Debug.Assert(value16.ToLayoutUnit() == value6);
     }
 
-    private static void LayoutUnitRaw64FromInt32()
+    private static void TestRaw64FromInt32()
     {
         int int32_max_plus = LayoutUnit.IntegerMax + 10;
         LayoutUnit int32_max_plus_32 = new(int32_max_plus);
@@ -574,7 +574,7 @@ public static class LayoutUnitTest
         Debug.Assert(raw32_min_minus_64.ToInteger() == raw32_min_minus);
     }
 
-    private static void LayoutUnitRaw64FromRaw32()
+    private static void TestRaw64FromRaw32()
     {
         float value = 1.0f + LayoutUnit.Epsilon() * 234;
         LayoutUnit value32_6 = new(value);
@@ -586,7 +586,7 @@ public static class LayoutUnitTest
         // TextRunLayoutUnit back_to_32{InlineLayoutUnit(value)};
     }
 
-    private static void LayoutUnitTo()
+    private static void TestTo()
     {
         // LayoutUnit <-> TextRunLayoutUnit
 
@@ -622,25 +622,25 @@ public static class LayoutUnitTest
         Debug.Assert(new InlineLayoutUnit(-1.0f) == new TextRunLayoutUnit(-1.0f).ToInlineLayoutUnit());
     }
 
-    private static void LayoutUnitToClampSameFractional64To32()
+    private static void TestToClampSameFractional64To32()
     {
         Debug.Assert(TextRunLayoutUnit.MaxValue == new InlineLayoutUnit(TextRunLayoutUnit.IntegerMax + 1).ToTextRunLayoutUnit());
         Debug.Assert(TextRunLayoutUnit.MinValue == new InlineLayoutUnit(TextRunLayoutUnit.IntegerMin - 1).ToTextRunLayoutUnit());
     }
 
-    private static void LayoutUnitToClampLessFractional64To32()
+    private static void TestToClampLessFractional64To32()
     {
         Debug.Assert(LayoutUnit.MaxValue == new InlineLayoutUnit(LayoutUnit.IntegerMax + 1).ToLayoutUnit());
         Debug.Assert(LayoutUnit.MinValue == new InlineLayoutUnit(LayoutUnit.IntegerMin - 1).ToLayoutUnit());
     }
 
-    private static void LayoutUnitToClampMoreFractional()
+    private static void TestToClampMoreFractional()
     {
         Debug.Assert(TextRunLayoutUnit.MaxValue == new LayoutUnit(TextRunLayoutUnit.IntegerMax + 1).ToTextRunLayoutUnit());
         Debug.Assert(TextRunLayoutUnit.MinValue == new LayoutUnit(TextRunLayoutUnit.IntegerMin - 1).ToTextRunLayoutUnit());
     }
 
-    private static void LayoutUnitRaw64Ceil()
+    private static void TestRaw64Ceil()
     {
         LayoutUnit layout = new(1.234);
         InlineLayoutUnit inline_value = new(layout);
