@@ -9,7 +9,7 @@ public static class Program
 {
     public static void Main(string[] args)
     {
-        //LayoutUnitTests.RunAllTests();
-        LayoutUnitTestsChromium.RunAllTests();
+        LayoutUnitTest.Run();
+        Vector2DTest.Run();
     }
 }

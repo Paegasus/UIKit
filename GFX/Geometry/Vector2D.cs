@@ -96,4 +96,9 @@ public struct Vector2D
         result.Subtract(rhs);
         return result;
     }
+
+    public static Vector2D TransposeVector2D(in Vector2D vector)
+    {
+        return new Vector2D(vector.Y, vector.X);
+    }
 }

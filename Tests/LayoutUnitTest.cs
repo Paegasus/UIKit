@@ -5,7 +5,7 @@ using static UI.Geometry.LayoutUnit;
 
 namespace UI.Tests;
 
-public static class LayoutUnitTestsChromium
+public static class LayoutUnitTest
 {
     private static bool AreNear(float val1, float val2, float abs_error)
     {
@@ -14,7 +14,7 @@ public static class LayoutUnitTestsChromium
         return diff <= abs_error;
     }
 
-    public static void RunAllTests()
+    public static void Run()
     {
         LayoutUnitInt();
         LayoutUnitUnsigned();
