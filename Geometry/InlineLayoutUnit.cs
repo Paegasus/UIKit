@@ -510,14 +510,15 @@ public struct InlineLayoutUnit : IEquatable<InlineLayoutUnit>, IComparable<Inlin
     public readonly LayoutUnit ToCeil()
     {
         int kBitsDiff = FractionalBits - LayoutUnit.FractionalBits;
-        
-        long raw_value = RawValue() >> kBitsDiff;
 
-        if ((RawValue() & ((1 << kBitsDiff) - 1)) != 0)
-        {
-            ++raw_value;
-        }
-        
-        return LayoutUnit.FromRawValueWithClamp(raw_value);
+        long raw = RawValue();
+        long shifted = raw >> kBitsDiff;
+
+        long mask = (1L << kBitsDiff) - 1;
+
+        if ((raw & mask) != 0)
+            ++shifted;
+
+        return LayoutUnit.FromRawValueWithClamp(shifted);
     }
 }
