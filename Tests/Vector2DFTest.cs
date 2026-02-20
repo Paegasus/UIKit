@@ -16,6 +16,7 @@ public static class Vector2DFTest
         TestLength();
         TestSlopeAngleRadians();
         TestTranspose();
+        TestToString();
 
         Debug.WriteLine("All Vector2DF tests passed!");
     }
@@ -171,5 +172,11 @@ public static class Vector2DFTest
         Debug.Assert(new Vector2DF(2.5f, -1.5f) == Vector2DF.TransposeVector2D(v));
         v.Transpose();
         Debug.Assert(new Vector2DF(2.5f, -1.5f) == v);
+    }
+
+    public static void TestToString()
+    {
+        Debug.Assert("[1 2]" == new Vector2DF(1f, 2f).ToString());
+        Debug.Assert("[1.03125 2.5]" == new Vector2DF(1.03125f, 2.5f).ToString());
     }
 }
