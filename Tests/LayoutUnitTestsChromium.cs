@@ -588,7 +588,7 @@ public static class LayoutUnitTestsChromium
 
     private static void LayoutUnitTo()
     {
-        // Test 1
+        // LayoutUnit <-> TextRunLayoutUnit
 
         Debug.Assert(new LayoutUnit(1.0f) == new TextRunLayoutUnit(1.0f).ToLayoutUnit());
         Debug.Assert(new TextRunLayoutUnit(1.0f) == new LayoutUnit(1.0f).ToTextRunLayoutUnit());
@@ -599,7 +599,7 @@ public static class LayoutUnitTestsChromium
         Debug.Assert(new LayoutUnit(-1.0f) == new TextRunLayoutUnit(-1.0f).ToLayoutUnit());
         Debug.Assert(new TextRunLayoutUnit(-1.0f) == new LayoutUnit(-1.0f).ToTextRunLayoutUnit());
 
-        // Test 2
+        // LayoutUnit <-> InlineLayoutUnit
 
         Debug.Assert(new LayoutUnit(1.0f) == new InlineLayoutUnit(1.0f).ToLayoutUnit());
         Debug.Assert(new InlineLayoutUnit(1.0f) == new LayoutUnit(1.0f).ToInlineLayoutUnit());
@@ -610,7 +610,7 @@ public static class LayoutUnitTestsChromium
         Debug.Assert(new LayoutUnit(-1.0f) == new InlineLayoutUnit(-1.0f).ToLayoutUnit());
         Debug.Assert(new InlineLayoutUnit(-1.0f) == new LayoutUnit(-1.0f).ToInlineLayoutUnit());
 
-        // Test 3
+        // TextRunLayoutUnit <-> InlineLayoutUnit
 
         Debug.Assert(new TextRunLayoutUnit(1.0f) == new InlineLayoutUnit(1.0f).ToTextRunLayoutUnit());
         Debug.Assert(new InlineLayoutUnit(1.0f) == new TextRunLayoutUnit(1.0f).ToInlineLayoutUnit());
