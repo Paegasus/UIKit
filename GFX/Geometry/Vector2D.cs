@@ -1,3 +1,4 @@
+using System.Numerics;
 using static UI.Numerics.ClampedMath;
 
 namespace UI.GFX.Geometry;
@@ -95,6 +96,11 @@ public struct Vector2D
         Vector2D result = lhs;
         result.Subtract(rhs);
         return result;
+    }
+
+    public static implicit operator Vector2DF(in Vector2D source)
+    {
+        return new Vector2DF((float)source.X, (float)source.Y);
     }
 
     public static Vector2D TransposeVector2D(in Vector2D vector)
