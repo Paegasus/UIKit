@@ -49,6 +49,12 @@ public struct InlineLayoutUnit : IEquatable<InlineLayoutUnit>, IComparable<Inlin
     public InlineLayoutUnit(float value) { m_Value = ClampRawValue(value * FixedPointDenominator); }
     public InlineLayoutUnit(double value) { m_Value = ClampRawValue(value * FixedPointDenominator); }
 
+    public InlineLayoutUnit(LayoutUnit source)
+    {
+        // Convert 6-bit fractional LayoutUnit to 16-bit fractional InlineLayoutUnit
+        m_Value = source.RawValue() << 10;
+    }
+
     public readonly long RawValue() => m_Value;
 
 	public void SetRawValue(long value) => m_Value = value;
