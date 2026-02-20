@@ -46,10 +46,33 @@ public struct TextRunLayoutUnit : IEquatable<TextRunLayoutUnit>, IComparable<Tex
     public TextRunLayoutUnit(float value) { m_Value = ClampRawValue(value * FixedPointDenominator); }
     public TextRunLayoutUnit(double value) { m_Value = ClampRawValue(value * FixedPointDenominator); }
 
-    public TextRunLayoutUnit(LayoutUnit source)
+    public TextRunLayoutUnit(in LayoutUnit source)
     {
         // Convert 6-bit fractional LayoutUnit to 16-bit fractional TextRunLayoutUnit
         m_Value = source.RawValue() << 10;
+    }
+
+    public static TextRunLayoutUnit FromLayoutUnit(int value)
+    {
+        if (value >= RawValueMax >> 10) return MaxValue;
+        if (value <= RawValueMin >> 10) return MinValue;
+	
+        return FromRawValue(value << 10);
+    }
+    
+    public static TextRunLayoutUnit FromInlineLayoutUnit(long value)
+    {
+        return FromRawValue(ClampRawValue(value));
+    }
+
+    public readonly InlineLayoutUnit ToInlineLayoutUnit()
+    {
+        return InlineLayoutUnit.FromTextRunLayoutUnit(RawValue());
+    }
+
+    public readonly LayoutUnit ToLayoutUnit()
+    {
+        return LayoutUnit.FromTextRunLayoutUnit(RawValue());
     }
 
     public readonly int RawValue() => m_Value;

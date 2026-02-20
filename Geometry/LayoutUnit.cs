@@ -63,6 +63,26 @@ public struct LayoutUnit : IEquatable<LayoutUnit>, IComparable<LayoutUnit>
     public LayoutUnit(float value) { m_Value = ClampRawValue(value * FixedPointDenominator); }
     public LayoutUnit(double value) { m_Value = ClampRawValue(value * FixedPointDenominator); }
 
+    public static LayoutUnit FromInlineLayoutUnit(long value)
+    {
+        return FromRawValueWithClamp(value >> 10);
+    }
+
+    public static LayoutUnit FromTextRunLayoutUnit(int value)
+    {
+        return FromRawValueWithClamp(value >> 10);
+    }
+
+    public readonly TextRunLayoutUnit ToTextRunLayoutUnit()
+    {
+        return TextRunLayoutUnit.FromLayoutUnit(RawValue());
+    }
+
+    public readonly InlineLayoutUnit ToInlineLayoutUnit()
+    {
+        return InlineLayoutUnit.FromLayoutUnit(RawValue());
+    }
+
     public readonly int RawValue() => m_Value;
 
 	public void SetRawValue(int value) => m_Value = value;

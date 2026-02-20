@@ -544,7 +544,7 @@ public static class LayoutUnitTestsChromium
         int raw_value6 = raw_value16 >> 10;
         var value16 = TextRunLayoutUnit.FromRawValue(raw_value16);
         var value6 = LayoutUnit.FromRawValue(raw_value6);
-        //Debug.Assert(value16.To<LayoutUnit>(), value6);
+        Debug.Assert(value16.ToLayoutUnit() == value6);
     }
 
     private static void LayoutUnitRaw64FromInt32()
@@ -593,20 +593,20 @@ public static class LayoutUnitTestsChromium
 
     private static void LayoutUnitToClampSameFractional64To32()
     {
-        //Debug.Assert(TextRunLayoutUnit.MaxValue == new InlineLayoutUnit(TextRunLayoutUnit.IntegerMax + 1).To<TextRunLayoutUnit>());
-        //Debug.Assert(TextRunLayoutUnit.MinValue == new InlineLayoutUnit(TextRunLayoutUnit.IntegerMin - 1).To<TextRunLayoutUnit>());
+        Debug.Assert(TextRunLayoutUnit.MaxValue == new InlineLayoutUnit(TextRunLayoutUnit.IntegerMax + 1).ToTextRunLayoutUnit());
+        Debug.Assert(TextRunLayoutUnit.MinValue == new InlineLayoutUnit(TextRunLayoutUnit.IntegerMin - 1).ToTextRunLayoutUnit());
     }
 
     private static void LayoutUnitToClampLessFractional64To32()
     {
-        //Debug.Assert(LayoutUnit.MaxValue == new InlineLayoutUnit(LayoutUnit.IntegerMax + 1).To<LayoutUnit>());
-        //Debug.Assert(LayoutUnit.MinValue == new InlineLayoutUnit(LayoutUnit.IntegerMin - 1).To<LayoutUnit>());
+        Debug.Assert(LayoutUnit.MaxValue == new InlineLayoutUnit(LayoutUnit.IntegerMax + 1).ToLayoutUnit());
+        Debug.Assert(LayoutUnit.MinValue == new InlineLayoutUnit(LayoutUnit.IntegerMin - 1).ToLayoutUnit());
     }
 
     private static void LayoutUnitToClampMoreFractional()
     {
-        //Debug.Assert(TextRunLayoutUnit.MaxValue == new LayoutUnit(TextRunLayoutUnit.IntegerMax + 1).To<TextRunLayoutUnit>());
-        //Debug.Assert(TextRunLayoutUnit.MinValue == new LayoutUnit(TextRunLayoutUnit.IntegerMin - 1).To<TextRunLayoutUnit>());
+        Debug.Assert(TextRunLayoutUnit.MaxValue == new LayoutUnit(TextRunLayoutUnit.IntegerMax + 1).ToTextRunLayoutUnit());
+        Debug.Assert(TextRunLayoutUnit.MinValue == new LayoutUnit(TextRunLayoutUnit.IntegerMin - 1).ToTextRunLayoutUnit());
     }
 
     private static void LayoutUnitRaw64Ceil()

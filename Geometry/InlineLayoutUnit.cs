@@ -49,10 +49,30 @@ public struct InlineLayoutUnit : IEquatable<InlineLayoutUnit>, IComparable<Inlin
     public InlineLayoutUnit(float value) { m_Value = ClampRawValue(value * FixedPointDenominator); }
     public InlineLayoutUnit(double value) { m_Value = ClampRawValue(value * FixedPointDenominator); }
 
-    public InlineLayoutUnit(LayoutUnit source)
+    public InlineLayoutUnit(in LayoutUnit source)
     {
         // Convert 6-bit fractional LayoutUnit to 16-bit fractional InlineLayoutUnit
         m_Value = source.RawValue() << 10;
+    }
+
+    public static InlineLayoutUnit FromLayoutUnit(int value)
+    {
+        return FromRawValue((long)value << 10);
+    }
+
+    public static InlineLayoutUnit FromTextRunLayoutUnit(int value)
+    {
+        return FromRawValue(value);
+    }
+
+    public readonly TextRunLayoutUnit ToTextRunLayoutUnit()
+    {
+        return TextRunLayoutUnit.FromInlineLayoutUnit(RawValue());
+    }
+
+    public readonly LayoutUnit ToLayoutUnit()
+    {
+        return LayoutUnit.FromInlineLayoutUnit(RawValue());
     }
 
     public readonly long RawValue() => m_Value;
@@ -111,7 +131,7 @@ public struct InlineLayoutUnit : IEquatable<InlineLayoutUnit>, IComparable<Inlin
 	{
 		return (double)m_Value / FixedPointDenominator;
 	}
-    
+
     public static long ClampRawValue(long value)
     {
         if (value > long.MaxValue) return long.MaxValue;
@@ -149,15 +169,11 @@ public struct InlineLayoutUnit : IEquatable<InlineLayoutUnit>, IComparable<Inlin
 	
 	public static InlineLayoutUnit FromRawValueWithClamp(float raw_value)
 	{
-		// Note: Might be better to just call Conversion.SaturatedCast() directly and avoid the indirect call to ClampRawValue()
-		// return FromRawValue(Conversion.SaturatedCast<int, T>(raw_value));
 		return FromRawValue(ClampRawValue(raw_value));
 	}
 
     public static InlineLayoutUnit FromRawValueWithClamp(double raw_value)
 	{
-		// Note: Might be better to just call Conversion.SaturatedCast() directly and avoid the indirect call to ClampRawValue()
-		// return FromRawValue(Conversion.SaturatedCast<int, T>(raw_value));
 		return FromRawValue(ClampRawValue(raw_value));
 	}
 
