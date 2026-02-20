@@ -27,6 +27,8 @@ public static class Vector3DFTest
 
     private static bool FloatNear(float val1, float val2, float abs_error) => MathF.Abs(val1 - val2) <= abs_error;
 
+    private static bool DoubleNear(double val1, double val2, double abs_error) => Math.Abs(val1 - val2) <= abs_error;
+
     public static void TestIsZero()
     {
         Vector3DF float_zero = new(0, 0, 0);
@@ -149,21 +151,62 @@ public static class Vector3DFTest
 
     public static void TestLength()
     {
-        
+        float kFloatTolerance = 1e-7f;
+        double kDoubleTolerance = 1e-15;
+
+        (float, float, float)[] float_values =
+        [
+            (0, 0, 0),
+            (10.5f, 20.5f, 8.5f),
+            (20.5f, 10.5f, 8.5f),
+            (8.5f, 20.5f, 10.5f),
+            (10.5f, 8.5f, 20.5f),
+            (-10.5f, -20.5f, -8.5f),
+            (-20.5f, 10.5f, -8.5f),
+            (-8.5f, -20.5f, -10.5f),
+            (-10.5f, -8.5f, -20.5f),
+            (10.5f, -20.5f, 8.5f),
+            (-10.5f, 20.5f, 8.5f),
+            (10.5f, -20.5f, -8.5f),
+            (-10.5f, 20.5f, -8.5f),
+            // A large vector that fails if the Length function doesn't use
+            // double precision internally.
+            (1236278317862780234892374893213178027.12122348904204230f,
+            335890352589839028212313231225425134332.38123f,
+            27861786423846742743236423478236784678.236713617231f)
+        ];
+
+        foreach (var (v0, v1, v2) in float_values)
+        {
+            double length_squared =
+                (double)v0 * v0 +
+                (double)v1 * v1 +
+                (double)v2 * v2;
+            
+            double length = Math.Sqrt(length_squared);
+
+            Vector3DF vector = new(v0, v1, v2);
+            
+            Debug.Assert(DoubleNear(length_squared, vector.LengthSquared(), kDoubleTolerance));
+            Debug.Assert(FloatNear((float)length, vector.Length(), kFloatTolerance));
+        }
     }
 
     public static void TestDotProduct()
     {
         
     }
+
     public static void TestCrossProduct()
     {
         
     }
+
     public static void TestClampVector3dF()
     {
         
     }
+    
     public static void TestAngleBetweenVectorsInDegress()
     {
         
