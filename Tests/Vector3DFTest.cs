@@ -302,7 +302,32 @@ public static class Vector3DFTest
 
     public static void TestClockwiseAngleBetweenVectorsInDegress()
     {
+        float kTolerance = 1e-7f;
+
+        (float, Vector3DF, Vector3DF)[] tests =
+        [
+            (0, new Vector3DF(0, 1, 0), new Vector3DF(0, 1, 0)),
+            (90, new Vector3DF(0, 1, 0), new Vector3DF(0, 0, -1)),
+            (45, new Vector3DF(0, -1, 0), new Vector3DF(0, -0.70710678188f, 0.70710678188f)),
+            (180, new Vector3DF(0, -1, 0), new Vector3DF(0, 1, 0)),
+            (270, new Vector3DF(0, 1, 0), new Vector3DF(0, 0, 1))
+        ];
         
+        Vector3DF normal_vector = new(1.0f, 0.0f, 0.0f);
+
+        foreach(var (expected, input1, input2) in tests)
+        {
+            float actual = Vector3DF.ClockwiseAngleBetweenVectorsInDegrees(input1, input2, normal_vector);
+            
+            Debug.Assert(FloatNear(expected, actual, kTolerance));
+            
+            actual = -Vector3DF.ClockwiseAngleBetweenVectorsInDegrees(input2, input1, normal_vector);
+
+            if (actual < 0.0f)
+                actual += 360.0f;
+
+            Debug.Assert(FloatNear(expected, actual, kTolerance));
+        }
     }
 
     public static void TestGetNormalized()
