@@ -11,7 +11,7 @@ public static class Vector2DFTest
         TestIsZero();
         TestAdd();
         TestNegative();
-        Scale();
+        TestScale();
         SetToMinMax();
         TestLength();
         TestSlopeAngleRadians();
@@ -59,7 +59,7 @@ public static class Vector2DFTest
         Debug.Assert(new Vector2DF(0.3f, -0.3f) == -new Vector2DF(-0.3f, 0.3f));
     }
 
-    public static void Scale()
+    public static void TestScale()
     {
         (float, float, float, float)[] double_values =
         [

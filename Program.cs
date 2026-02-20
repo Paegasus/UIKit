@@ -12,5 +12,6 @@ public static class Program
         LayoutUnitTest.Run();
         Vector2DTest.Run();
         Vector2DFTest.Run();
+        Vector3DFTest.Run();
     }
 }

@@ -194,7 +194,7 @@ public struct Vector3DF : IEquatable<Vector3DF>
     /// Returns a new vector created by scaling the components of |v| by the components of |s|.
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static Vector3DF ScaleVector(in Vector3DF v, in Vector3DF s)
+    public static Vector3DF ScaleVector3D(in Vector3DF v, in Vector3DF s)
     {
         return new Vector3DF(v.X * s.X, v.Y * s.Y, v.Z * s.Z);
     }
@@ -203,7 +203,7 @@ public struct Vector3DF : IEquatable<Vector3DF>
     /// Returns a new vector created by scaling |v| by the given scale factors.
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static Vector3DF ScaleVector(in Vector3DF v, float x_scale, float y_scale, float z_scale)
+    public static Vector3DF ScaleVector3D(in Vector3DF v, float x_scale, float y_scale, float z_scale)
     {
         return new Vector3DF(v.X * x_scale, v.Y * y_scale, v.Z * z_scale);
     }
@@ -212,9 +212,9 @@ public struct Vector3DF : IEquatable<Vector3DF>
     /// Returns a new vector created by scaling |v| by a uniform scale factor.
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static Vector3DF ScaleVector(in Vector3DF v, float scale)
+    public static Vector3DF ScaleVector3D(in Vector3DF v, float scale)
     {
-        return ScaleVector(v, scale, scale, scale);
+        return ScaleVector3D(v, scale, scale, scale);
     }
     
     /// <summary>
