@@ -94,16 +94,16 @@ public struct Vector2DF : IEquatable<Vector2DF>
     public static double DotProduct(in Vector2DF lhs, in Vector2DF rhs) => (double)lhs.X * rhs.X + (double)lhs.Y * rhs.Y;
 
     // Return a vector that is |v| scaled by the given scale factors along each axis.
-    public static Vector2DF ScaleVector2d(in Vector2DF v, float x_scale, float y_scale)
+    public static Vector2DF ScaleVector2D(in Vector2DF v, float x_scale, float y_scale)
     {
         return new Vector2DF(v.X * x_scale, v.Y * y_scale);
     }
 
     // Return a vector that is |v| scaled by the given scale factor.
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static  Vector2DF ScaleVector2d(in Vector2DF v, float scale)
+    public static  Vector2DF ScaleVector2D(in Vector2DF v, float scale)
     {
-        return ScaleVector2d(v, scale, scale);
+        return ScaleVector2D(v, scale, scale);
     }
 
     public static Vector2DF TransposeVector2d(in Vector2DF v)
