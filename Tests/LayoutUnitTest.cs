@@ -7,13 +7,6 @@ namespace UI.Tests;
 
 public static class LayoutUnitTest
 {
-    private static bool AreNear(float val1, float val2, float abs_error)
-    {
-        float diff = MathF.Abs(val1 - val2);
-        
-        return diff <= abs_error;
-    }
-
     public static void Run()
     {
         TestInt();
@@ -50,6 +43,10 @@ public static class LayoutUnitTest
 
         Debug.WriteLine("All LayoutUnit tests passed!");
     }
+
+    private static bool FloatEqual(float a, float b) => MathF.Abs(a - b) <= 1e-6f;
+
+    private static bool FloatNear(float val1, float val2, float abs_error) => MathF.Abs(val1 - val2) <= abs_error;
 
     public static void TestInt()
     {
@@ -120,14 +117,14 @@ public static class LayoutUnitTest
         Debug.Assert(1.25f == new LayoutUnit(1.25f).ToFloat());
         Debug.Assert(new LayoutUnit(1.25f) == new LayoutUnit(1.25f + Tolerance / 2));
         Debug.Assert(new LayoutUnit(-2.0f) == new LayoutUnit(-2.0f - Tolerance / 2));
-        Debug.Assert(AreNear(new LayoutUnit(1.1f).ToFloat(), 1.1f, Tolerance));
-        Debug.Assert(AreNear(new LayoutUnit(1.33f).ToFloat(), 1.33f, Tolerance));
-        Debug.Assert(AreNear(new LayoutUnit(1.3333f).ToFloat(), 1.3333f, Tolerance));
-        Debug.Assert(AreNear(new LayoutUnit(1.53434f).ToFloat(), 1.53434f, Tolerance));
-        Debug.Assert(AreNear(new LayoutUnit(345634).ToFloat(), 345634.0f, Tolerance));
-        Debug.Assert(AreNear(new LayoutUnit(345634.12335f).ToFloat(), 345634.12335f, Tolerance));
-        Debug.Assert(AreNear(new LayoutUnit(-345634.12335f).ToFloat(), -345634.12335f, Tolerance));
-        Debug.Assert(AreNear(new LayoutUnit(-345634).ToFloat(), -345634.0f, Tolerance));
+        Debug.Assert(FloatNear(new LayoutUnit(1.1f).ToFloat(), 1.1f, Tolerance));
+        Debug.Assert(FloatNear(new LayoutUnit(1.33f).ToFloat(), 1.33f, Tolerance));
+        Debug.Assert(FloatNear(new LayoutUnit(1.3333f).ToFloat(), 1.3333f, Tolerance));
+        Debug.Assert(FloatNear(new LayoutUnit(1.53434f).ToFloat(), 1.53434f, Tolerance));
+        Debug.Assert(FloatNear(new LayoutUnit(345634).ToFloat(), 345634.0f, Tolerance));
+        Debug.Assert(FloatNear(new LayoutUnit(345634.12335f).ToFloat(), 345634.12335f, Tolerance));
+        Debug.Assert(FloatNear(new LayoutUnit(-345634.12335f).ToFloat(), -345634.12335f, Tolerance));
+        Debug.Assert(FloatNear(new LayoutUnit(-345634).ToFloat(), -345634.0f, Tolerance));
 
         // Larger than Max()
         Debug.Assert(MaxValue == new LayoutUnit(float.MaxValue));

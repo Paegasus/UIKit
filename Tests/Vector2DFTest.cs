@@ -15,12 +15,14 @@ public static class Vector2DFTest
         SetToMinMax();
         TestLength();
         TestSlopeAngleRadians();
-        TestSetToMinMax();
-        TestIntegerOverflow();
         TestTranspose();
 
         Debug.WriteLine("All Vector2DF tests passed!");
     }
+
+    private static bool FloatEqual(float a, float b) => MathF.Abs(a - b) <= 1e-6f;
+
+    private static bool FloatNear(float val1, float val2, float abs_error) => MathF.Abs(val1 - val2) <= abs_error;
 
     public static void TestVector2DToVector2DF()
     {
@@ -128,45 +130,46 @@ public static class Vector2DFTest
 
     public static void TestLength()
     {
-        static bool FloatEq(float a, float b) => MathF.Abs(a - b) <= 1e-6f;
-
-        Debug.Assert(FloatEq(0.0f, new Vector2DF(0, 0).Length()));
-        Debug.Assert(FloatEq(1.0f, new Vector2DF(1, 0).Length()));
-        Debug.Assert(FloatEq(1.414214f, new Vector2DF(1, 1).Length()));
-        Debug.Assert(FloatEq(2.236068f, new Vector2DF(-1, -2).Length()));
+        Debug.Assert(FloatEqual(0.0f, new Vector2DF(0, 0).Length()));
+        Debug.Assert(FloatEqual(1.0f, new Vector2DF(1, 0).Length()));
+        Debug.Assert(FloatEqual(1.414214f, new Vector2DF(1, 1).Length()));
+        Debug.Assert(FloatEqual(2.236068f, new Vector2DF(-1, -2).Length()));
 
         // The Pythagorean triples 3-4-5 and 5-12-13.
-        Debug.Assert(FloatEq(5.0f, new Vector2DF(3.0f, 4.0f).Length()));
-        Debug.Assert(FloatEq(13.0f, new Vector2DF(5.0f, 12.0f).Length()));
+        Debug.Assert(FloatEqual(5.0f, new Vector2DF(3.0f, 4.0f).Length()));
+        Debug.Assert(FloatEqual(13.0f, new Vector2DF(5.0f, 12.0f).Length()));
 
         // Very small numbers.
-        Debug.Assert(FloatEq(.7071068e-20f, new Vector2DF(.5e-20f, .5e-20f).Length()));
+        Debug.Assert(FloatEqual(.7071068e-20f, new Vector2DF(.5e-20f, .5e-20f).Length()));
 
         // Very large numbers.
-        Debug.Assert(FloatEq(.7071068e20f, new Vector2DF(.5e20f, .5e20f).Length()));
-        Debug.Assert(FloatEq(float.MaxValue, new Vector2DF(float.MaxValue, 0).Length()));
-        // The original C++ code checks if Length() returns float.MaxValue, but that's impossible
+        Debug.Assert(FloatEqual(.7071068e20f, new Vector2DF(.5e20f, .5e20f).Length()));
+        Debug.Assert(FloatEqual(float.MaxValue, new Vector2DF(float.MaxValue, 0).Length()));
+        // The original C++ code checks if Length() returns float.MaxValue, but that's impossible,
+        // since float.Hypot(float.MaxValue, float.MaxValue) returns positive infinity
         //Debug.Assert(FloatEq(float.MaxValue, new Vector2DF(float.MaxValue, float.MaxValue).Length()));
         Debug.Assert(float.PositiveInfinity == new Vector2DF(float.MaxValue, float.MaxValue).Length());
     }
 
     public static void TestSlopeAngleRadians()
     {
-        
-    }
-
-    public static void TestSetToMinMax()
-    {
-        
-    }
-
-    public static void TestIntegerOverflow()
-    {
-        
+        // The function is required to be very accurate, so we use a smaller tolerance than EXPECT_FLOAT_EQ().
+        float kTolerance = 1e-7f;
+        float kPi = 3.1415927f;
+        FloatNear(0, new Vector2DF(0, 0).SlopeAngleRadians(), kTolerance);
+        FloatNear(0, new Vector2DF(1, 0).SlopeAngleRadians(), kTolerance);
+        FloatNear(kPi / 4, new Vector2DF(1, 1).SlopeAngleRadians(), kTolerance);
+        FloatNear(kPi / 2, new Vector2DF(0, 1).SlopeAngleRadians(), kTolerance);
+        FloatNear(kPi, new Vector2DF(-50, 0).SlopeAngleRadians(), kTolerance);
+        FloatNear(-kPi * 3 / 4, new Vector2DF(-50, -50).SlopeAngleRadians(), kTolerance);
+        FloatNear(-kPi / 4, new Vector2DF(1, -1).SlopeAngleRadians(), kTolerance);
     }
 
     public static void TestTranspose()
     {
-        
+        Vector2DF v = new(-1.5f, 2.5f);
+        Debug.Assert(new Vector2DF(2.5f, -1.5f) == Vector2DF.TransposeVector2D(v));
+        v.Transpose();
+        Debug.Assert(new Vector2DF(2.5f, -1.5f) == v);
     }
 }

@@ -106,7 +106,7 @@ public struct Vector2DF : IEquatable<Vector2DF>
         return ScaleVector2D(v, scale, scale);
     }
 
-    public static Vector2DF TransposeVector2d(in Vector2DF v)
+    public static Vector2DF TransposeVector2D(in Vector2DF v)
     {
         return new Vector2DF(v.Y, v.X);
     }
