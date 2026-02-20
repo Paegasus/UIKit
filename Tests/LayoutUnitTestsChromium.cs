@@ -593,21 +593,30 @@ public static class LayoutUnitTestsChromium
 
     private static void LayoutUnitToClampSameFractional64To32()
     {
-        
+        //Debug.Assert(TextRunLayoutUnit.MaxValue == new InlineLayoutUnit(TextRunLayoutUnit.IntegerMax + 1).To<TextRunLayoutUnit>());
+        //Debug.Assert(TextRunLayoutUnit.MinValue == new InlineLayoutUnit(TextRunLayoutUnit.IntegerMin - 1).To<TextRunLayoutUnit>());
     }
 
     private static void LayoutUnitToClampLessFractional64To32()
     {
-        
+        //Debug.Assert(LayoutUnit.MaxValue == new InlineLayoutUnit(LayoutUnit.IntegerMax + 1).To<LayoutUnit>());
+        //Debug.Assert(LayoutUnit.MinValue == new InlineLayoutUnit(LayoutUnit.IntegerMin - 1).To<LayoutUnit>());
     }
 
     private static void LayoutUnitToClampMoreFractional()
     {
-        
+        //Debug.Assert(TextRunLayoutUnit.MaxValue == new LayoutUnit(TextRunLayoutUnit.IntegerMax + 1).To<TextRunLayoutUnit>());
+        //Debug.Assert(TextRunLayoutUnit.MinValue == new LayoutUnit(TextRunLayoutUnit.IntegerMin - 1).To<TextRunLayoutUnit>());
     }
 
     private static void LayoutUnitRaw64Ceil()
     {
-        
+        LayoutUnit layout = new(1.234);
+        InlineLayoutUnit inline_value = new(layout);
+        //Debug.Assert(layout == inline_value.ToCeil<LayoutUnit>());
+
+        inline_value = inline_value.AddEpsilon();
+        //Debug.Assert(layout != inline_value.ToCeil<LayoutUnit>());
+        //Debug.Assert(layout.AddEpsilon() == inline_value.ToCeil<LayoutUnit>());
     }
 }
