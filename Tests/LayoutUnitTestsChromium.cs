@@ -588,7 +588,38 @@ public static class LayoutUnitTestsChromium
 
     private static void LayoutUnitTo()
     {
-        
+        // Test 1
+
+        Debug.Assert(new LayoutUnit(1.0f) == new TextRunLayoutUnit(1.0f).ToLayoutUnit());
+        Debug.Assert(new TextRunLayoutUnit(1.0f) == new LayoutUnit(1.0f).ToTextRunLayoutUnit());
+
+        Debug.Assert(new LayoutUnit(1.5f) == new TextRunLayoutUnit(1.5f).ToLayoutUnit());
+        Debug.Assert(new TextRunLayoutUnit(1.5f) == new LayoutUnit(1.5f).ToTextRunLayoutUnit());
+
+        Debug.Assert(new LayoutUnit(-1.0f) == new TextRunLayoutUnit(-1.0f).ToLayoutUnit());
+        Debug.Assert(new TextRunLayoutUnit(-1.0f) == new LayoutUnit(-1.0f).ToTextRunLayoutUnit());
+
+        // Test 2
+
+        Debug.Assert(new LayoutUnit(1.0f) == new InlineLayoutUnit(1.0f).ToLayoutUnit());
+        Debug.Assert(new InlineLayoutUnit(1.0f) == new LayoutUnit(1.0f).ToInlineLayoutUnit());
+
+        Debug.Assert(new LayoutUnit(1.5f) == new InlineLayoutUnit(1.5f).ToLayoutUnit());
+        Debug.Assert(new InlineLayoutUnit(1.5f) == new LayoutUnit(1.5f).ToInlineLayoutUnit());
+
+        Debug.Assert(new LayoutUnit(-1.0f) == new InlineLayoutUnit(-1.0f).ToLayoutUnit());
+        Debug.Assert(new InlineLayoutUnit(-1.0f) == new LayoutUnit(-1.0f).ToInlineLayoutUnit());
+
+        // Test 3
+
+        Debug.Assert(new TextRunLayoutUnit(1.0f) == new InlineLayoutUnit(1.0f).ToTextRunLayoutUnit());
+        Debug.Assert(new InlineLayoutUnit(1.0f) == new TextRunLayoutUnit(1.0f).ToInlineLayoutUnit());
+
+        Debug.Assert(new TextRunLayoutUnit(1.5f) == new InlineLayoutUnit(1.5f).ToTextRunLayoutUnit());
+        Debug.Assert(new InlineLayoutUnit(1.5f) == new TextRunLayoutUnit(1.5f).ToInlineLayoutUnit());
+
+        Debug.Assert(new TextRunLayoutUnit(-1.0f) == new InlineLayoutUnit(-1.0f).ToTextRunLayoutUnit());
+        Debug.Assert(new InlineLayoutUnit(-1.0f) == new TextRunLayoutUnit(-1.0f).ToInlineLayoutUnit());
     }
 
     private static void LayoutUnitToClampSameFractional64To32()
