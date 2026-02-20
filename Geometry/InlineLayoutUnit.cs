@@ -505,4 +505,19 @@ public struct InlineLayoutUnit : IEquatable<InlineLayoutUnit>, IComparable<Inlin
 
     public static InlineLayoutUnit Min(in InlineLayoutUnit a, in InlineLayoutUnit b) => a < b ? a : b;
     public static InlineLayoutUnit Max(in InlineLayoutUnit a, in InlineLayoutUnit b) => a > b ? a : b;
+
+    // Convert `InlineLayoutUnit` to `LayoutUnit` by ceiling the lost precision
+    public readonly LayoutUnit ToCeil()
+    {
+        int kBitsDiff = FractionalBits - LayoutUnit.FractionalBits;
+        
+        long raw_value = RawValue() >> kBitsDiff;
+
+        if ((RawValue() & ((1 << kBitsDiff) - 1)) != 0)
+        {
+            ++raw_value;
+        }
+        
+        return LayoutUnit.FromRawValueWithClamp(raw_value);
+    }
 }

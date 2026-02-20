@@ -613,10 +613,10 @@ public static class LayoutUnitTestsChromium
     {
         LayoutUnit layout = new(1.234);
         InlineLayoutUnit inline_value = new(layout);
-        //Debug.Assert(layout == inline_value.ToCeil<LayoutUnit>());
+        Debug.Assert(layout == inline_value.ToCeil());
 
         inline_value = inline_value.AddEpsilon();
-        //Debug.Assert(layout != inline_value.ToCeil<LayoutUnit>());
-        //Debug.Assert(layout.AddEpsilon() == inline_value.ToCeil<LayoutUnit>());
+        Debug.Assert(layout != inline_value.ToCeil());
+        Debug.Assert(layout.AddEpsilon() == inline_value.ToCeil());
     }
 }
