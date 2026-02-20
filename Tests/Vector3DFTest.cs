@@ -242,12 +242,62 @@ public static class Vector3DFTest
 
     public static void TestClampVector3dF()
     {
-        
+        Vector3DF a;
+
+        a = new Vector3DF(3.5f, 5.5f, 7.5f);
+        Debug.Assert(new Vector3DF(3.5f, 5.5f, 7.5f).ToString() == a.ToString());
+        a.SetToMax(new Vector3DF(2, 4.5f, 6.5f));
+        Debug.Assert(new Vector3DF(3.5f, 5.5f, 7.5f).ToString() == a.ToString());
+        a.SetToMax(new Vector3DF(3.5f, 5.5f, 7.5f));
+        Debug.Assert(new Vector3DF(3.5f, 5.5f, 7.5f).ToString() == a.ToString());
+        a.SetToMax(new Vector3DF(4.5f, 2, 6.5f));
+        Debug.Assert(new Vector3DF(4.5f, 5.5f, 7.5f).ToString() == a.ToString());
+        a.SetToMax(new Vector3DF(3.5f, 6.5f, 6.5f));
+        Debug.Assert(new Vector3DF(4.5f, 6.5f, 7.5f).ToString() == a.ToString());
+        a.SetToMax(new Vector3DF(3.5f, 5.5f, 8.5f));
+        Debug.Assert(new Vector3DF(4.5f, 6.5f, 8.5f).ToString() == a.ToString());
+        a.SetToMax(new Vector3DF(8.5f, 10.5f, 12.5f));
+        Debug.Assert(new Vector3DF(8.5f, 10.5f, 12.5f).ToString() == a.ToString());
+
+        a.SetToMin(new Vector3DF(9.5f, 11.5f, 13.5f));
+        Debug.Assert(new Vector3DF(8.5f, 10.5f, 12.5f).ToString() == a.ToString());
+        a.SetToMin(new Vector3DF(8.5f, 10.5f, 12.5f));
+        Debug.Assert(new Vector3DF(8.5f, 10.5f, 12.5f).ToString() == a.ToString());
+        a.SetToMin(new Vector3DF(7.5f, 11.5f, 13.5f));
+        Debug.Assert(new Vector3DF(7.5f, 10.5f, 12.5f).ToString() == a.ToString());
+        a.SetToMin(new Vector3DF(9.5f, 9.5f, 13.5f));
+        Debug.Assert(new Vector3DF(7.5f, 9.5f, 12.5f).ToString() == a.ToString());
+        a.SetToMin(new Vector3DF(9.5f, 11.5f, 11.5f));
+        Debug.Assert(new Vector3DF(7.5f, 9.5f, 11.5f).ToString() == a.ToString());
+        a.SetToMin(new Vector3DF(3.5f, 5.5f, 7.5f));
+        Debug.Assert(new Vector3DF(3.5f, 5.5f, 7.5f).ToString() == a.ToString());
     }
 
     public static void TestAngleBetweenVectorsInDegress()
     {
-        
+        float kTolerance = 1e-7f;
+
+        (float, Vector3DF, Vector3DF)[] tests =
+        [
+            (0, new Vector3DF(0, 1, 0), new Vector3DF(0, 1, 0)),
+            (90, new Vector3DF(0, 1, 0), new Vector3DF(0, 0, 1)),
+            (45, new Vector3DF(0, 1, 0),
+            new Vector3DF(0, 0.70710678188f, 0.70710678188f)),
+            (180, new Vector3DF(0, 1, 0), new Vector3DF(0, -1, 0)),
+            // Two vectors that are sufficiently close enough together to
+            // trigger an issue that produces NANs if the value passed to
+            // acos is not clamped due to floating point precision.
+            (0, new Vector3DF(0, -0.990842f, -0.003177f),
+            new Vector3DF(0, -0.999995f, -0.003124f)),
+        ];
+
+        foreach (var (expected, input1, input2) in tests)
+        {
+            float actual = Vector3DF.AngleBetweenVectorsInDegrees(input1, input2);
+            Debug.Assert(FloatNear(expected, actual, kTolerance));
+            actual = Vector3DF.AngleBetweenVectorsInDegrees(input2, input1);
+            Debug.Assert(FloatNear(expected, actual, kTolerance));
+        }
     }
 
     public static void TestClockwiseAngleBetweenVectorsInDegress()
