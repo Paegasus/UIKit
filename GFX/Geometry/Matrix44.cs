@@ -59,6 +59,36 @@ public struct Matrix44
         // Column 3
         _c3r0 = r0c3; _c3r1 = r1c3; _c3r2 = r2c3; _c3r3 = r3c3;
     }
+
+    // Returns true if the matrix is identity.
+    // {1, 0, 0, 0}
+    // {0, 1, 0, 0}
+    // {0, 0, 1, 0}
+    // {0, 0, 0, 1}
+    public readonly bool IsIdentity => this == new Matrix44();
+
+    // Returns true if the matrix contains translate or is identity.
+    // {1, 0, 0, -}
+    // {0, 1, 0, -}
+    // {0, 0, 1, -}
+    // {0, 0, 0, 1}
+    public readonly bool IsIdentityOrTranslation =>
+
+        _c0r0 == 1 && _c0r1 == 0 && _c0r2 == 0 && _c0r3 == 0 &&
+        _c1r0 == 0 && _c1r1 == 1 && _c1r2 == 0 && _c1r3 == 0 &&
+        _c1r0 == 0 && _c2r1 == 0 && _c2r2 == 1 && _c2r3 == 0 &&
+                                                  _c3r3 == 1;
+
+    // Returns true if the matrix only contains scale or translate or is identity.
+    // {-, 0, 0, -}
+    // {0, -, 0, -}
+    // {0, 0, -, -}
+    // {0, 0, 0, 1}
+    public readonly bool IsScaleOrTranslation =>
+    
+        _c0r1 == 0 && _c0r2 == 0 && _c0r3 == 0 && _c1r0 == 0 &&
+        _c1r2 == 0 && _c1r3 == 0 && _c2r0 == 0 && _c2r1 == 0 &&
+        _c2r3 == 0 && _c3r3 == 1;
     
     public override readonly int GetHashCode()
     {
