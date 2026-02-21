@@ -3,6 +3,7 @@ using System.Runtime.InteropServices;
 
 namespace UI.GFX.Geometry;
 
+[StructLayout(LayoutKind.Sequential)]
 public struct Matrix44
 {
     // 16 explicit fields, column-major layout:
@@ -112,6 +113,8 @@ public struct Matrix44
     public readonly bool HasPerspective =>
     
         _c0r3 != 0 && _c1r3 != 0 && _c2r3 != 0 && _c3r3 != 1;
+
+    public readonly bool Is2DTransform => IsFlat && !HasPerspective;
 
     public override readonly int GetHashCode()
     {

@@ -22,19 +22,14 @@ public static class Program
     {
         //RunTests()
 
-        Matrix44 matrix1 = new ();
+        Matrix44 matrix = new ();
 
-        Debug.WriteLine($"matrix1 IsIdentity: {matrix1.IsIdentity}");
-        Debug.WriteLine($"matrix1 IsIdentityOrTranslation: {matrix1.IsIdentityOrTranslation}");
-        Debug.WriteLine($"matrix1 IsScaleOrTranslation: {matrix1.IsScaleOrTranslation}");
-        Debug.WriteLine($"matrix1 IsScale: {matrix1.IsScale}");
-        Debug.WriteLine($"matrix1 IsFlat: {matrix1.IsFlat}");
-        Debug.WriteLine($"matrix1 HasPerspective: {matrix1.HasPerspective}");
-
-        //Matrix44 matrix2 = new ();
-
-        //Debug.WriteLine($"matrix1 == matrix2: {matrix1 == matrix2}");
-        //Debug.WriteLine($"matrix1 0,0: {matrix1[0, 0]}");
-        //Debug.WriteLine($"matrix2 0,0: {matrix2[0, 0]}");
+        Debug.WriteLine($"matrix1 IsIdentity: {matrix.IsIdentity}");
+        Debug.WriteLine($"matrix1 IsIdentityOrTranslation: {matrix.IsIdentityOrTranslation}");
+        Debug.WriteLine($"matrix1 IsScaleOrTranslation: {matrix.IsScaleOrTranslation}");
+        Debug.WriteLine($"matrix1 IsScale: {matrix.IsScale}");
+        Debug.WriteLine($"matrix1 IsFlat: {matrix.IsFlat}");
+        Debug.WriteLine($"matrix1 HasPerspective: {matrix.HasPerspective}");
+        Debug.WriteLine($"matrix1 Is2dTransform: {matrix.Is2DTransform}");
     }
 }
