@@ -8,6 +8,7 @@ public static class AxisTransform2DTest
     public static void Run()
     {
         TestMapping();
+        TestScaling();
 
         Debug.WriteLine("All AxisTransform2D tests passed!");
     }
@@ -28,5 +29,22 @@ public static class AxisTransform2DTest
         RectF r = new(150.0f, 100.0f, 22.5f, 37.5f);
         Debug.Assert(new RectF(191.25f, 180.0f, 28.125f, 46.875f) == t.MapRect(r));
         Debug.Assert(new RectF(117.0f, 36.0f, 18.0f, 30.0f) == t.InverseMapRect(r));
+    }
+
+    public static void TestScaling()
+    {
+        {
+            AxisTransform2D t = new(1.25f, new Vector2DF(3.75f, 55.0f));
+            Debug.Assert(new AxisTransform2D(1.5625f, new Vector2DF(3.75f, 55.0f)) == AxisTransform2D.PreScaleAxisTransform2D(t, 1.25f));
+            t.PreScale(new Vector2DF(1.25f, 1.25f));
+            Debug.Assert(new AxisTransform2D(1.5625f, new Vector2DF(3.75f, 55.0f)) == t);
+        }
+
+        {
+            AxisTransform2D t = new(1.25f, new Vector2DF(3.75f, 55.0f));
+            Debug.Assert(new AxisTransform2D(1.5625f, new Vector2DF(4.6875f, 68.75f)) == AxisTransform2D.PostScaleAxisTransform2D(t, 1.25f));
+            t.PostScale(new Vector2DF(1.25f, 1.25f));
+            Debug.Assert(new AxisTransform2D(1.5625f, new Vector2DF(4.6875f, 68.75f)) == t);
+        }
     }
 }
