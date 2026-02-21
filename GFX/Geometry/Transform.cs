@@ -35,6 +35,9 @@ public struct Transform
 
     public Matrix44 EnsureFullMatrix()
     {
+        throw new NotImplementedException();
+        
+        /*
         if (!full_matrix_)
         {
             full_matrix_ = true;
@@ -42,20 +45,28 @@ public struct Transform
         }
         
         return matrix_;
+        */
     }
 
     // Sets a value in the matrix at |row|, |col|. It forces full double precision 4x4 matrix.
     public void set_rc(int row, int col, double v)
     {
+        throw new NotImplementedException();
+
+        /*
 #if DEBUG
         Debug.Assert((uint)row <= 3u);
         Debug.Assert((uint)col <= 3u);
 #endif
         EnsureFullMatrix().set_rc(row, col, v);
+        */
     }
 
     public static Transform Compose(in DecomposedTransform decomp)
     {
+        throw new NotImplementedException();
+
+        /*
         Transform result = new();
 
         if (decomp.Perspective.X != 0)
@@ -80,5 +91,6 @@ public struct Transform
         result.Scale3D(decomp.Scale.X, decomp.Scale.Y, decomp.Scale.Z);
 
         return result;
+        */
     }
 }
