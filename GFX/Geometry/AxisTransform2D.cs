@@ -187,11 +187,11 @@ public struct AxisTransform2D
 
     public override readonly string ToString() => $"[{m_Scale}, {m_Translation}]";
     
+    public override readonly int GetHashCode() => HashCode.Combine(m_Scale, m_Translation);
+    
     public readonly bool Equals(AxisTransform2D other) => m_Scale == other.Scale && m_Translation == other.Translation;
 
     public override readonly bool Equals(object? obj) => obj is AxisTransform2D other && Equals(other);
-
-    public override readonly int GetHashCode() => HashCode.Combine(m_Scale, m_Translation);
 
     public static bool operator == (in AxisTransform2D left, in AxisTransform2D right) => left.Equals(right);
     public static bool operator != (in AxisTransform2D left, in AxisTransform2D right) => !left.Equals(right);
