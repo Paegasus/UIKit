@@ -99,6 +99,15 @@ public struct Matrix44
 
         IsScaleOrTranslation &&
         _c3r0 == 0 && _c3r1 == 0 && _c3r2 == 0 && _c3r3 == 1;
+    
+    // {-, -, 0, -}
+    // {-, -, 0, -}
+    // {0, 0, 1, 0}
+    // {-, -, 0, -}
+    public readonly bool IsFlat =>
+
+        _c2r0 == 0 && _c2r1 == 0 && _c2r2 == 1 && _c2r3 == 0 &&
+        _c0r2 == 0 && _c1r2 == 0 && _c3r2 == 0;
 
     public override readonly int GetHashCode()
     {
