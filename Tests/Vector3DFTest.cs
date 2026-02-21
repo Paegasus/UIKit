@@ -332,7 +332,20 @@ public static class Vector3DFTest
 
     public static void TestGetNormalized()
     {
-        
+        (bool, Vector3DF, Vector3DF)[] tests =
+        [
+            (false, new Vector3DF(0, 0, 0), new Vector3DF(0, 0, 0)),
+            (false, new Vector3DF(float.Epsilon, float.Epsilon, float.Epsilon), new Vector3DF(float.Epsilon, float.Epsilon, float.Epsilon)),
+            (true, new Vector3DF(1, 0, 0), new Vector3DF(1, 0, 0)),
+            (true, new Vector3DF(float.MaxValue, 0, 0), new Vector3DF(1, 0, 0))
+        ];
+
+        foreach(var (expected, v, normalized) in tests)
+        {
+            Vector3DF n;
+            Debug.Assert(expected == v.GetNormalized(out n));
+            Debug.Assert(normalized.ToString() == n.ToString());
+        }
     }
 
     public static void TestToString()
