@@ -77,7 +77,7 @@ public struct Matrix44
 
         _c0r0 == 1 && _c0r1 == 0 && _c0r2 == 0 && _c0r3 == 0 &&
         _c1r0 == 0 && _c1r1 == 1 && _c1r2 == 0 && _c1r3 == 0 &&
-        _c1r0 == 0 && _c2r1 == 0 && _c2r2 == 1 && _c2r3 == 0 &&
+        _c2r0 == 0 && _c2r1 == 0 && _c2r2 == 1 && _c2r3 == 0 &&
                                                   _c3r3 == 1;
 
     // Returns true if the matrix only contains scale or translate or is identity.
@@ -112,7 +112,7 @@ public struct Matrix44
 
     public readonly bool HasPerspective =>
     
-        _c0r3 != 0 && _c1r3 != 0 && _c2r3 != 0 && _c3r3 != 1;
+        _c0r3 != 0 || _c1r3 != 0 || _c2r3 != 0 || _c3r3 != 1;
 
     public readonly bool Is2DTransform => IsFlat && !HasPerspective;
 

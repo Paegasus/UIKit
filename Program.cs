@@ -30,6 +30,6 @@ public static class Program
         Debug.WriteLine($"matrix1 IsScale: {matrix.IsScale}");
         Debug.WriteLine($"matrix1 IsFlat: {matrix.IsFlat}");
         Debug.WriteLine($"matrix1 HasPerspective: {matrix.HasPerspective}");
-        Debug.WriteLine($"matrix1 Is2dTransform: {matrix.Is2DTransform}");
+        Debug.WriteLine($"matrix1 Is2DTransform: {matrix.Is2DTransform}");
     }
 }
