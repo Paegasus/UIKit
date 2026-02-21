@@ -135,6 +135,67 @@ public struct Matrix44
         _c3r3 = _c0r3 * dx + _c1r3 * dy + _c2r3 * dz + _c3r3;
     }
 
+    public void PostTranslate(double dx, double dy)
+    {
+        if (!HasPerspective)
+        {
+            _c3r0 += dx;
+            _c3r1 += dy;
+        }
+        else
+        {
+            if (dx != 0)
+            {
+                _c0r0 += _c0r3 * dx;
+                _c1r0 += _c1r3 * dx;
+                _c2r0 += _c2r3 * dx;
+                _c3r0 += _c3r3 * dx;
+            }
+            if (dy != 0)
+            {
+                _c0r1 += _c0r3 * dy;
+                _c1r1 += _c1r3 * dy;
+                _c2r1 += _c2r3 * dy;
+                _c3r1 += _c3r3 * dy;
+            }
+        }
+    }
+
+    public void PostTranslate3D(double dx, double dy, double dz)
+    {
+        if (dx == 0 && dy == 0 && dz == 0)
+            return;
+
+        if (!HasPerspective)
+        {
+            _c3r0 += dx;
+            _c3r1 += dy;
+            _c3r2 += dz;
+        }
+        else
+        {
+            _c0r0 += dx * _c0r3;
+            _c0r1 += dy * _c0r3;
+            _c0r2 += dz * _c0r3;
+            //_c0r3 += 0 * _c0r3;
+            
+            _c1r0 += dx * _c1r3;
+            _c1r1 += dy * _c1r3;
+            _c1r2 += dz * _c1r3;
+            //_c1r3 += 0 * _c1r3;
+
+            _c2r0 += dx * _c2r3;
+            _c2r1 += dy * _c2r3;
+            _c2r2 += dz * _c2r3;
+            //_c2r3 += 0 * _c2r3;
+            
+            _c3r0 += dx * _c3r3;
+            _c3r1 += dy * _c3r3;
+            _c3r2 += dz * _c3r3;
+            //_c3r3 += 0 * _c3r3;
+        }
+    }
+
     public override readonly int GetHashCode()
     {
         var span = MemoryMarshal.Cast<double, byte>(MemoryMarshal.CreateReadOnlySpan(ref Unsafe.AsRef(in _c0r0), 16));
