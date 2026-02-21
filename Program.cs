@@ -28,6 +28,12 @@ public static class Program
         Debug.WriteLine($"matrix1 IsIdentityOrTranslation: {matrix1.IsIdentityOrTranslation}");
         Debug.WriteLine($"matrix1 IsScaleOrTranslation: {matrix1.IsScaleOrTranslation}");
 
+        matrix1[0, 0] = 2;
+        matrix1[1, 1] = 3;
+        matrix1[2, 2] = 4;
+
+        Debug.WriteLine($"matrix1 IsScale: {matrix1.IsScale}");
+
         //Matrix44 matrix2 = new ();
 
         //Debug.WriteLine($"matrix1 == matrix2: {matrix1 == matrix2}");

@@ -90,6 +90,16 @@ public struct Matrix44
         _c1r2 == 0 && _c1r3 == 0 && _c2r0 == 0 && _c2r1 == 0 &&
         _c2r3 == 0 && _c3r3 == 1;
     
+    // Returns true if the matrix only contains scale or is identity.
+    // {-, 0, 0, 0}
+    // {0, -, 0, 0}
+    // {0, 0, -, 0}
+    // {0, 0, 0, 1}
+    public readonly bool IsScale =>
+
+        IsScaleOrTranslation &&
+        _c3r0 == 0 && _c3r1 == 0 && _c3r2 == 0 && _c3r3 == 1;
+
     public override readonly int GetHashCode()
     {
         var span = MemoryMarshal.Cast<double, byte>(MemoryMarshal.CreateReadOnlySpan(ref Unsafe.AsRef(in _c0r0), 16));
