@@ -10,6 +10,10 @@ public static class AxisTransform2DTest
         TestMapping();
         TestScaling();
         TestTranslating();
+        TestConcat();
+        TestInverse();
+        TestClampOutput();
+        TestDecompose();
 
         Debug.WriteLine("All AxisTransform2D tests passed!");
     }
@@ -50,6 +54,57 @@ public static class AxisTransform2DTest
     }
 
     private static void TestTranslating()
+    {
+        Vector2DF tr = new(3.0f, -5.0f);
+        {
+            AxisTransform2D t = new(1.25f, new Vector2DF(3.75f, 55.0f));
+            Debug.Assert(new AxisTransform2D(1.25f, new Vector2DF(7.5f, 48.75f)) == AxisTransform2D.PreTranslateAxisTransform2D(t, tr));
+            t.PreTranslate(tr);
+            Debug.Assert(new AxisTransform2D(1.25f, new Vector2DF(7.5f, 48.75f)) == t);
+        }
+
+        {
+            AxisTransform2D t = new(1.25f, new Vector2DF(3.75f, 55.0f));
+            Debug.Assert(new AxisTransform2D(1.25f, new Vector2DF(6.75f, 50.0f)) == AxisTransform2D.PostTranslateAxisTransform2D(t, tr));
+            t.PostTranslate(tr);
+            Debug.Assert(new AxisTransform2D(1.25f, new Vector2DF(6.75f, 50.0f)) == t);
+        }
+    }
+
+    private static void TestConcat()
+    {
+        AxisTransform2D pre = new(1.25f, new Vector2DF(3.75f, 55.0f));
+        AxisTransform2D post = new(0.5f, new Vector2DF(10.0f, 5.0f));
+        AxisTransform2D expectation = new(0.625f, new Vector2DF(11.875f, 32.5f));
+        Debug.Assert(expectation == AxisTransform2D.ConcatAxisTransform2D(post, pre));
+
+        AxisTransform2D post_concat = pre;
+        post_concat.PostConcat(post);
+        Debug.Assert(expectation == post_concat);
+
+        AxisTransform2D pre_concat = post;
+        pre_concat.PreConcat(pre);
+        Debug.Assert(expectation == pre_concat);
+    }
+
+    private static void TestInverse()
+    {
+        AxisTransform2D t = new(1.25f, new Vector2DF(3.75f, 55.0f));
+        AxisTransform2D inv_inplace = t;
+        inv_inplace.Invert();
+        AxisTransform2D inv_out_of_place = AxisTransform2D.InvertAxisTransform2D(t);
+
+        Debug.Assert(inv_inplace == inv_out_of_place);
+        Debug.Assert(new AxisTransform2D() == AxisTransform2D.ConcatAxisTransform2D(t, inv_inplace));
+        Debug.Assert(new AxisTransform2D() == AxisTransform2D.ConcatAxisTransform2D(inv_inplace, t));
+    }
+
+    private static void TestClampOutput()
+    {
+        
+    }
+
+    private static void TestDecompose()
     {
         
     }
