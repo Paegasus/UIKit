@@ -29,16 +29,16 @@ public struct DecomposedTransform
 
 // We need these vector structs because doing double[] instead would lead to heap allocations.
 
-public readonly struct Vector3D
+public struct Vector3D
 {
-    public readonly double X, Y, Z;
+    public double X, Y, Z;
 
     public Vector3D(double x, double y, double z) => (X, Y, Z) = (x, y, z);
 }
 
-public readonly struct Vector4D
+public struct Vector4D
 {
-    public readonly double X, Y, Z, W;
+    public double X, Y, Z, W;
 
     public Vector4D(double x, double y, double z, double w) => (X, Y, Z, W) = (x, y, z, w);
 }
