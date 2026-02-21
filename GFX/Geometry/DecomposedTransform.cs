@@ -1,5 +1,3 @@
-using System.Dynamic;
-
 namespace UI.GFX.Geometry;
 
 // Contains the components of a factored transform.
@@ -65,9 +63,9 @@ public struct DecomposedTransform
       return $"translate: {Translate.X} {Translate.Y} {Translate.Z}\nscale: {Scale.X} {Scale.Y} {Scale.Z}\nskew: {Skew.X} {Skew.Y} {Skew.Z}\nperspective: {Perspective.X} {Perspective.Y} {Perspective.Z} {Perspective.W}\nquaternion: {Quaternion.X} {Quaternion.Y} {Quaternion.Z} {Quaternion.W}\n";
     }
 
-    //public override readonly int GetHashCode() => HashCode.Combine(m_Scale, m_Translation);
+    public override readonly int GetHashCode() => HashCode.Combine(Translate, Scale, Skew, Perspective, Quaternion);
     
-    public readonly bool Equals(DecomposedTransform other) => Translate == other.Translate;
+    public readonly bool Equals(DecomposedTransform other) => Translate == other.Translate && Scale == other.Scale && Skew == other.Skew && Perspective == other.Perspective && Quaternion == other.Quaternion;
 
     public override readonly bool Equals(object? obj) => obj is DecomposedTransform other && Equals(other);
 

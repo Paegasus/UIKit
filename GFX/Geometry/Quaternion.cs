@@ -197,4 +197,13 @@ public struct Quaternion
         v.Scale(scale);
         return $"[{X} {Y} {Z} {W}], v:{v}, θ:{abs_theta / MathF.PI}π";
     }
+
+    public override readonly int GetHashCode() => HashCode.Combine(X, Y, Z, W);
+    
+    public readonly bool Equals(Quaternion other) => X == other.X && Y == other.Y && Z == other.Z && W == other.W;
+
+    public override readonly bool Equals(object? obj) => obj is Quaternion other && Equals(other);
+
+    public static bool operator == (in Quaternion left, in Quaternion right) => left.Equals(right);
+    public static bool operator != (in Quaternion left, in Quaternion right) => !left.Equals(right);
 }
