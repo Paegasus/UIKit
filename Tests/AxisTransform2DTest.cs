@@ -9,6 +9,7 @@ public static class AxisTransform2DTest
     {
         TestMapping();
         TestScaling();
+        TestTranslating();
 
         Debug.WriteLine("All AxisTransform2D tests passed!");
     }
@@ -18,7 +19,7 @@ public static class AxisTransform2DTest
     private static bool FloatNear(float val1, float val2, float abs_error) => MathF.Abs(val1 - val2) <= abs_error;
 
 
-    public static void TestMapping()
+    private static void TestMapping()
     {
         AxisTransform2D t = new(1.25f, new Vector2DF(3.75f, 55.0f));
 
@@ -31,7 +32,7 @@ public static class AxisTransform2DTest
         Debug.Assert(new RectF(117.0f, 36.0f, 18.0f, 30.0f) == t.InverseMapRect(r));
     }
 
-    public static void TestScaling()
+    private static void TestScaling()
     {
         {
             AxisTransform2D t = new(1.25f, new Vector2DF(3.75f, 55.0f));
@@ -46,5 +47,10 @@ public static class AxisTransform2DTest
             t.PostScale(new Vector2DF(1.25f, 1.25f));
             Debug.Assert(new AxisTransform2D(1.5625f, new Vector2DF(4.6875f, 68.75f)) == t);
         }
+    }
+
+    private static void TestTranslating()
+    {
+        
     }
 }

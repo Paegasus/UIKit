@@ -25,14 +25,14 @@ public static class Vector2DFTest
 
     private static bool FloatNear(float val1, float val2, float abs_error) => MathF.Abs(val1 - val2) <= abs_error;
 
-    public static void TestVector2DToVector2DF()
+    private static void TestVector2DToVector2DF()
     {
         Vector2D i = new(3, 4);
         Vector2DF f = i;
         Debug.Assert(i == f);
     }
 
-    public static void TestIsZero()
+    private static void TestIsZero()
     {
         Debug.Assert(new Vector2DF().IsZero());
         Debug.Assert(new Vector2DF(0, 0).IsZero());
@@ -41,7 +41,7 @@ public static class Vector2DFTest
         Debug.Assert(!new Vector2DF(0.1f, -0.1f).IsZero());
     }
 
-    public static void TestAdd()
+    private static void TestAdd()
     {
         Vector2DF f1 = new(3.1f, 5.1f);
         Vector2DF f2 = new(4.3f, -1.3f);
@@ -50,7 +50,7 @@ public static class Vector2DFTest
         Debug.Assert(new Vector2DF(3.1f - 4.3f, 5.1f + 1.3f) == f1 - f2);
     }
 
-    public static void TestNegative()
+    private static void TestNegative()
     {
         Debug.Assert(new Vector2DF() == -new Vector2DF());
         Debug.Assert(new Vector2DF(-0.3f, -0.3f) == -new Vector2DF(0.3f, 0.3f));
@@ -59,7 +59,7 @@ public static class Vector2DFTest
         Debug.Assert(new Vector2DF(0.3f, -0.3f) == -new Vector2DF(-0.3f, 0.3f));
     }
 
-    public static void TestScale()
+    private static void TestScale()
     {
         (float, float, float, float)[] double_values =
         [
@@ -102,7 +102,7 @@ public static class Vector2DFTest
         }
     }
 
-    public static void SetToMinMax()
+    private static void SetToMinMax()
     {
         Vector2DF a;
 
@@ -129,7 +129,7 @@ public static class Vector2DFTest
         Debug.Assert(new Vector2DF(3.5f, 5.5f) == a);
     }
 
-    public static void TestLength()
+    private static void TestLength()
     {
         Debug.Assert(FloatEqual(0.0f, new Vector2DF(0, 0).Length()));
         Debug.Assert(FloatEqual(1.0f, new Vector2DF(1, 0).Length()));
@@ -152,7 +152,7 @@ public static class Vector2DFTest
         Debug.Assert(float.PositiveInfinity == new Vector2DF(float.MaxValue, float.MaxValue).Length());
     }
 
-    public static void TestSlopeAngleRadians()
+    private static void TestSlopeAngleRadians()
     {
         // The function is required to be very accurate, so we use a smaller tolerance than EXPECT_FLOAT_EQ().
         float kTolerance = 1e-7f;
@@ -166,7 +166,7 @@ public static class Vector2DFTest
         FloatNear(-kPi / 4, new Vector2DF(1, -1).SlopeAngleRadians(), kTolerance);
     }
 
-    public static void TestTranspose()
+    private static void TestTranspose()
     {
         Vector2DF v = new(-1.5f, 2.5f);
         Debug.Assert(new Vector2DF(2.5f, -1.5f) == Vector2DF.TransposeVector2D(v));
@@ -174,7 +174,7 @@ public static class Vector2DFTest
         Debug.Assert(new Vector2DF(2.5f, -1.5f) == v);
     }
 
-    public static void TestToString()
+    private static void TestToString()
     {
         Debug.Assert("[1 2]" == new Vector2DF(1f, 2f).ToString());
         Debug.Assert("[1.03125 2.5]" == new Vector2DF(1.03125f, 2.5f).ToString());

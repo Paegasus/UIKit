@@ -48,7 +48,7 @@ public static class LayoutUnitTest
 
     private static bool FloatNear(float val1, float val2, float abs_error) => MathF.Abs(val1 - val2) <= abs_error;
 
-    public static void TestInt()
+    private static void TestInt()
     {
         Debug.Assert(IntegerMin == new LayoutUnit(int.MinValue).ToInteger());
         Debug.Assert(IntegerMin == new LayoutUnit(int.MinValue / 2).ToInteger());
@@ -88,7 +88,7 @@ public static class LayoutUnitTest
         Debug.Assert((IntegerMin + 100) * (1 << FractionalBits) == new LayoutUnit(IntegerMin + 100).RawValue());
     }
 
-    public static void TestUnsigned()
+    private static void TestUnsigned()
     {
         // Test the raw unsaturated value
         Debug.Assert(0 == new LayoutUnit((uint)0).RawValue());
@@ -99,7 +99,7 @@ public static class LayoutUnitTest
         Debug.Assert((IntegerMax - 100) << FractionalBits == new LayoutUnit(kNotOverflowed).RawValue());
     }
 
-    public static void TestInt64()
+    private static void TestInt64()
     {
         const int raw_min = int.MinValue;
         const int raw_max = int.MaxValue;
@@ -109,7 +109,7 @@ public static class LayoutUnitTest
         Debug.Assert(new LayoutUnit((long)raw_max + 100) == MaxValue);
     }
 
-    public static void TestFloat()
+    private static void TestFloat()
     {
         const float Tolerance = 1.0f / FixedPointDenominator;
 
@@ -136,7 +136,7 @@ public static class LayoutUnitTest
         Debug.Assert(new LayoutUnit() == Clamp(float.NaN));
     }
 
-    public static void TestFromFloatCeil()
+    private static void TestFromFloatCeil()
     {
         const float Tolerance = 1.0f / FixedPointDenominator;
 
@@ -154,7 +154,7 @@ public static class LayoutUnitTest
         Debug.Assert(new LayoutUnit() == FromFloatCeil(float.NaN));
     }
 
-    public static void TestFromFloatFloor()
+    private static void TestFromFloatFloor()
     {
         const float Tolerance = 1.0f / FixedPointDenominator;
 
@@ -172,7 +172,7 @@ public static class LayoutUnitTest
         Debug.Assert(new LayoutUnit() == FromFloatFloor(float.NaN));
     }
 
-    public static void TestFromFloatRound()
+    private static void TestFromFloatRound()
     {
         const float Tolerance = 1.0f / FixedPointDenominator;
 

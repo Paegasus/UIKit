@@ -18,7 +18,7 @@ public static class Vector2DTest
         Debug.WriteLine("All Vector2D tests passed!");
     }
 
-    public static void TestIsZero()
+    private static void TestIsZero()
     {
         Debug.Assert(new Vector2D().IsZero());
         Debug.Assert(new Vector2D(0, 0).IsZero());
@@ -27,7 +27,7 @@ public static class Vector2DTest
         Debug.Assert(!new Vector2D(1, -2).IsZero());
     }
 
-    public static void TestAdd()
+    private static void TestAdd()
     {
         Vector2D i1 = new(3, 5);
         Vector2D i2 = new(4, -1);
@@ -36,7 +36,7 @@ public static class Vector2DTest
         Debug.Assert(new Vector2D(3 - 4, 5 + 1) == i1 - i2);
     }
 
-    public static void TestNegative()
+    private static void TestNegative()
     {
         Debug.Assert(new Vector2D(0, 0) == -new Vector2D(0, 0));
         Debug.Assert(new Vector2D(-3, -3) == -new Vector2D(3, 3));
@@ -45,7 +45,7 @@ public static class Vector2DTest
         Debug.Assert(new Vector2D(3, -3) == -new Vector2D(-3, 3));
     }
 
-    public static void TestLength()
+    private static void TestLength()
     {
         (int X, int Y)[] values =
         [
@@ -67,7 +67,7 @@ public static class Vector2DTest
         }
     }
 
-    public static void TestSetToMinMax()
+    private static void TestSetToMinMax()
     {
         Vector2D a;
 
@@ -94,7 +94,7 @@ public static class Vector2DTest
         Debug.Assert(new Vector2D(3, 5) == a);
     }
 
-    public static void TestIntegerOverflow()
+    private static void TestIntegerOverflow()
     {
         int int_max = int.MaxValue;
         int int_min = int.MinValue;
@@ -143,7 +143,7 @@ public static class Vector2DTest
         Debug.Assert(test == max_vector);
     }
 
-    public static void TestTranspose()
+    private static void TestTranspose()
     {
         Vector2D v = new(1, -2);
         Debug.Assert(new Vector2D(-2, 1) == Vector2D.TransposeVector2D(v));

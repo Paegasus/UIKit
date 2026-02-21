@@ -29,7 +29,7 @@ public static class Vector3DFTest
 
     private static bool DoubleNear(double val1, double val2, double abs_error) => Math.Abs(val1 - val2) <= abs_error;
 
-    public static void TestIsZero()
+    private static void TestIsZero()
     {
         Vector3DF float_zero = new(0, 0, 0);
         Vector3DF float_nonzero = new(0.1f, -0.1f, 0.1f);
@@ -38,7 +38,7 @@ public static class Vector3DFTest
         Debug.Assert(!float_nonzero.IsZero());
     }
 
-    public static void TestAdd()
+    private static void TestAdd()
     {
         Vector3DF f1 = new(3.1f, 5.1f, 2.7f);
         Vector3DF f2 = new(4.3f, -1.3f, 8.1f);
@@ -56,7 +56,7 @@ public static class Vector3DFTest
         }
     }
 
-    public static void TestNegative()
+    private static void TestNegative()
     {
         (Vector3DF expected, Vector3DF actual)[] values =
         [
@@ -72,7 +72,7 @@ public static class Vector3DFTest
             Debug.Assert(expected.ToString() == actual.ToString());
     }
 
-    public static void TestScale()
+    private static void TestScale()
     {
         (float, float, float, float, float, float)[] triple_values =
         [
@@ -149,7 +149,7 @@ public static class Vector3DFTest
         }
     }
 
-    public static void TestLength()
+    private static void TestLength()
     {
         float kFloatTolerance = 1e-7f;
         double kDoubleTolerance = 1e-15;
@@ -192,7 +192,7 @@ public static class Vector3DFTest
         }
     }
 
-    public static void TestDotProduct()
+    private static void TestDotProduct()
     {
         (float, Vector3DF, Vector3DF)[] tests =
         [
@@ -215,7 +215,7 @@ public static class Vector3DFTest
         }
     }
 
-    public static void TestCrossProduct()
+    private static void TestCrossProduct()
     {
         (Vector3DF, Vector3DF, Vector3DF)[] tests =
         [
@@ -240,7 +240,7 @@ public static class Vector3DFTest
         }
     }
 
-    public static void TestClampVector3dF()
+    private static void TestClampVector3dF()
     {
         Vector3DF a;
 
@@ -273,7 +273,7 @@ public static class Vector3DFTest
         Debug.Assert(new Vector3DF(3.5f, 5.5f, 7.5f).ToString() == a.ToString());
     }
 
-    public static void TestAngleBetweenVectorsInDegress()
+    private static void TestAngleBetweenVectorsInDegress()
     {
         float kTolerance = 1e-7f;
 
@@ -300,7 +300,7 @@ public static class Vector3DFTest
         }
     }
 
-    public static void TestClockwiseAngleBetweenVectorsInDegress()
+    private static void TestClockwiseAngleBetweenVectorsInDegress()
     {
         float kTolerance = 1e-7f;
 
@@ -330,7 +330,7 @@ public static class Vector3DFTest
         }
     }
 
-    public static void TestGetNormalized()
+    private static void TestGetNormalized()
     {
         (bool, Vector3DF, Vector3DF)[] tests =
         [
@@ -348,7 +348,7 @@ public static class Vector3DFTest
         }
     }
 
-    public static void TestToString()
+    private static void TestToString()
     {
         Debug.Assert("[1.03125 2.5 -3]" == new Vector3DF(1.03125f, 2.5f, -3f).ToString());
     }
