@@ -19,9 +19,29 @@ namespace UI.GFX.Geometry;
 //
 public struct Transform
 {
+    // axis_2d_ is used if full_matrix_ is false, otherwise matrix_ is used.
+    // See the class documentation for more details about how we use them.
+    private bool full_matrix_ = false;
+
+    // Each constructor must explicitly initialize one of the following,
+    // according to the value of full_matrix_.
+    AxisTransform2D axis_2d_;
+    Matrix44 matrix_;
+
     public Transform()
     {
         
+    }
+
+    public Matrix44 EnsureFullMatrix()
+    {
+        if (!full_matrix_)
+        {
+            full_matrix_ = true;
+            matrix_ = AxisTransform2dToMatrix44(axis_2d_);
+        }
+        
+        return matrix_;
     }
 
     // Sets a value in the matrix at |row|, |col|. It forces full double precision 4x4 matrix.
