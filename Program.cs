@@ -13,5 +13,6 @@ public static class Program
         Vector2DTest.Run();
         Vector2DFTest.Run();
         Vector3DFTest.Run();
+        AxisTransform2DTest.Run();
     }
 }
