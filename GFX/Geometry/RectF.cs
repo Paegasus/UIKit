@@ -27,6 +27,10 @@ public struct RectF : IEquatable<RectF>
     public float Width { readonly get => m_Size.Width; set => m_Size.Width = value; }
     public float Height { readonly get => m_Size.Height; set => m_Size.Height = value; }
 
+    public PointF Origin { readonly get => m_Origin; set => m_Origin = value; }
+
+    public  SizeF Size { readonly get => m_Size; set => m_Size = value; }
+
     public readonly float Right => X + Width;
     public readonly float Bottom => Y + Height;
 

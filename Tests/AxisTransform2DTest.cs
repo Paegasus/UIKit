@@ -101,7 +101,42 @@ public static class AxisTransform2DTest
 
     private static void TestClampOutput()
     {
-        
+        (float, float)[] entries =
+        [
+            // The first entry is used to initialize the transform.
+            // The second entry is used to initialize the object to be mapped.
+            (float.MaxValue, float.PositiveInfinity),
+            (1, float.PositiveInfinity),
+            (-1, float.PositiveInfinity),
+            (1, float.NegativeInfinity),
+            (float.MaxValue, float.MaxValue),
+            (float.MinValue, float.NegativeInfinity)
+        ];
+
+        foreach(var (mv, factor) in entries)
+        {
+            bool is_valid_point (in PointF p) => float.IsFinite(p.X) && float.IsFinite(p.Y);
+
+            bool is_valid_rect (in RectF r) => is_valid_point(r.Origin) && float.IsFinite(r.Width) && float.IsFinite(r.Height);
+
+            void test(in AxisTransform2D m)
+            {
+                //Debug.WriteLine($"m: {m} factor: {factor}");
+                PointF p = m.MapPoint(new PointF(factor, factor));
+                Debug.Assert(is_valid_point(p));
+
+                // AxisTransform2d::MapRect() requires non-negative scales.
+                if (m.Scale.X >= 0 && m.Scale.Y >= 0)
+                {
+                    RectF r = m.MapRect(new RectF(factor, factor, factor, factor));
+                    Debug.Assert(is_valid_rect(r));
+                }
+            }
+
+            test(AxisTransform2D.FromScaleAndTranslation(new Vector2DF(mv, mv), new Vector2DF(mv, mv)));
+            test(AxisTransform2D.FromScaleAndTranslation(new Vector2DF(mv, mv), new Vector2DF(0, 0)));
+            test(AxisTransform2D.FromScaleAndTranslation(new Vector2DF(1, 1), new Vector2DF(mv, mv)));
+        }
     }
 
     private static void TestDecompose()
