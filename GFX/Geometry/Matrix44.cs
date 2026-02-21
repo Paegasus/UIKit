@@ -116,6 +116,25 @@ public struct Matrix44
 
     public readonly bool Is2DTransform => IsFlat && !HasPerspective;
 
+    public void PreTranslate(double dx, double dy)
+    {
+        _c3r0 = _c0r0 * dx + _c1r0 * dy + _c3r0;
+        _c3r1 = _c0r1 * dx + _c1r1 * dy + _c3r1;
+        _c3r2 = _c0r2 * dx + _c1r2 * dy + _c3r2;
+        _c3r3 = _c0r3 * dx + _c1r3 * dy + _c3r3;
+    }
+
+    public void PreTranslate3D(double dx, double dy, double dz)
+    {
+        if(dx == 0 && dy == 0 && dz == 0)
+            return;
+
+        _c3r0 = _c0r0 * dx + _c1r0 * dy + _c2r0 * dz + _c3r0;
+        _c3r1 = _c0r1 * dx + _c1r1 * dy + _c2r1 * dz + _c3r1;
+        _c3r2 = _c0r2 * dx + _c1r2 * dy + _c2r2 * dz + _c3r2;
+        _c3r3 = _c0r3 * dx + _c1r3 * dy + _c2r3 * dz + _c3r3;
+    }
+
     public override readonly int GetHashCode()
     {
         var span = MemoryMarshal.Cast<double, byte>(MemoryMarshal.CreateReadOnlySpan(ref Unsafe.AsRef(in _c0r0), 16));
