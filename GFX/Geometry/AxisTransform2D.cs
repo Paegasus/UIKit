@@ -22,6 +22,9 @@ public struct AxisTransform2D
     Vector2DF scale_;
     Vector2DF translation_;
 
+    public readonly Vector2DF Scale => scale_;
+    public readonly Vector2DF Translation => translation_;
+
     public AxisTransform2D()
     {
         scale_ = new(1.0f, 1.0f);
@@ -37,25 +40,82 @@ public struct AxisTransform2D
 
     public static AxisTransform2D FromScaleAndTranslation(in Vector2DF scale, in Vector2DF translation) => new(scale, translation);
 
-    private readonly float MapX(float x)
+    private readonly float MapX(float x) => ClampFloatGeometry(x * scale_.X + translation_.X);
+
+    private readonly float MapY(float y) => ClampFloatGeometry(y * scale_.Y + translation_.Y);
+
+    // |* (1.0f / scale)| instead of '/ scale' to keep the same precision before crrev.com/c/3937107.
+    private readonly float InverseMapX(float x) => ClampFloatGeometry((x - translation_.X) * (1.0f / scale_.X));
+
+    // |* (1.0f / scale)| instead of '/ scale' to keep the same precision before crrev.com/c/3937107.
+    private readonly float InverseMapY(float y) => ClampFloatGeometry((y - translation_.Y) * (1.0f / scale_.Y));
+
+    public void PreScale(in Vector2DF scale) => scale_.Scale(scale.X, scale.Y);
+
+    public void PostScale(in Vector2DF scale)
     {
-        return ClampFloatGeometry(x * scale_.X + translation_.X);
+        scale_.Scale(scale.X, scale.Y);
+        translation_.Scale(scale.X, scale.Y);
     }
-    private readonly float MapY(float y)
+
+    public void PreTranslate(in Vector2DF translation) => translation_ += Vector2DF.ScaleVector2D(translation, scale_.X, scale_.Y);
+
+    public void PostTranslate(in Vector2DF translation) => translation_ += translation;
+
+    public void PreConcat(in AxisTransform2D pre)
     {
-        return ClampFloatGeometry(y * scale_.Y + translation_.Y);
+        PreTranslate(pre.translation_);
+        PreScale(pre.scale_);
     }
-    private readonly float InverseMapX(float x)
+    public void PostConcat(in AxisTransform2D post)
     {
-        // |* (1.f / scale)| instead of '/ scale' to keep the same precision
-        // before crrev.com/c/3937107.
-        return ClampFloatGeometry((x - translation_.X) * (1.0f / scale_.X));
+        PostScale(post.scale_);
+        PostTranslate(post.translation_);
     }
-    private readonly float InverseMapY(float y)
+
+    public readonly double Determinant() => (double)scale_.X * scale_.Y;
+
+    // Check float determinant (stricter than checking each component or double
+    // determinant) to keep consistency with Matrix44.
+    // TODO(crbug.com/40237414): This may be stricter than necessary. Revisit
+    // this after combination of gfx::Transform and blink::TransformationMatrix.
+    public readonly bool IsInvertible() => float.IsNormal(scale_.X * scale_.Y);
+
+    public void Invert()
     {
-        // |* (1.f / scale)| instead of '/ scale' to keep the same precision
-        // before crrev.com/c/3937107.
-        return ClampFloatGeometry((y - translation_.Y) * (1.0f / scale_.Y));
+#if DEBUG
+        Debug.Assert(IsInvertible());
+#endif
+        scale_ = new Vector2DF(1.0f / scale_.X, 1.0f / scale_.Y);
+        translation_.Scale(-scale_.X, -scale_.Y);
+    }
+
+    // Changes the transform to: scale(z) * mat * scale(1/z).
+    // Useful for mapping zoomed points to their zoomed transformed result:
+    // new_mat * (scale(z) * x) == scale(z) * (mat * x).
+    public void Zoom(float zoom_factor) => translation_.Scale(zoom_factor);
+
+    public readonly PointF MapPoint(in PointF p) => new(MapX(p.X), MapY(p.Y));
+
+    public readonly PointF InverseMapPoint(in PointF p) => new(InverseMapX(p.X), InverseMapY(p.Y));
+
+    public readonly RectF MapRect(in RectF r)
+    {
+#if DEBUG
+        Debug.Assert(scale_.X >= 0.0f);
+        Debug.Assert(scale_.Y >= 0.0f);
+#endif
+        return new RectF(MapX(r.X), MapY(r.Y), ClampFloatGeometry(r.Width * scale_.X), ClampFloatGeometry(r.Height * scale_.Y));
+    }
+
+    public readonly RectF InverseMapRect(in RectF r)
+    {
+#if DEBUG
+        Debug.Assert(scale_.X > 0.0f);
+        Debug.Assert(scale_.Y > 0.0f);
+#endif
+        // |* (1.0f / scale)| instead of '/ scale' to keep the same precision before crrev.com/c/3937107.
+        return new RectF(InverseMapX(r.X), InverseMapY(r.Y), ClampFloatGeometry(r.Width * (1.0f / scale_.X)), ClampFloatGeometry(r.Height * (1.0f / scale_.Y)));
     }
 
     // Decomposes this transform into |decomp|, following the 2d decomposition
@@ -75,8 +135,7 @@ public struct AxisTransform2D
         }
         else
         {
-            // If both scales are negative,
-            // decompose to positive scales with a 180deg rotation.
+            // If both scales are negative, decompose to positive scales with a 180deg rotation.
             decomp.Scale.X = -scale_.X;
             decomp.Scale.Y = -scale_.Y;
             decomp.Quaternion.Z = 1;
@@ -85,8 +144,47 @@ public struct AxisTransform2D
         return decomp;
     }
 
-    public override readonly string ToString()
+    public static AxisTransform2D PreScaleAxisTransform2D(in AxisTransform2D t, float scale)
     {
-        return $"[{scale_}, {translation_}]";
+        AxisTransform2D result = t;
+        result.PreScale(new Vector2DF(scale, scale));
+        return result;
     }
+
+    public static AxisTransform2D PostScaleAxisTransform2D(in AxisTransform2D t, float scale)
+    {
+        AxisTransform2D result = t;
+        result.PostScale(new Vector2DF(scale, scale));
+        return result;
+    }
+
+    public static AxisTransform2D PreTranslateAxisTransform2D(in AxisTransform2D t, in Vector2DF translation)
+    {
+        AxisTransform2D result = t;
+        result.PreTranslate(translation);
+        return result;
+    }
+
+    public static AxisTransform2D PostTranslateAxisTransform2D(in AxisTransform2D t, in Vector2DF translation)
+    {
+        AxisTransform2D result = t;
+        result.PostTranslate(translation);
+        return result;
+    }
+
+    public static AxisTransform2D ConcatAxisTransform2D(in AxisTransform2D post, in AxisTransform2D pre)
+    {
+        AxisTransform2D result = post;
+        result.PreConcat(pre);
+        return result;
+    }
+
+    public static AxisTransform2D InvertAxisTransform2D(in AxisTransform2D t)
+    {
+        AxisTransform2D result = t;
+        result.Invert();
+        return result;
+    }
+
+    public override readonly string ToString() => $"[{scale_}, {translation_}]";
 }
