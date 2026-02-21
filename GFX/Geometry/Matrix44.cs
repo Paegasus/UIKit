@@ -109,6 +109,10 @@ public struct Matrix44
         _c2r0 == 0 && _c2r1 == 0 && _c2r2 == 1 && _c2r3 == 0 &&
         _c0r2 == 0 && _c1r2 == 0 && _c3r2 == 0;
 
+    public readonly bool HasPerspective =>
+    
+        _c0r3 != 0 && _c1r3 != 0 && _c2r3 != 0 && _c3r3 != 1;
+
     public override readonly int GetHashCode()
     {
         var span = MemoryMarshal.Cast<double, byte>(MemoryMarshal.CreateReadOnlySpan(ref Unsafe.AsRef(in _c0r0), 16));

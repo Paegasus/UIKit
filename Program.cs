@@ -29,6 +29,7 @@ public static class Program
         Debug.WriteLine($"matrix1 IsScaleOrTranslation: {matrix1.IsScaleOrTranslation}");
         Debug.WriteLine($"matrix1 IsScale: {matrix1.IsScale}");
         Debug.WriteLine($"matrix1 IsFlat: {matrix1.IsFlat}");
+        Debug.WriteLine($"matrix1 HasPerspective: {matrix1.HasPerspective}");
 
         //Matrix44 matrix2 = new ();
 
