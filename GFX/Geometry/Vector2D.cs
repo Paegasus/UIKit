@@ -1,4 +1,3 @@
-using System.Numerics;
 using static UI.Numerics.ClampedMath;
 
 namespace UI.GFX.Geometry;
