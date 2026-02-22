@@ -452,6 +452,28 @@ public struct Matrix44
         _c1r3 += _c0r3 * tan_skew_x;
     }
 
+    //               |1 skew[0] skew[1] 0|
+    // this = this * |0    1    skew[2] 0|
+    //               |0    0      1     0|
+    //               |0    0      0     1|
+    public void ApplyDecomposedSkews(ReadOnlySpan<double> skews)
+    {
+        //                  / |1 0 0  0|   |1 0 s1 0|   |1 s0 0 0|   |1 s0 s1 0| \
+        // |c0 c1 c2 c3| * |  |0 1 s2 0| * |0 1  0 0| * |0  1 0 0| = |0  1 s2 0|  |
+        //                 |  |0 0 1  0|   |0 0  1 0|   |0  0 1 0|   |0  0  1 0|  |
+        //                  \ |0 0 0  1|   |0 0  0 1|   |0  0 0 1|   |0  0  0 1| /
+
+        _c1r0 = _c1r0 + _c0r0 * skews[0];
+        _c1r1 = _c1r1 + _c0r1 * skews[0];
+        _c1r2 = _c1r2 + _c0r2 * skews[0];
+        _c1r3 = _c1r3 + _c0r3 * skews[0];
+
+        _c2r0 = _c0r0 * skews[1] + _c1r0 * skews[2] + _c2r0;
+        _c2r1 = _c0r1 * skews[1] + _c1r1 * skews[2] + _c2r1;
+        _c2r2 = _c0r2 * skews[1] + _c1r2 * skews[2] + _c2r2;
+        _c2r3 = _c0r3 * skews[1] + _c1r3 * skews[2] + _c2r3;
+    }
+
     public override readonly int GetHashCode()
     {
         var span = MemoryMarshal.Cast<double, byte>(MemoryMarshal.CreateReadOnlySpan(ref Unsafe.AsRef(in _c0r0), 16));
