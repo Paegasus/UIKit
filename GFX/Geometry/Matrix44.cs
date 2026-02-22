@@ -188,11 +188,63 @@ public struct Matrix44
             _c2r1 += dy * _c2r3;
             _c2r2 += dz * _c2r3;
             //_c2r3 += 0 * _c2r3;
-            
+
             _c3r0 += dx * _c3r3;
             _c3r1 += dy * _c3r3;
             _c3r2 += dz * _c3r3;
             //_c3r3 += 0 * _c3r3;
+        }
+    }
+
+    public void PreScale(double sx, double sy)
+    {
+        _c0r0 *= sx;
+        _c0r1 *= sx;
+        _c0r2 *= sx;
+        _c0r3 *= sx;
+
+        _c1r0 *= sy;
+        _c1r1 *= sy;
+        _c1r2 *= sy;
+        _c1r3 *= sy;
+    }
+
+    public void PreScale3D(double sx, double sy, double sz)
+    {
+        if (sx == 1 && sy == 1 && sz == 1)
+            return;
+        
+        _c0r0 *= sx;
+        _c0r1 *= sx;
+        _c0r2 *= sx;
+        _c0r3 *= sx;
+
+        _c1r0 *= sy;
+        _c1r1 *= sy;
+        _c1r2 *= sy;
+        _c1r3 *= sy;
+
+        _c2r0 *= sz;
+        _c2r1 *= sz;
+        _c2r2 *= sz;
+        _c2r3 *= sz;
+    }
+
+    public void PostScale(double sx, double sy)
+    {
+        if (sx != 1)
+        {
+            _c0r0 *= sx;
+            _c1r0 *= sx;
+            _c2r0 *= sx;
+            _c3r0 *= sx;
+        }
+        if (sy != 1)
+        {
+            _c0r1 *= sy;
+            _c1r1 *= sy;
+            _c2r1 *= sy;
+            _c3r1 *= sy;
         }
     }
 
