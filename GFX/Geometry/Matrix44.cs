@@ -499,6 +499,80 @@ public struct Matrix44
         return float.IsNormal((float)Determinant());
     }
 
+    // Based on:
+    // https://github.com/niswegmann/small-matrix-inverse/blob/master/invert4x4_llvm.h
+    // which is based on Intel AP-928 "Streaming SIMD Extensions - Inverse of 4x4 Matrix"
+    private static bool InverseWithDouble4Cols(ref Double4 c0, ref Double4 c1, ref Double4 c2, ref Double4 c3)
+    {
+        // Note that r1 and r3 have components 2/3 and 0/1 swapped.
+        var r0 = new Double4(c0.V0, c1.V0, c2.V0, c3.V0);
+        var r1 = new Double4(c2.V1, c3.V1, c0.V1, c1.V1);
+        var r2 = new Double4(c0.V2, c1.V2, c2.V2, c3.V2);
+        var r3 = new Double4(c2.V3, c3.V3, c0.V3, c1.V3);
+
+        var t = Double4.SwapInPairs(r2 * r3);
+        c0 = r1 * t;
+        c1 = r0 * t;
+
+        t = Double4.SwapHighLow(t);
+        c0 = r1 * t - c0;
+        c1 = Double4.SwapHighLow(r0 * t - c1);
+
+        t = Double4.SwapInPairs(r1 * r2);
+        c0 += r3 * t;
+        c3 = r0 * t;
+
+        t = Double4.SwapHighLow(t);
+        c0 -= r3 * t;
+        c3 = Double4.SwapHighLow(r0 * t - c3);
+
+        t = Double4.SwapInPairs(Double4.SwapHighLow(r1) * r3);
+        r2 = Double4.SwapHighLow(r2);
+        c0 += r2 * t;
+        c2 = r0 * t;
+
+        t = Double4.SwapHighLow(t);
+        c0 -= r2 * t;
+
+        double det = Double4.Sum(r0 * c0);
+
+        if (!float.IsNormal((float)det))
+            return false;
+
+        c2 = Double4.SwapHighLow(r0 * t - c2);
+
+        t = Double4.SwapInPairs(r0 * r1);
+        c2 = r3 * t + c2;
+        c3 = r2 * t - c3;
+
+        t = Double4.SwapHighLow(t);
+        c2 = r3 * t - c2;
+        c3 -= r2 * t;
+
+        t = Double4.SwapInPairs(r0 * r3);
+        c1 -= r2 * t;
+        c2 = r1 * t + c2;
+
+        t = Double4.SwapHighLow(t);
+        c1 = r2 * t + c1;
+        c2 -= r1 * t;
+
+        t = Double4.SwapInPairs(r0 * r2);
+        c1 = r3 * t + c1;
+        c3 -= r1 * t;
+
+        t = Double4.SwapHighLow(t);
+        c1 -= r3 * t;
+        c3 = r1 * t + c3;
+
+        det = 1.0 / det;
+        c0 *= det;
+        c1 *= det;
+        c2 *= det;
+        c3 *= det;
+        return true;
+    }
+
     // Returns true and set |inverse| to the inverted matrix if this matrix
     // is invertible. Otherwise return false and leave the |inverse| parameter unchanged.
     public readonly bool GetInverse(out Matrix44 result)
@@ -527,8 +601,13 @@ public struct Matrix44
                       1);  // col 3
             return true;
         }
-        
-        if(!InverseWithDouble4Cols(Col(0), Col(1), Col(2), Col(3)))
+
+        Double4 c0 = new Double4(_c0r0, _c0r1, _c0r2, _c0r3);
+        Double4 c1 = new Double4(_c0r0, _c0r1, _c0r2, _c0r3);
+        Double4 c2 = new Double4(_c0r0, _c0r1, _c0r2, _c0r3);
+        Double4 c3 = new Double4(_c0r0, _c0r1, _c0r2, _c0r3);
+
+        if(!InverseWithDouble4Cols(ref c0, ref c1, ref c2, ref c3))
             return false;
         
         result._c0r0 = _c0r0;
