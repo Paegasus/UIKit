@@ -79,6 +79,8 @@ public struct Vector3D
 {
     public double X, Y, Z;
 
+    public Vector3D() => (X, Y, Z) = (0, 0, 0);
+
     public Vector3D(double x, double y, double z) => (X, Y, Z) = (x, y, z);
 
     public void Set(double x, double y, double z) => (X, Y, Z) = (x, y, z);
@@ -96,6 +98,8 @@ public struct Vector3D
 public struct Vector4D
 {
     public double X, Y, Z, W;
+
+    public Vector4D() => (X, Y, Z, W) = (0, 0, 0, 0);
 
     public Vector4D(double x, double y, double z, double w) => (X, Y, Z, W) = (x, y, z, w);
 

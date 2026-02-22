@@ -538,6 +538,157 @@ public struct Matrix44
         (_c2r3, _c3r2) = (_c3r2, _c2r3);
     }
 
+    // See Transform::Zoom().
+    public void Zoom(double zoom_factor)
+    {
+        _c0r3 /= zoom_factor;
+        _c1r3 /= zoom_factor;
+        _c2r3 /= zoom_factor;
+        _c3r0 *= zoom_factor;
+        _c3r1 *= zoom_factor;
+        _c3r2 *= zoom_factor;
+    }
+
+    // Same as above, but assumes the vec[2] is 0 and vec[3] is 1, discards
+    // vec[2], and returns vec[3].
+    public readonly double MapVector2(ReadOnlySpan<double> vec)
+    {
+        
+    }
+
+    // Applies the matrix to the vector in place.
+    public readonly void MapVector4(double[] vec)
+    {
+        
+    }
+
+    public void Flatten()
+    {
+        _c0r2 = 0;
+        _c1r2 = 0;
+        _c3r2 = 0;
+
+        _c2r0 = 0;
+        _c2r1 = 0;
+        _c2r2 = 1;
+        _c2r3 = 0;
+    }
+
+    // TODO(crbug.com/40237414): Consider letting this function always succeed.
+    public readonly DecomposedTransform Decompose2D()
+    {
+#if DEBUG
+        Debug.Assert(Is2DTransform);
+#endif
+        // https://www.w3.org/TR/css-transforms-1/#decomposing-a-2d-matrix.
+        // Decompose a 2D transformation matrix of the form:
+        // [m11 m21 0 m41]
+        // [m12 m22 0 m42]
+        // [ 0   0  1  0 ]
+        // [ 0   0  0  1 ]
+        //
+        // The decomposition is of the form:
+        // M = translate * rotate * skew * scale
+        //     [1 0 0 Tx] [cos(R) -sin(R) 0 0] [1 K 0 0] [Sx 0  0 0]
+        //   = [0 1 0 Ty] [sin(R)  cos(R) 0 0] [0 1 0 0] [0  Sy 0 0]
+        //     [0 0 1 0 ] [  0       0    1 0] [0 0 1 0] [0  0  1 0]
+        //     [0 0 0 1 ] [  0       0    0 1] [0 0 0 1] [0  0  0 1]
+
+        double m11 = matrix_[0][0];
+        double m21 = matrix_[1][0];
+        double m12 = matrix_[0][1];
+        double m22 = matrix_[1][1];
+
+        double determinant = m11 * m22 - m12 * m21;
+        // Test for matrix being singular.
+        if (determinant == 0)
+            return null;
+
+        DecomposedTransform decomp = new();
+
+        // Translation transform.
+        // [m11 m21 0 m41]    [1 0 0 Tx] [m11 m21 0 0]
+        // [m12 m22 0 m42]  = [0 1 0 Ty] [m12 m22 0 0]
+        // [ 0   0  1  0 ]    [0 0 1 0 ] [ 0   0  1 0]
+        // [ 0   0  0  1 ]    [0 0 0 1 ] [ 0   0  0 1]
+        decomp.Translate.X = matrix_[3][0];
+        decomp.Translate.Y = matrix_[3][1];
+
+        // For the remainder of the decomposition process, we can focus on the upper
+        // 2x2 submatrix
+        // [m11 m21] = [cos(R) -sin(R)] [1 K] [Sx 0 ]
+        // [m12 m22]   [sin(R)  cos(R)] [0 1] [0  Sy]
+        //           = [Sx*cos(R) Sy*(K*cos(R) - sin(R))]
+        //             [Sx*sin(R) Sy*(K*sin(R) + cos(R))]
+
+        // Determine sign of the x and y scale.
+        if (determinant < 0)
+        {
+            // If the determinant is negative, we need to flip either the x or y scale.
+            // Flipping both is equivalent to rotating by 180 degrees.
+            if (m11 < m22)
+            {
+                decomp.Scale.X *= -1;
+            }
+            else
+            {
+                decomp.Scale.Y *= -1;
+            }
+        }
+
+        // X Scale.
+        // m11^2 + m12^2 = Sx^2*(cos^2(R) + sin^2(R)) = Sx^2.
+        // Sx = +/-sqrt(m11^2 + m22^2)
+        decomp.Scale.X *= Math.Sqrt(m11 * m11 + m12 * m12);
+        m11 /= decomp.Scale.X;
+        m12 /= decomp.Scale.X;
+
+        // Post normalization, the submatrix is now of the form:
+        // [m11 m21] = [cos(R)  Sy*(K*cos(R) - sin(R))]
+        // [m12 m22]   [sin(R)  Sy*(K*sin(R) + cos(R))]
+
+        // XY Shear.
+        // m11 * m21 + m12 * m22 = Sy*K*cos^2(R) - Sy*sin(R)*cos(R) +
+        //                         Sy*K*sin^2(R) + Sy*cos(R)*sin(R)
+        //                       = Sy*K
+        double scaled_shear = m11 * m21 + m12 * m22;
+        m21 -= m11 * scaled_shear;
+        m22 -= m12 * scaled_shear;
+
+        // Post normalization, the submatrix is now of the form:
+        // [m11 m21] = [cos(R)  -Sy*sin(R)]
+        // [m12 m22]   [sin(R)   Sy*cos(R)]
+
+        // Y Scale.
+        // Similar process to determining x-scale.
+        decomp.Scale.Y *= Math.Sqrt(m21 * m21 + m22 * m22);
+        m21 /= decomp.Scale.Y;
+        m22 /= decomp.Scale.Y;
+        decomp.Skew.X = scaled_shear / decomp.Scale.Y;
+
+        // Rotation transform.
+        // [1-2(yy+zz)  2(xy-zw)    2(xz+yw) ]   [cos(R) -sin(R)  0]
+        // [2(xy+zw)   1-2(xx+zz)   2(yz-xw) ] = [sin(R)  cos(R)  0]
+        // [2(xz-yw)    2*(yz+xw)  1-2(xx+yy)]   [  0       0     1]
+        // Comparing terms, we can conclude that x = y = 0.
+        // [1-2zz   -2zw  0]   [cos(R) -sin(R)  0]
+        // [ 2zw   1-2zz  0] = [sin(R)  cos(R)  0]
+        // [  0     0     1]   [  0       0     1]
+        // cos(R) = 1 - 2*z^2
+        // From the double angle formula: cos(2a) = 1 - 2 sin(a)^2
+        // cos(R) = 1 - 2*sin(R/2)^2 = 1 - 2*z^2 ==> z = sin(R/2)
+        // sin(R) = 2*z*w
+        // But sin(2a) = 2 sin(a) cos(a)
+        // sin(R) = 2 sin(R/2) cos(R/2) = 2*z*w ==> w = cos(R/2)
+        double angle = Math.Atan2(m12, m11);
+        decomp.Quaternion.X = 0;
+        decomp.Quaternion.Y = 0;
+        decomp.Quaternion.Z = Math.Sin(0.5 * angle);
+        decomp.Quaternion.W = Math.Cos(0.5 * angle);
+
+        return decomp;
+    }
+
     // Based on:
     // https://github.com/niswegmann/small-matrix-inverse/blob/master/invert4x4_llvm.h
     // which is based on Intel AP-928 "Streaming SIMD Extensions - Inverse of 4x4 Matrix"
@@ -671,8 +822,6 @@ public struct Matrix44
 
         return true;
     }
-
-    
 
     public override readonly int GetHashCode()
     {
