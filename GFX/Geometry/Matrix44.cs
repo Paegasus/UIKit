@@ -177,22 +177,18 @@ public struct Matrix44
             _c0r0 += dx * _c0r3;
             _c0r1 += dy * _c0r3;
             _c0r2 += dz * _c0r3;
-            //_c0r3 += 0 * _c0r3;
             
             _c1r0 += dx * _c1r3;
             _c1r1 += dy * _c1r3;
             _c1r2 += dz * _c1r3;
-            //_c1r3 += 0 * _c1r3;
 
             _c2r0 += dx * _c2r3;
             _c2r1 += dy * _c2r3;
             _c2r2 += dz * _c2r3;
-            //_c2r3 += 0 * _c2r3;
 
             _c3r0 += dx * _c3r3;
             _c3r1 += dy * _c3r3;
             _c3r2 += dz * _c3r3;
-            //_c3r3 += 0 * _c3r3;
         }
     }
 
@@ -246,6 +242,106 @@ public struct Matrix44
             _c2r1 *= sy;
             _c3r1 *= sy;
         }
+    }
+
+    public void PostScale3D(double sx, double sy, double sz)
+    {
+        if (sx == 1 && sy == 1 && sz == 1)
+            return;
+        
+        _c0r0 *= sx;
+        _c0r1 *= sx;
+        _c0r2 *= sx;
+        _c0r3 *= sx;
+
+        _c1r0 *= sy;
+        _c1r1 *= sy;
+        _c1r2 *= sy;
+        _c1r3 *= sy;
+
+        _c2r0 *= sz;
+        _c2r1 *= sz;
+        _c2r2 *= sz;
+        _c2r3 *= sz;
+    }
+
+    public void RotateAboutXAxisSinCos(double sin_angle, double cos_angle)
+    {
+        _c1r0 = _c1r0 * cos_angle + _c2r0 * sin_angle;
+        _c1r1 = _c1r1 * cos_angle + _c2r1 * sin_angle;
+        _c1r2 = _c1r2 * cos_angle + _c2r2 * sin_angle;
+        _c1r3 = _c1r3 * cos_angle + _c2r3 * sin_angle;
+
+        _c2r0 = _c2r0 * cos_angle - _c1r0 * sin_angle;
+        _c2r1 = _c2r1 * cos_angle - _c1r1 * sin_angle;
+        _c2r2 = _c2r2 * cos_angle - _c1r2 * sin_angle;
+        _c2r3 = _c2r3 * cos_angle - _c1r3 * sin_angle;
+    }
+
+    public void RotateAboutYAxisSinCos(double sin_angle, double cos_angle)
+    {
+        _c0r0 = _c0r0 * cos_angle - _c2r0 * sin_angle;
+        _c0r1 = _c0r1 * cos_angle - _c2r1 * sin_angle;
+        _c0r2 = _c0r2 * cos_angle - _c2r2 * sin_angle;
+        _c0r3 = _c0r3 * cos_angle - _c2r3 * sin_angle;
+
+        _c2r0 = _c2r0 * cos_angle + _c0r0 * sin_angle;
+        _c2r1 = _c2r1 * cos_angle + _c0r1 * sin_angle;
+        _c2r2 = _c2r2 * cos_angle + _c0r2 * sin_angle;
+        _c2r3 = _c2r3 * cos_angle + _c0r3 * sin_angle;
+    }
+
+    public void RotateAboutZAxisSinCos(double sin_angle, double cos_angle)
+    {
+        _c0r0 = _c0r0 * cos_angle + _c1r0 * sin_angle;
+        _c0r1 = _c0r1 * cos_angle + _c1r1 * sin_angle;
+        _c0r2 = _c0r2 * cos_angle + _c1r2 * sin_angle;
+        _c0r3 = _c0r3 * cos_angle + _c1r3 * sin_angle;
+
+        _c1r0 = _c1r0 * cos_angle - _c0r0 * sin_angle;
+        _c1r1 = _c1r1 * cos_angle - _c0r1 * sin_angle;
+        _c1r2 = _c1r2 * cos_angle - _c0r2 * sin_angle;
+        _c1r3 = _c1r3 * cos_angle - _c0r3 * sin_angle;
+    }
+
+    void RotateUnitSinCos(double x, double y, double z, double sin_angle, double cos_angle)
+    {
+        // Optimize cases where the axis is along a major axis.
+        // Since we've already normalized the vector we don't need to check that the other two dimensions are zero.
+        // Tiny errors of the other two dimensions are ignored.
+        if (z == 1.0)
+        {
+            RotateAboutZAxisSinCos(sin_angle, cos_angle);
+            return;
+        }
+        if (y == 1.0)
+        {
+            RotateAboutYAxisSinCos(sin_angle, cos_angle);
+            return;
+        }
+        if (x == 1.0)
+        {
+            RotateAboutXAxisSinCos(sin_angle, cos_angle);
+            return;
+        }
+
+        double c = cos_angle;
+        double s = sin_angle;
+        double C = 1 - c;
+        double xs = x * s;
+        double ys = y * s;
+        double zs = z * s;
+        double xC = x * C;
+        double yC = y * C;
+        double zC = z * C;
+        double xyC = x * yC;
+        double yzC = y * zC;
+        double zxC = z * xC;
+
+        PreConcat(new Matrix44(x * xC + c, xyC + zs, zxC - ys, 0,  // col 0
+                               xyC - zs, y * yC + c, yzC + xs, 0,  // col 1
+                               zxC + ys, yzC - xs, z * zC + c, 0,  // col 2
+                               0, 0, 0, 1));                       // col 3
     }
 
     public override readonly int GetHashCode()
