@@ -52,7 +52,7 @@ public static class Vector2DTest
 
         foreach (var (X, Y) in values)
         {
-            double length_squared =  (double)X * X + (double)Y * Y;
+            double length_squared = (double)X * X + (double)Y * Y;
             double length = Math.Sqrt(length_squared);
             Vector2D vector = new(X, Y);
             Assert.Equal((float)length_squared, vector.LengthSquared());
@@ -100,42 +100,42 @@ public static class Vector2DTest
 
         test = new Vector2D();
         test += new Vector2D(int_max, int_max);
-        Assert.Equal(test,  max_vector);
+        Assert.Equal(test, max_vector);
 
         test = new Vector2D();
         test += new Vector2D(int_min, int_min);
-        Assert.Equal(test,  min_vector);
+        Assert.Equal(test, min_vector);
 
         test = new Vector2D(10, 20);
         test += new Vector2D(int_max, int_max);
-        Assert.Equal(test,  max_vector);
+        Assert.Equal(test, max_vector);
 
         test = new Vector2D(-10, -20);
         test += new Vector2D(int_min, int_min);
-        Assert.Equal(test,  min_vector);
+        Assert.Equal(test, min_vector);
 
         test = new Vector2D();
         test -= new Vector2D(int_max, int_max);
-        Assert.Equal(test,  new Vector2D(-int_max, -int_max));
+        Assert.Equal(test, new Vector2D(-int_max, -int_max));
 
         test = new Vector2D();
         test -= new Vector2D(int_min, int_min);
-        Assert.Equal(test,  max_vector);
+        Assert.Equal(test, max_vector);
 
         test = new Vector2D(10, 20);
         test -= new Vector2D(int_min, int_min);
-        Assert.Equal(test,  max_vector);
+        Assert.Equal(test, max_vector);
 
         test = new Vector2D(-10, -20);
         test -= new Vector2D(int_max, int_max);
-        Assert.Equal(test,  min_vector);
+        Assert.Equal(test, min_vector);
 
         test = new Vector2D();
         test -= new Vector2D(int_min, int_min);
-        Assert.Equal(test,  max_vector);
+        Assert.Equal(test, max_vector);
 
         test = -new Vector2D(int_min, int_min);
-        Assert.Equal(test,  max_vector);
+        Assert.Equal(test, max_vector);
     }
 
     [Fact]
