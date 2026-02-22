@@ -302,11 +302,11 @@ public struct Matrix44
             double yd = y._c1r1;
             double ye = y._c3r0;
             double yf = y._c3r1;
-            
-            this = new Matrix44(a * ya + c * yb, b * ya + d * yb, 0, 0,        // col 0
-                             a * yc + c * yd, b * yc + d * yd, 0, 0,           // col 1
-                             0, 0, 1, 0,                                       // col 2
-                             a * ye + c * yf + e, b * ye + d * yf + f, 0, 1);  // col 3
+
+            this = new Matrix44(a * ya + c * yb, b * ya + d * yb, 0, 0,           // col 0
+                                a * yc + c * yd, b * yc + d * yd, 0, 0,           // col 1
+                                0, 0, 1, 0,                                       // col 2
+                                a * ye + c * yf + e, b * ye + d * yf + f, 0, 1);  // col 3
             return;
         }
 
@@ -320,7 +320,10 @@ public struct Matrix44
         //var mc2 = y.Col(2);
         //var mc3 = y.Col(3);
 
-        //SetCol(0, c0 * mc0[0] + c1 * mc0[1] + c2 * mc0[2] + c3 * mc0[3]);
+        //SetCol(0, x.Col(0) * y.Col(0)[0] + x.Col(1) * y.Col(0)[1] + x.Col(2) * y.Col(0)[2] + x.Col(3) * y.Col(0)[3]);
+        
+        _c0r0 = x._c0r0 * y._c0r0 + x._c1r0 * y._c0r1 + x._c2r0 * y._c0r2 + x._c3r0 * y._c0r3;
+
         //SetCol(1, c0 * mc1[0] + c1 * mc1[1] + c2 * mc1[2] + c3 * mc1[3]);
         //SetCol(2, c0 * mc2[0] + c1 * mc2[1] + c2 * mc2[2] + c3 * mc2[3]);
         //SetCol(3, c0 * mc3[0] + c1 * mc3[1] + c2 * mc3[2] + c3 * mc3[3]);
