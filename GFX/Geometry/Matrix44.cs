@@ -491,12 +491,51 @@ public struct Matrix44
     // This is a simplified version of InverseWithDouble4Cols().
     public readonly double Determinant()
     {
-        throw new NotImplementedException();
+        if (Is2DTransform)
+            return _c0r0 * _c1r1 - _c0r1 * _c1r0;
+
+        Double4 c0 = new(_c0r0, _c0r1, _c0r2, _c0r3);
+        Double4 c1 = new(_c1r0, _c1r1, _c1r2, _c1r3);
+        Double4 c2 = new(_c2r0, _c2r1, _c2r2, _c2r3);
+        Double4 c3 = new(_c3r0, _c3r1, _c3r2, _c3r3);
+
+        // Note that r1 and r3 have components 2/3 and 0/1 swapped.
+        Double4 r0 = new(c0.V0, c1.V0, c2.V0, c3.V0);
+        Double4 r1 = new(c2.V1, c3.V1, c0.V1, c1.V1);
+        Double4 r2 = new(c0.V2, c1.V2, c2.V2, c3.V2);
+        Double4 r3 = new(c2.V3, c3.V3, c0.V3, c1.V3);
+
+        Double4 t = Double4.SwapInPairs(r2 * r3);
+        c0 = r1 * t;
+        t = Double4.SwapHighLow(t);
+        c0 = r1 * t - c0;
+        t = Double4.SwapInPairs(r1 * r2);
+        c0 += r3 * t;
+        t = Double4.SwapHighLow(t);
+        c0 -= r3 * t;
+        t = Double4.SwapInPairs(Double4.SwapHighLow(r1) * r3);
+        r2 = Double4.SwapHighLow(r2);
+        c0 += r2 * t;
+        t = Double4.SwapHighLow(t);
+        c0 -= r2 * t;
+
+        return Double4.Sum(r0 * c0);
     }
 
     public readonly bool IsInvertible()
     {
         return float.IsNormal((float)Determinant());
+    }
+
+    // Transposes this matrix in place.
+    public void Transpose()
+    {
+        (_c0r1, _c1r0) = (_c1r0, _c0r1);
+        (_c0r2, _c2r0) = (_c2r0, _c0r2);
+        (_c0r3, _c3r0) = (_c3r0, _c0r3);
+        (_c1r2, _c2r1) = (_c2r1, _c1r2);
+        (_c1r3, _c3r1) = (_c3r1, _c1r3);
+        (_c2r3, _c3r2) = (_c3r2, _c2r3);
     }
 
     // Based on:
@@ -632,6 +671,8 @@ public struct Matrix44
 
         return true;
     }
+
+    
 
     public override readonly int GetHashCode()
     {
