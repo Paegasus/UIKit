@@ -463,15 +463,95 @@ public struct Matrix44
         //                 |  |0 0 1  0|   |0 0  1 0|   |0  0 1 0|   |0  0  1 0|  |
         //                  \ |0 0 0  1|   |0 0  0 1|   |0  0 0 1|   |0  0  0 1| /
 
-        _c1r0 = _c1r0 + _c0r0 * skews[0];
-        _c1r1 = _c1r1 + _c0r1 * skews[0];
-        _c1r2 = _c1r2 + _c0r2 * skews[0];
-        _c1r3 = _c1r3 + _c0r3 * skews[0];
+        _c1r0 += _c0r0 * skews[0];
+        _c1r1 += _c0r1 * skews[0];
+        _c1r2 += _c0r2 * skews[0];
+        _c1r3 += _c0r3 * skews[0];
 
         _c2r0 = _c0r0 * skews[1] + _c1r0 * skews[2] + _c2r0;
         _c2r1 = _c0r1 * skews[1] + _c1r1 * skews[2] + _c2r1;
         _c2r2 = _c0r2 * skews[1] + _c1r2 * skews[2] + _c2r2;
         _c2r3 = _c0r3 * skews[1] + _c1r3 * skews[2] + _c2r3;
+    }
+
+    // this = this * perspective.
+    public void ApplyPerspectiveDepth(double perspective)
+    {
+#if DEBUG
+        Debug.Assert(perspective != 0.0);
+#endif
+        double p = -1.0 / perspective;
+
+        _c2r0 += _c3r0 * p;
+        _c2r1 += _c3r1 * p;
+        _c2r2 += _c3r2 * p;
+        _c2r3 += _c3r3 * p;
+    }
+
+    // This is a simplified version of InverseWithDouble4Cols().
+    public readonly double Determinant()
+    {
+        throw new NotImplementedException();
+    }
+
+    public readonly bool IsInvertible()
+    {
+        return float.IsNormal((float)Determinant());
+    }
+
+    // Returns true and set |inverse| to the inverted matrix if this matrix
+    // is invertible. Otherwise return false and leave the |inverse| parameter unchanged.
+    public readonly bool GetInverse(out Matrix44 result)
+    {
+        result = new Matrix44();
+
+        if (Is2DTransform)
+        {
+            double determinant = Determinant();
+            
+            if (!float.IsNormal((float)determinant))
+                return false;
+
+            double inv_det = 1.0 / determinant;
+            double a = _c0r0;
+            double b = _c0r1;
+            double c = _c1r0;
+            double d = _c1r1;
+            double e = _c3r0;
+            double f = _c3r1;
+
+            result = new Matrix44(d * inv_det, -b * inv_det, 0, 0,  // col 0
+                      -c * inv_det, a * inv_det, 0, 0,  // col 1
+                      0, 0, 1, 0,                       // col 2
+                      (c * f - d * e) * inv_det, (b * e - a * f) * inv_det, 0,
+                      1);  // col 3
+            return true;
+        }
+        
+        if(!InverseWithDouble4Cols(Col(0), Col(1), Col(2), Col(3)))
+            return false;
+        
+        result._c0r0 = _c0r0;
+        result._c0r1 = _c0r1;
+        result._c0r2 = _c0r2;
+        result._c0r3 = _c0r3;
+
+        result._c1r0 = _c1r0;
+        result._c1r1 = _c1r1;
+        result._c1r2 = _c1r2;
+        result._c1r3 = _c1r3;
+
+        result._c2r0 = _c2r0;
+        result._c2r1 = _c2r1;
+        result._c2r2 = _c2r2;
+        result._c2r3 = _c2r3;
+        
+        result._c3r0 = _c3r0;
+        result._c3r1 = _c3r1;
+        result._c3r2 = _c3r2;
+        result._c3r3 = _c3r3;
+
+        return true;
     }
 
     public override readonly int GetHashCode()
