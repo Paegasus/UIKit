@@ -323,6 +323,9 @@ public struct Matrix44
         //SetCol(0, x.Col(0) * y.Col(0)[0] + x.Col(1) * y.Col(0)[1] + x.Col(2) * y.Col(0)[2] + x.Col(3) * y.Col(0)[3]);
         
         _c0r0 = x._c0r0 * y._c0r0 + x._c1r0 * y._c0r1 + x._c2r0 * y._c0r2 + x._c3r0 * y._c0r3;
+        _c0r1 = x._c0r1 * y._c0r0 + x._c1r1 * y._c0r1 + x._c2r1 * y._c0r2 + x._c3r1 * y._c0r3;
+        _c0r2 = x._c0r2 * y._c0r0 + x._c1r2 * y._c0r1 + x._c2r2 * y._c0r2 + x._c3r2 * y._c0r3;
+        _c0r3 = x._c0r3 * y._c0r0 + x._c1r3 * y._c0r1 + x._c2r3 * y._c0r2 + x._c3r3 * y._c0r3;
 
         //SetCol(1, c0 * mc1[0] + c1 * mc1[1] + c2 * mc1[2] + c3 * mc1[3]);
         //SetCol(2, c0 * mc2[0] + c1 * mc2[1] + c2 * mc2[2] + c3 * mc2[3]);
