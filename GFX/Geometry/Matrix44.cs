@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
@@ -115,6 +116,26 @@ public struct Matrix44
         _c0r3 != 0 || _c1r3 != 0 || _c2r3 != 0 || _c3r3 != 1;
 
     public readonly bool Is2DTransform => IsFlat && !HasPerspective;
+
+    // Gets a value at |row|, |col| from the matrix.
+  public readonly double rc(int row, int col)
+  {
+#if DEBUG
+        Debug.Assert((uint)row <= 3u);
+        Debug.Assert((uint)col <= 3u);
+#endif
+    return this[col, row];
+  }
+
+    // Set a value in the matrix at |row|, |col|.
+    public void set_rc(int row, int col, double value)
+    {
+#if DEBUG
+        Debug.Assert((uint)row <= 3u);
+        Debug.Assert((uint)col <= 3u);
+#endif
+        this[col, row] = value;
+    }
 
     // this = this * translation.
     public void PreTranslate(double dx, double dy)
@@ -324,7 +345,7 @@ public struct Matrix44
         _c2r1 = x._c0r1 * y._c2r0 + x._c1r1 * y._c2r1 + x._c2r1 * y._c2r2 + x._c3r1 * y._c2r3;
         _c2r2 = x._c0r2 * y._c2r0 + x._c1r2 * y._c2r1 + x._c2r2 * y._c2r2 + x._c3r2 * y._c2r3;
         _c2r3 = x._c0r3 * y._c2r0 + x._c1r3 * y._c2r1 + x._c2r3 * y._c2r2 + x._c3r3 * y._c2r3;
-        
+
         _c3r0 = x._c0r0 * y._c3r0 + x._c1r0 * y._c3r1 + x._c2r0 * y._c3r2 + x._c3r0 * y._c3r3;
         _c3r1 = x._c0r1 * y._c3r0 + x._c1r1 * y._c3r1 + x._c2r1 * y._c3r2 + x._c3r1 * y._c3r3;
         _c3r2 = x._c0r2 * y._c3r0 + x._c1r2 * y._c3r1 + x._c2r2 * y._c3r2 + x._c3r2 * y._c3r3;
