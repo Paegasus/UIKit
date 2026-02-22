@@ -438,6 +438,20 @@ public struct Matrix44
                                0, 0, 0, 1));                       // col 3
     }
 
+    // this = this * skew.
+    public void Skew(double tan_skew_x, double tan_skew_y)
+    {
+        _c0r0 += _c1r0 * tan_skew_y;
+        _c0r1 += _c1r1 * tan_skew_y;
+        _c0r2 += _c1r2 * tan_skew_y;
+        _c0r3 += _c1r3 * tan_skew_y;
+
+        _c1r0 += _c0r0 * tan_skew_x;
+        _c1r1 += _c0r1 * tan_skew_x;
+        _c1r2 += _c0r2 * tan_skew_x;
+        _c1r3 += _c0r3 * tan_skew_x;
+    }
+
     public override readonly int GetHashCode()
     {
         var span = MemoryMarshal.Cast<double, byte>(MemoryMarshal.CreateReadOnlySpan(ref Unsafe.AsRef(in _c0r0), 16));
