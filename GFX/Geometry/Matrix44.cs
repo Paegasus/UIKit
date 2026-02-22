@@ -116,6 +116,7 @@ public struct Matrix44
 
     public readonly bool Is2DTransform => IsFlat && !HasPerspective;
 
+    // this = this * translation.
     public void PreTranslate(double dx, double dy)
     {
         _c3r0 = _c0r0 * dx + _c1r0 * dy + _c3r0;
@@ -124,6 +125,7 @@ public struct Matrix44
         _c3r3 = _c0r3 * dx + _c1r3 * dy + _c3r3;
     }
 
+    // this = this * translation.
     public void PreTranslate3D(double dx, double dy, double dz)
     {
         if(dx == 0 && dy == 0 && dz == 0)
@@ -135,6 +137,7 @@ public struct Matrix44
         _c3r3 = _c0r3 * dx + _c1r3 * dy + _c2r3 * dz + _c3r3;
     }
 
+    // this = translation * this.
     public void PostTranslate(double dx, double dy)
     {
         if (!HasPerspective)
@@ -161,6 +164,7 @@ public struct Matrix44
         }
     }
 
+    // this = translation * this.
     public void PostTranslate3D(double dx, double dy, double dz)
     {
         if (dx == 0 && dy == 0 && dz == 0)
@@ -192,6 +196,7 @@ public struct Matrix44
         }
     }
 
+    // this = this * scale.
     public void PreScale(double sx, double sy)
     {
         _c0r0 *= sx;
@@ -205,6 +210,7 @@ public struct Matrix44
         _c1r3 *= sy;
     }
 
+    // this = this * scale.
     public void PreScale3D(double sx, double sy, double sz)
     {
         if (sx == 1 && sy == 1 && sz == 1)
@@ -226,6 +232,7 @@ public struct Matrix44
         _c2r3 *= sz;
     }
 
+    // this = scale * this.
     public void PostScale(double sx, double sy)
     {
         if (sx != 1)
@@ -244,6 +251,7 @@ public struct Matrix44
         }
     }
 
+    // this = scale * this.
     public void PostScale3D(double sx, double sy, double sz)
     {
         if (sx == 1 && sy == 1 && sz == 1)
@@ -265,6 +273,59 @@ public struct Matrix44
         _c2r3 *= sz;
     }
 
+    // this = this * m.
+    public void PreConcat(in Matrix44 m)
+    {
+        SetConcat(this, m);
+    }
+
+    // this = m * this.
+    public void PostConcat(in Matrix44 m)
+    {
+        SetConcat(m, this);
+    }
+    
+    // this = a * b.
+    public void SetConcat(in Matrix44 x, in Matrix44 y)
+    {
+        if (x.Is2DTransform && y.Is2DTransform)
+        {
+            double a = x.matrix_[0][0];
+            double b = x.matrix_[0][1];
+            double c = x.matrix_[1][0];
+            double d = x.matrix_[1][1];
+            double e = x.matrix_[3][0];
+            double f = x.matrix_[3][1];
+            double ya = y.matrix_[0][0];
+            double yb = y.matrix_[0][1];
+            double yc = y.matrix_[1][0];
+            double yd = y.matrix_[1][1];
+            double ye = y.matrix_[3][0];
+            double yf = y.matrix_[3][1];
+            this = new Matrix44(a * ya + c * yb, b * ya + d * yb, 0, 0,           // col 0
+                             a * yc + c * yd, b * yc + d * yd, 0, 0,           // col 1
+                             0, 0, 1, 0,                                       // col 2
+                             a * ye + c * yf + e, b * ye + d * yf + f, 0, 1);  // col 3
+            return;
+        }
+
+        var c0 = x.Col(0);
+        var c1 = x.Col(1);
+        var c2 = x.Col(2);
+        var c3 = x.Col(3);
+
+        var mc0 = y.Col(0);
+        var mc1 = y.Col(1);
+        var mc2 = y.Col(2);
+        var mc3 = y.Col(3);
+
+        SetCol(0, c0 * mc0[0] + c1 * mc0[1] + c2 * mc0[2] + c3 * mc0[3]);
+        SetCol(1, c0 * mc1[0] + c1 * mc1[1] + c2 * mc1[2] + c3 * mc1[3]);
+        SetCol(2, c0 * mc2[0] + c1 * mc2[1] + c2 * mc2[2] + c3 * mc2[3]);
+        SetCol(3, c0 * mc3[0] + c1 * mc3[1] + c2 * mc3[2] + c3 * mc3[3]);
+    }
+
+    // Special case for x axis of RotateUnitSinCos().
     public void RotateAboutXAxisSinCos(double sin_angle, double cos_angle)
     {
         _c1r0 = _c1r0 * cos_angle + _c2r0 * sin_angle;
@@ -278,6 +339,7 @@ public struct Matrix44
         _c2r3 = _c2r3 * cos_angle - _c1r3 * sin_angle;
     }
 
+    // Special case for y axis of RotateUnitSinCos().
     public void RotateAboutYAxisSinCos(double sin_angle, double cos_angle)
     {
         _c0r0 = _c0r0 * cos_angle - _c2r0 * sin_angle;
@@ -291,6 +353,7 @@ public struct Matrix44
         _c2r3 = _c2r3 * cos_angle + _c0r3 * sin_angle;
     }
 
+    // Special case for z axis of RotateUnitSinCos().
     public void RotateAboutZAxisSinCos(double sin_angle, double cos_angle)
     {
         _c0r0 = _c0r0 * cos_angle + _c1r0 * sin_angle;
@@ -304,6 +367,10 @@ public struct Matrix44
         _c1r3 = _c1r3 * cos_angle - _c0r3 * sin_angle;
     }
 
+    // Rotates this matrix about the specified unit-length axis vector,
+    // by an angle specified by its sin() and cos(). This does not attempt to
+    // verify that axis(x, y, z).length() == 1 or that the sin, cos values are
+    // correct. this = this * rotation.
     void RotateUnitSinCos(double x, double y, double z, double sin_angle, double cos_angle)
     {
         // Optimize cases where the axis is along a major axis.
