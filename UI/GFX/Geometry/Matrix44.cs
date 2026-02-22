@@ -553,7 +553,7 @@ public struct Matrix44
     // vec[2], and returns vec[3].
     public readonly double MapVector2(ReadOnlySpan<double> vec)
     {
-        
+        throw new NotImplementedException();
     }
 
     // Applies the matrix to the vector in place.
