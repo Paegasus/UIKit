@@ -153,7 +153,7 @@ public static class AxisTransform2DTest
             expected.SetQuaternion(0f, 0f, 0f, 1f);
 
             Debug.Assert(expected == decomp);
-            //Debug.Assert(new Transform(transform), Transform.Compose(decomp));
+            Debug.Assert(new Transform(transform), Transform.Compose(decomp));
         }
         {
             var transform = AxisTransform2D.FromScaleAndTranslation(new Vector2DF(-2.5f, -3.75f), new Vector2DF(4.25f, -5.5f));
@@ -167,7 +167,7 @@ public static class AxisTransform2DTest
             expected.SetQuaternion(0f, 0f, 1f, 0f);
 
             Debug.Assert(expected == decomp);
-            //Debug.Assert(new Transform(transform) == Transform.Compose(decomp));
+            Debug.Assert(new Transform(transform) == Transform.Compose(decomp));
         }
         {
             var transform =
@@ -182,7 +182,7 @@ public static class AxisTransform2DTest
             expected.SetQuaternion(0f, 0f, 0f, 1f);
 
             Debug.Assert(expected == decomp);
-            //Debug.Assert(new Transform(transform) == Transform.Compose(decomp));
+            Debug.Assert(new Transform(transform) == Transform.Compose(decomp));
         }
     }
 }

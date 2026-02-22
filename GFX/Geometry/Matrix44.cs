@@ -575,7 +575,7 @@ public struct Matrix44
     }
 
     // TODO(crbug.com/40237414): Consider letting this function always succeed.
-    public readonly DecomposedTransform Decompose2D()
+    public readonly DecomposedTransform? Decompose2D()
     {
 #if DEBUG
         Debug.Assert(Is2DTransform);
@@ -594,10 +594,10 @@ public struct Matrix44
         //     [0 0 1 0 ] [  0       0    1 0] [0 0 1 0] [0  0  1 0]
         //     [0 0 0 1 ] [  0       0    0 1] [0 0 0 1] [0  0  0 1]
 
-        double m11 = matrix_[0][0];
-        double m21 = matrix_[1][0];
-        double m12 = matrix_[0][1];
-        double m22 = matrix_[1][1];
+        double m11 = _c0r0;
+        double m21 = _c1r0;
+        double m12 = _c0r1;
+        double m22 = _c1r1;
 
         double determinant = m11 * m22 - m12 * m21;
         // Test for matrix being singular.
@@ -611,8 +611,8 @@ public struct Matrix44
         // [m12 m22 0 m42]  = [0 1 0 Ty] [m12 m22 0 0]
         // [ 0   0  1  0 ]    [0 0 1 0 ] [ 0   0  1 0]
         // [ 0   0  0  1 ]    [0 0 0 1 ] [ 0   0  0 1]
-        decomp.Translate.X = matrix_[3][0];
-        decomp.Translate.Y = matrix_[3][1];
+        decomp.Translate.X = _c3r0;
+        decomp.Translate.Y = _c3r1;
 
         // For the remainder of the decomposition process, we can focus on the upper
         // 2x2 submatrix
