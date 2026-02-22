@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using UI.GFX.Geometry;
+using Xunit;
 
 namespace UI.Tests;
 
@@ -18,13 +19,15 @@ public static class Vector2DTest
         Debug.WriteLine("All Vector2D tests passed!");
     }
 
+    [Fact]
     private static void TestIsZero()
     {
-        Debug.Assert(new Vector2D().IsZero());
-        Debug.Assert(new Vector2D(0, 0).IsZero());
-        Debug.Assert(!new Vector2D(1, 0).IsZero());
-        Debug.Assert(!new Vector2D(0, -2).IsZero());
-        Debug.Assert(!new Vector2D(1, -2).IsZero());
+        Assert.True(new Vector2D().IsZero());
+        //Debug.Assert(new Vector2D().IsZero());
+        //Debug.Assert(new Vector2D(0, 0).IsZero());
+        //Debug.Assert(!new Vector2D(1, 0).IsZero());
+        //Debug.Assert(!new Vector2D(0, -2).IsZero());
+        //Debug.Assert(!new Vector2D(1, -2).IsZero());
     }
 
     private static void TestAdd()

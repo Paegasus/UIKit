@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using UI.GFX.Geometry;
+using Xunit;
 
 namespace UI.Tests;
 
