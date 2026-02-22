@@ -6,46 +6,35 @@ namespace UI.Tests;
 
 public static class Vector2DTest
 {
-    public static void Run()
-    {
-        TestIsZero();
-        TestAdd();
-        TestNegative();
-        TestLength();
-        TestSetToMinMax();
-        TestIntegerOverflow();
-        TestTranspose();
-
-        Debug.WriteLine("All Vector2D tests passed!");
-    }
-
     [Fact]
     private static void TestIsZero()
     {
         Assert.True(new Vector2D().IsZero());
-        //Debug.Assert(new Vector2D().IsZero());
-        //Debug.Assert(new Vector2D(0, 0).IsZero());
-        //Debug.Assert(!new Vector2D(1, 0).IsZero());
-        //Debug.Assert(!new Vector2D(0, -2).IsZero());
-        //Debug.Assert(!new Vector2D(1, -2).IsZero());
+        Assert.True(new Vector2D().IsZero());
+        Assert.True(new Vector2D(0, 0).IsZero());
+        Assert.False(new Vector2D(1, 0).IsZero());
+        Assert.False(new Vector2D(0, -2).IsZero());
+        Assert.False(new Vector2D(1, -2).IsZero());
     }
 
+    [Fact]
     private static void TestAdd()
     {
         Vector2D i1 = new(3, 5);
         Vector2D i2 = new(4, -1);
-        Debug.Assert(new Vector2D(3, 5) == i1 + new Vector2D());
-        Debug.Assert(new Vector2D(3 + 4, 5 - 1) == i1 + i2);
-        Debug.Assert(new Vector2D(3 - 4, 5 + 1) == i1 - i2);
+        Assert.Equal(new Vector2D(3, 5), i1 + new Vector2D());
+        Assert.Equal(new Vector2D(3 + 4, 5 - 1), i1 + i2);
+        Assert.Equal(new Vector2D(3 - 4, 5 + 1), i1 - i2);
     }
 
+    [Fact]
     private static void TestNegative()
     {
-        Debug.Assert(new Vector2D(0, 0) == -new Vector2D(0, 0));
-        Debug.Assert(new Vector2D(-3, -3) == -new Vector2D(3, 3));
-        Debug.Assert(new Vector2D(3, 3) == -new Vector2D(-3, -3));
-        Debug.Assert(new Vector2D(-3, 3) == -new Vector2D(3, -3));
-        Debug.Assert(new Vector2D(3, -3) == -new Vector2D(-3, 3));
+        Assert.Equal(new Vector2D(0, 0), -new Vector2D(0, 0));
+        Assert.Equal(new Vector2D(-3, -3), -new Vector2D(3, 3));
+        Assert.Equal(new Vector2D(3, 3), -new Vector2D(-3, -3));
+        Assert.Equal(new Vector2D(-3, 3), -new Vector2D(3, -3));
+        Assert.Equal(new Vector2D(3, -3), -new Vector2D(-3, 3));
     }
 
     private static void TestLength()
