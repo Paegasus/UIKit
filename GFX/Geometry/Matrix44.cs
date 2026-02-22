@@ -602,10 +602,10 @@ public struct Matrix44
             return true;
         }
 
-        Double4 c0 = new Double4(_c0r0, _c0r1, _c0r2, _c0r3);
-        Double4 c1 = new Double4(_c0r0, _c0r1, _c0r2, _c0r3);
-        Double4 c2 = new Double4(_c0r0, _c0r1, _c0r2, _c0r3);
-        Double4 c3 = new Double4(_c0r0, _c0r1, _c0r2, _c0r3);
+        Double4 c0 = new(_c0r0, _c0r1, _c0r2, _c0r3);
+        Double4 c1 = new(_c0r0, _c0r1, _c0r2, _c0r3);
+        Double4 c2 = new(_c0r0, _c0r1, _c0r2, _c0r3);
+        Double4 c3 = new(_c0r0, _c0r1, _c0r2, _c0r3);
 
         if(!InverseWithDouble4Cols(ref c0, ref c1, ref c2, ref c3))
             return false;
