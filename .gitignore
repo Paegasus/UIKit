@@ -4,3 +4,4 @@ UI/obj/
 UI Tests/bin/
 UI Tests/obj/
 # Other directories to ignore
+/notes/

@@ -26,7 +26,7 @@ public static class Program
             Console.WriteLine("Transforms are NOT equal.");
         }
         */
-        
+
         /*
         Matrix44 matrix = new ();
 

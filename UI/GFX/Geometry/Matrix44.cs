@@ -1083,20 +1083,42 @@ public struct Matrix44
         return true;
     }
 
+    // HashCode.Add<double>() uses the bit pattern of the value internally,
+    // since 0.0 and -0.0 have different bit patterns, they'd produce different hashes if we added them directly,
+    // and because Equals(Matrix44 other) treats them as equal, that would violate the contract that equal objects must have equal hash codes.
     public override readonly int GetHashCode()
     {
-        var span = MemoryMarshal.Cast<double, byte>(MemoryMarshal.CreateReadOnlySpan(ref Unsafe.AsRef(in _c0r0), 16));
         var hc = new HashCode();
-        hc.AddBytes(span);
+
+        hc.Add(_c0r0 == 0.0 ? 0.0 : _c0r0);
+        hc.Add(_c0r1 == 0.0 ? 0.0 : _c0r1);
+        hc.Add(_c0r2 == 0.0 ? 0.0 : _c0r2);
+        hc.Add(_c0r3 == 0.0 ? 0.0 : _c0r3);
+
+        hc.Add(_c1r0 == 0.0 ? 0.0 : _c1r0);
+        hc.Add(_c1r1 == 0.0 ? 0.0 : _c1r1);
+        hc.Add(_c1r2 == 0.0 ? 0.0 : _c1r2);
+        hc.Add(_c1r3 == 0.0 ? 0.0 : _c1r3);
+
+        hc.Add(_c2r0 == 0.0 ? 0.0 : _c2r0);
+        hc.Add(_c2r1 == 0.0 ? 0.0 : _c2r1);
+        hc.Add(_c2r2 == 0.0 ? 0.0 : _c2r2);
+        hc.Add(_c2r3 == 0.0 ? 0.0 : _c2r3);
+
+        hc.Add(_c3r0 == 0.0 ? 0.0 : _c3r0);
+        hc.Add(_c3r1 == 0.0 ? 0.0 : _c3r1);
+        hc.Add(_c3r2 == 0.0 ? 0.0 : _c3r2);
+        hc.Add(_c3r3 == 0.0 ? 0.0 : _c3r3);
+
         return hc.ToHashCode();
     }
 
     public readonly bool Equals(Matrix44 other)
     {
-        // Compare all 16 fields as raw bytes via a span — no loops, no boxing
-        var left  = MemoryMarshal.Cast<double, byte>(MemoryMarshal.CreateReadOnlySpan(ref Unsafe.AsRef(in _c0r0), 16));
-        var right = MemoryMarshal.Cast<double, byte>(MemoryMarshal.CreateReadOnlySpan(ref other._c0r0, 16));
-        return left.SequenceEqual(right);
+        return _c0r0 == other._c0r0 && _c0r1 == other._c0r1 && _c0r2 == other._c0r2 && _c0r3 == other._c0r3 &&
+               _c1r0 == other._c1r0 && _c1r1 == other._c1r1 && _c1r2 == other._c1r2 && _c1r3 == other._c1r3 &&
+               _c2r0 == other._c2r0 && _c2r1 == other._c2r1 && _c2r2 == other._c2r2 && _c2r3 == other._c2r3 &&
+               _c3r0 == other._c3r0 && _c3r1 == other._c3r1 && _c3r2 == other._c3r2 && _c3r3 == other._c3r3;
     }
 
     public override readonly bool Equals(object? obj) => obj is Matrix44 other && Equals(other);
