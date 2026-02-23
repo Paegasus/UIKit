@@ -87,7 +87,7 @@ public struct Vector3D
 
     public override readonly int GetHashCode() => HashCode.Combine(X, Y, Z);
     
-    public readonly bool Equals(Vector3D other) => X == other.X && Y == other.Y && Z == other.Z;
+    public readonly bool Equals(in Vector3D other) => X == other.X && Y == other.Y && Z == other.Z;
 
     public override readonly bool Equals(object? obj) => obj is Vector3D other && Equals(other);
 

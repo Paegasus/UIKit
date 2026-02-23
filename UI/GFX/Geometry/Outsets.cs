@@ -10,7 +10,7 @@ namespace UI.GFX.Geometry;
 /// This can be used to represent a space surrounding a rectangle, by
 /// "expanding" the rectangle by the outset amount on all four sides.
 /// </summary>
-public struct Outsets : IEquatable<Outsets>
+public struct Outsets
 {
     private int m_Top;
     private int m_Left;
@@ -154,7 +154,7 @@ public struct Outsets : IEquatable<Outsets>
 
     public override readonly bool Equals(object? obj) => obj is Outsets other && Equals(other);
 
-    public readonly bool Equals(Outsets other) => m_Top == other.m_Top && m_Left == other.m_Left && m_Bottom == other.m_Bottom && m_Right == other.m_Right;
+    public readonly bool Equals(in Outsets other) => m_Top == other.m_Top && m_Left == other.m_Left && m_Bottom == other.m_Bottom && m_Right == other.m_Right;
     
     public static bool operator ==(in Outsets left, in Outsets right) => left.Equals(right);
     public static bool operator !=(in Outsets left, in Outsets right) => !left.Equals(right);

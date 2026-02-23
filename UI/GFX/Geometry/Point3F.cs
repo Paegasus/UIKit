@@ -1,7 +1,7 @@
 namespace UI.GFX.Geometry;
 
 // A point has an x, y and z coordinate.
-public struct Point3F : IEquatable<Point3F>
+public struct Point3F
 {
     public float X;
     public float Y;
@@ -41,7 +41,7 @@ public struct Point3F : IEquatable<Point3F>
 
     public override readonly bool Equals(object? obj) => obj is Point3F other && Equals(other);
 
-    public readonly bool Equals(Point3F other) => X == other.X && Y == other.Y && Z == other.Z;
+    public readonly bool Equals(in Point3F other) => X == other.X && Y == other.Y && Z == other.Z;
 
     public static bool operator ==(in Point3F left, in Point3F right) => left.Equals(right);
     public static bool operator !=(in Point3F left, in Point3F right) => !left.Equals(right);

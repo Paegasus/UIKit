@@ -4,7 +4,7 @@ using static UI.Numerics.ClampedMath;
 
 namespace UI.Geometry;
 
-public struct TextRunLayoutUnit : IEquatable<TextRunLayoutUnit>, IComparable<TextRunLayoutUnit>
+public struct TextRunLayoutUnit
 {
 	public const int FractionalBits = 16;
     public const int IntegralBits = sizeof(int) * 8 - FractionalBits;
@@ -360,9 +360,7 @@ public struct TextRunLayoutUnit : IEquatable<TextRunLayoutUnit>, IComparable<Tex
 
     public override readonly bool Equals(object? obj) => obj is TextRunLayoutUnit other && Equals(other);
 
-    public readonly bool Equals(TextRunLayoutUnit other) => m_Value == other.m_Value;
-
-    public readonly int CompareTo(TextRunLayoutUnit other) => m_Value.CompareTo(other.m_Value);
+    public readonly bool Equals(in TextRunLayoutUnit other) => m_Value == other.m_Value;
 
     public override readonly int GetHashCode() => m_Value.GetHashCode();
 

@@ -4,7 +4,7 @@ using static UI.GFX.Geometry.RectConversions;
 
 namespace UI.GFX.Geometry;
 
-public struct Rect : IEquatable<Rect>
+public struct Rect
 {
     private Point m_Origin;
     private Size m_Size;
@@ -403,7 +403,7 @@ public struct Rect : IEquatable<Rect>
 
     public readonly bool ApproximatelyEqual(in Rect rect, int tolerance) => Math.Abs(X - rect.X) <= tolerance && Math.Abs(Y - rect.Y) <= tolerance && Math.Abs(Right - rect.Right) <= tolerance && Math.Abs(Bottom - rect.Bottom) <= tolerance;
 
-    public readonly bool Equals(Rect other) => m_Origin.Equals(other.m_Origin) && m_Size.Equals(other.m_Size);
+    public readonly bool Equals(in Rect other) => m_Origin.Equals(other.m_Origin) && m_Size.Equals(other.m_Size);
     public override readonly bool Equals(object? obj) => obj is Rect other && Equals(other);
     public override readonly int GetHashCode() => HashCode.Combine(m_Origin, m_Size);
 

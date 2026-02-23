@@ -4,7 +4,7 @@ using UI.Extensions;
 namespace UI.GFX.Geometry;
 
 // A floating version of Rect.
-public struct RectF : IEquatable<RectF>
+public struct RectF
 {
     private PointF m_Origin;
     private SizeF m_Size;
@@ -360,8 +360,8 @@ public struct RectF : IEquatable<RectF>
 
     public override readonly string ToString() => $"{m_Origin} {m_Size}";
     public override readonly int GetHashCode() => HashCode.Combine(m_Origin, m_Size);
-    public override bool Equals(object? obj) => obj is RectF other && Equals(other);
-    public bool Equals(RectF other) => m_Origin.Equals(other.m_Origin) && m_Size.Equals(other.m_Size);
+    public override readonly bool Equals(object? obj) => obj is RectF other && Equals(other);
+    public readonly bool Equals(in RectF other) => m_Origin.Equals(other.m_Origin) && m_Size.Equals(other.m_Size);
 
     private static void AdjustAlongAxis(float dst_origin, float dst_size, ref float origin, ref float size)
     {

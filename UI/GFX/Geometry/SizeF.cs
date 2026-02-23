@@ -3,7 +3,7 @@ using UI.Extensions;
 
 namespace UI.GFX.Geometry;
 
-public struct SizeF : IEquatable<SizeF>
+public struct SizeF
 {
     private float m_Width, m_Height;
 
@@ -116,7 +116,7 @@ public struct SizeF : IEquatable<SizeF>
 
     public override readonly int GetHashCode() => HashCode.Combine(Width, Height);
 
-    public readonly bool Equals(SizeF other) => Width == other.Width && Height == other.Height;
+    public readonly bool Equals(in SizeF other) => Width == other.Width && Height == other.Height;
 
     public override readonly bool Equals(object? obj) => obj is SizeF other && Equals(other);
 

@@ -1113,7 +1113,7 @@ public struct Matrix44
         return hc.ToHashCode();
     }
 
-    public readonly bool Equals(Matrix44 other)
+    public readonly bool Equals(in Matrix44 other)
     {
         return _c0r0 == other._c0r0 && _c0r1 == other._c0r1 && _c0r2 == other._c0r2 && _c0r3 == other._c0r3 &&
                _c1r0 == other._c1r0 && _c1r1 == other._c1r1 && _c1r2 == other._c1r2 && _c1r3 == other._c1r3 &&

@@ -7,7 +7,7 @@ namespace UI.GFX.Geometry;
 /// <summary>
 /// A 3D vector of floats, used to represent a distance in 3D space.
 /// </summary>
-public struct Vector3DF : IEquatable<Vector3DF>
+public struct Vector3DF
 {
     private const double Epsilon = 1.0e-6;
 
@@ -137,7 +137,7 @@ public struct Vector3DF : IEquatable<Vector3DF>
 
     public override readonly bool Equals(object? obj) => obj is Vector3DF other && Equals(other);
 
-    public readonly bool Equals(Vector3DF other) => X == other.X && Y == other.Y && Z == other.Z;
+    public readonly bool Equals(in Vector3DF other) => X == other.X && Y == other.Y && Z == other.Z;
 
     public static bool operator ==(in Vector3DF left, in Vector3DF right) => left.Equals(right);
     public static bool operator !=(in Vector3DF left, in Vector3DF right) => !left.Equals(right);

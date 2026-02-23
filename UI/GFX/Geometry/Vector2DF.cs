@@ -124,7 +124,7 @@ public struct Vector2DF : IEquatable<Vector2DF>
 
     public override readonly int GetHashCode() => HashCode.Combine(X, Y);
 
-    public readonly bool Equals(Vector2DF other) => X == other.X && Y == other.Y;
+    public readonly bool Equals(in Vector2DF other) => X == other.X && Y == other.Y;
 
     public override readonly bool Equals(object? obj) => obj is Vector2DF other && Equals(other);
 

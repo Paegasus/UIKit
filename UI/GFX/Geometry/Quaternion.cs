@@ -200,7 +200,7 @@ public struct Quaternion
 
     public override readonly int GetHashCode() => HashCode.Combine(X, Y, Z, W);
     
-    public readonly bool Equals(Quaternion other) => X == other.X && Y == other.Y && Z == other.Z && W == other.W;
+    public readonly bool Equals(in Quaternion other) => X == other.X && Y == other.Y && Z == other.Z && W == other.W;
 
     public override readonly bool Equals(object? obj) => obj is Quaternion other && Equals(other);
 

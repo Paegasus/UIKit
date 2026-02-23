@@ -3,7 +3,7 @@ namespace UI.GFX.Geometry;
 /// <summary>
 /// A floating point version of Outsets.
 /// </summary>
-public struct OutsetsF : IEquatable<OutsetsF>
+public struct OutsetsF
 {
     private float m_Top;
     private float m_Left;
@@ -102,7 +102,7 @@ public struct OutsetsF : IEquatable<OutsetsF>
     public override readonly string ToString() => $"x:{m_Left},{m_Right} y:{m_Top},{m_Bottom}";
     public override readonly int GetHashCode() => HashCode.Combine(m_Top, m_Left, m_Bottom, m_Right);
     public override readonly bool Equals(object? obj) => obj is OutsetsF other && Equals(other);
-    public readonly bool Equals(OutsetsF other) => m_Top == other.m_Top && m_Left == other.m_Left && m_Bottom == other.m_Bottom && m_Right == other.m_Right;
+    public readonly bool Equals(in OutsetsF other) => m_Top == other.m_Top && m_Left == other.m_Left && m_Bottom == other.m_Bottom && m_Right == other.m_Right;
 
     public static bool operator ==(in OutsetsF left, in OutsetsF right) => left.Equals(right);
     public static bool operator !=(in OutsetsF left, in OutsetsF right) => !left.Equals(right);

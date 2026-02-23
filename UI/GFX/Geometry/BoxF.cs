@@ -3,7 +3,7 @@ using System.Diagnostics;
 namespace UI.GFX.Geometry;
 
 // A 3d version of gfx::RectF, with the positive z-axis pointed towards the camera.
-public struct BoxF : IEquatable<BoxF>
+public struct BoxF
 {
     private Point3F m_Origin;
     private float m_Width;
@@ -109,7 +109,7 @@ public struct BoxF : IEquatable<BoxF>
 
     public override readonly bool Equals(object? obj) => obj is BoxF other && Equals(other);
 
-    public readonly bool Equals(BoxF other) => m_Origin.Equals(other.m_Origin) && m_Width == other.m_Width && m_Height == other.m_Height && m_Depth == other.m_Depth;
+    public readonly bool Equals(in BoxF other) => m_Origin.Equals(other.m_Origin) && m_Width == other.m_Width && m_Height == other.m_Height && m_Depth == other.m_Depth;
 
     public static bool operator ==(in BoxF left, in BoxF right) => left.Equals(right);
     public static bool operator !=(in BoxF left, in BoxF right) => !left.Equals(right);

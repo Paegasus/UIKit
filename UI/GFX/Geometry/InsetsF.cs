@@ -3,7 +3,7 @@ namespace UI.GFX.Geometry;
 //// <summary>
 /// This is the floating point version of Insets.
 /// </summary>
-public struct InsetsF : IEquatable<InsetsF>
+public struct InsetsF
 {
     private float m_Top;
     private float m_Left;
@@ -113,7 +113,7 @@ public struct InsetsF : IEquatable<InsetsF>
     public override readonly string ToString() => $"x:{m_Left},{m_Right} y:{m_Top},{m_Bottom}";
     public override readonly int GetHashCode() => HashCode.Combine(m_Top, m_Left, m_Bottom, m_Right);
     public override readonly bool Equals(object? obj) => obj is InsetsF other && Equals(other);
-    public readonly bool Equals(InsetsF other) => m_Top == other.m_Top && m_Left == other.m_Left && m_Bottom == other.m_Bottom && m_Right == other.m_Right;
+    public readonly bool Equals(in InsetsF other) => m_Top == other.m_Top && m_Left == other.m_Left && m_Bottom == other.m_Bottom && m_Right == other.m_Right;
 
     public static bool operator ==(in InsetsF left, in InsetsF right) => left.Equals(right);
     public static bool operator !=(in InsetsF left, in InsetsF right) => !left.Equals(right);

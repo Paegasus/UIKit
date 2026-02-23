@@ -7,7 +7,7 @@ namespace UI.Geometry;
 // `InlineLayoutUnit` stores the same precision as `TextRunLayoutUnit` using an
 // `int64_t` storage. It can provide the text precision, and represent the whole
 // layout space (and more, 48 bits vs 26 bits), but it's double-sized.
-public struct InlineLayoutUnit : IEquatable<InlineLayoutUnit>, IComparable<InlineLayoutUnit>
+public struct InlineLayoutUnit
 {
 	public const int FractionalBits = 16;
     public const int IntegralBits = sizeof(long) * 8 - FractionalBits;
@@ -327,9 +327,7 @@ public struct InlineLayoutUnit : IEquatable<InlineLayoutUnit>, IComparable<Inlin
 
     public override readonly bool Equals(object? obj) => obj is InlineLayoutUnit other && Equals(other);
 
-    public readonly bool Equals(InlineLayoutUnit other) => m_Value == other.m_Value;
-
-    public readonly int CompareTo(InlineLayoutUnit other) => m_Value.CompareTo(other.m_Value);
+    public readonly bool Equals(in InlineLayoutUnit other) => m_Value == other.m_Value;
 
     public override readonly int GetHashCode() => m_Value.GetHashCode();
 

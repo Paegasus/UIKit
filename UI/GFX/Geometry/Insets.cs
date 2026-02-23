@@ -12,7 +12,7 @@ namespace UI.GFX.Geometry;
 /// rectangle by the inset amount on all four sides. Alternatively, it can
 /// represent a border that has a different thickness on each side.
 /// </summary>
-public struct Insets : IEquatable<Insets>
+public struct Insets
 {
     private int m_Top;
     private int m_Left;
@@ -168,7 +168,7 @@ public struct Insets : IEquatable<Insets>
 
     public override readonly bool Equals(object? obj) => obj is Insets other && Equals(other);
 
-    public readonly bool Equals(Insets other) => m_Top == other.m_Top && m_Left == other.m_Left && m_Bottom == other.m_Bottom && m_Right == other.m_Right;
+    public readonly bool Equals(in Insets other) => m_Top == other.m_Top && m_Left == other.m_Left && m_Bottom == other.m_Bottom && m_Right == other.m_Right;
     
     public static bool operator ==(in Insets left, in Insets right) => left.Equals(right);
     public static bool operator !=(in Insets left, in Insets right) => !left.Equals(right);

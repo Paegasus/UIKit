@@ -1,6 +1,6 @@
 namespace UI.GFX.Geometry;
 
-public struct PointF : IComparable<PointF>, IEquatable<PointF>
+public struct PointF : IComparable<PointF>
 {
     public float X;
     public float Y;
@@ -94,7 +94,7 @@ public struct PointF : IComparable<PointF>, IEquatable<PointF>
 
     public override readonly bool Equals(object? obj) => obj is PointF other && Equals(other);
     
-    public readonly bool Equals(PointF other) => X == other.X && Y == other.Y;
+    public readonly bool Equals(in PointF other) => X == other.X && Y == other.Y;
 
     // A point is less than another point if its y-value is closer to the origin.
     // If the y-values are the same, then point with the x-value closer to the origin is considered less than the other.

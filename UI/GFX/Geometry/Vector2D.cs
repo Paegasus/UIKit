@@ -58,7 +58,7 @@ public struct Vector2D
 
     public override readonly string ToString() => $"[{X} {Y}]";
 
-    public readonly bool Equals(Vector2D other) => X == other.X && Y == other.Y;
+    public readonly bool Equals(in Vector2D other) => X == other.X && Y == other.Y;
 
     public override readonly bool Equals(object? obj) => obj is Vector2D other && Equals(other);
 

@@ -3,7 +3,7 @@ using static UI.GFX.Geometry.SizeConversions;
 
 namespace UI.GFX.Geometry;
 
-public struct Size : IEquatable<Size>
+public struct Size
 {
     private int m_Width;
     private int m_Height;
@@ -110,7 +110,7 @@ public struct Size : IEquatable<Size>
 
     public override readonly int GetHashCode() => HashCode.Combine(m_Width, m_Height);
 
-    public readonly bool Equals(Size other) => Width == other.Width && Height == other.Height;
+    public readonly bool Equals(in Size other) => Width == other.Width && Height == other.Height;
 
     public override readonly bool Equals(object? obj) => obj is Size other && Equals(other);
 
