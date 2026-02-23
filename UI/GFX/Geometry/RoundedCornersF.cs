@@ -31,10 +31,10 @@ public struct RoundedCornersF
     // Creates a RoundedCornersF with four different corner radii.
     public RoundedCornersF(float upper_left, float upper_right, float lower_right, float lower_left)
     {
-        m_UpperLeft = Clamp(upper_left);
+        m_UpperLeft  = Clamp(upper_left);
         m_UpperRight = Clamp(upper_right);
         m_LowerRight = Clamp(lower_right);
-        m_LowerLeft = Clamp(lower_left);
+        m_LowerLeft  = Clamp(lower_left);
     }
 
     // Returns true if all of the corners are square (zero effective radius).
