@@ -70,7 +70,7 @@ public struct Transform
           // Col 3.
           0, 0, 0, 1) {}
 
-    public static Matrix44 AxisTransform2dToMatrix44(in AxisTransform2D axis_2d)
+    public static Matrix44 AxisTransform2DToMatrix44(in AxisTransform2D axis_2d)
     {
         return new Matrix44(axis_2d.Scale.X, 0, 0, 0,  // col 0
                             0, axis_2d.Scale.Y, 0, 0,  // col 1
@@ -83,7 +83,7 @@ public struct Transform
         if (!full_matrix_)
         {
             full_matrix_ = true;
-            matrix_ = AxisTransform2dToMatrix44(axis_2d_);
+            matrix_ = AxisTransform2DToMatrix44(axis_2d_);
         }
         
         return matrix_;
@@ -261,11 +261,30 @@ public struct Transform
         
     }
 
+    public readonly Matrix44 GetFullMatrix()
+    {
+        if (!full_matrix_)
+        {
+            return AxisTransform2DToMatrix44(axis_2d_);
+        }
+        return matrix_;
+    }
+
     //public override readonly int GetHashCode() => HashCode.Combine();
 
     public override readonly bool Equals(object? obj) => obj is Transform other && Equals(other);
 
-    public readonly bool Equals(Transform other) => m_Origin.Equals(other.m_Origin) && m_Width == other.m_Width && m_Height == other.m_Height && m_Depth == other.m_Depth;
+    public readonly bool Equals(in Transform other)
+    {
+        if (!full_matrix_ && !other.full_matrix_)
+        {
+            return axis_2d_ == other.axis_2d_;
+        }
+        if (full_matrix_ && other.full_matrix_)
+            return matrix_ == other.matrix_;
+
+        return GetFullMatrix() == other.GetFullMatrix();
+    }
 
     public static bool operator ==(in Transform left, in Transform right) => left.Equals(right);
     public static bool operator !=(in Transform left, in Transform right) => !left.Equals(right);
