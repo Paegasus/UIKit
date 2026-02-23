@@ -62,11 +62,14 @@ public struct Transform
         EnsureFullMatrix().set_rc(row, col, v);
     }
 
+    // Translate3D
+    // PreConcat
+    // Scale3D
+
     public static Transform Compose(in DecomposedTransform decomp)
     {
         throw new NotImplementedException();
-
-        /*
+        
         Transform result = new();
 
         if (decomp.Perspective.X != 0)
@@ -80,7 +83,7 @@ public struct Transform
         
         if (decomp.Perspective.W != 1)
             result.set_rc(3, 3, decomp.Perspective.W);
-
+/*
         result.Translate3D(decomp.Translate.X, decomp.Translate.Y, decomp.Translate.Z);
 
         result.PreConcat(new Transform(decomp.Quaternion));
