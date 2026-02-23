@@ -8,10 +8,6 @@ namespace UI.Tests;
 
 public static class LayoutUnitTest
 {
-    private static bool FloatEqual(float a, float b) => MathF.Abs(a - b) <= 1e-6f;
-
-    private static bool FloatNear(float val1, float val2, float abs_error) => MathF.Abs(val1 - val2) <= abs_error;
-
     [Fact]
     private static void TestInt()
     {
