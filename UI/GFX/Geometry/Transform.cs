@@ -135,6 +135,19 @@ public struct Transform
         PostTranslate(offset.X, offset.Y);
     }
 
+    public void Translate3D(in Vector3DF offset)
+    {
+        Translate3D(offset.X, offset.Y, offset.Z);
+    }
+
+    public void Translate3D(float x, float y, float z)
+    {
+        if (z == 0)
+            Translate(x, y);
+        else
+            EnsureFullMatrix().PreTranslate3D(x, y, z);
+    }
+
     public void Scale(float x, float y)
     {
         if (!full_matrix_)
@@ -145,6 +158,14 @@ public struct Transform
         {
             matrix_.PreScale(x, y);
         }
+    }
+
+    public void Scale3D(float x, float y, float z)
+    {
+        if (z == 1)
+            Scale(x, y);
+        else
+            EnsureFullMatrix().PreScale3D(x, y, z);
     }
 
     public void PostScale(float x, float y)
@@ -229,14 +250,14 @@ public struct Transform
         if (decomp.Perspective.W != 1)
             result.set_rc(3, 3, decomp.Perspective.W);
 
-        result.Translate3D(decomp.Translate.X, decomp.Translate.Y, decomp.Translate.Z);
+        result.Translate3D((float)decomp.Translate.X, (float)decomp.Translate.Y, (float)decomp.Translate.Z);
 
         result.PreConcat(new Transform(decomp.Quaternion));
 
         if (decomp.Skew.X != 0 || decomp.Skew.Y != 0 || decomp.Skew.Z != 0)
             result.EnsureFullMatrix().ApplyDecomposedSkews(decomp.Skew);
 
-        result.Scale3D(decomp.Scale.X, decomp.Scale.Y, decomp.Scale.Z);
+        result.Scale3D((float)decomp.Scale.X, (float)decomp.Scale.Y, (float)decomp.Scale.Z);
 
         return result;
         
