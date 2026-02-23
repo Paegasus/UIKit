@@ -51,7 +51,7 @@ public struct Transform
                       r0c3, r1c3, r2c3, r3c3);
     }
 
-    Transform(in Quaternion q) : this(
+    public Transform(in Quaternion q) : this(
           // Col 0.
           1.0 - 2.0 * (q.Y * q.Y + q.Z * q.Z),
           2.0 * (q.X * q.Y + q.Z * q.W),
@@ -283,8 +283,9 @@ public struct Transform
             return axis_2d_ == other.axis_2d_;
         }
         if (full_matrix_ && other.full_matrix_)
+        {
             return matrix_ == other.matrix_;
-
+        }
         return GetFullMatrix() == other.GetFullMatrix();
     }
 

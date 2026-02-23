@@ -1103,4 +1103,9 @@ public struct Matrix44
 
     public static bool operator ==(in Matrix44 left, in Matrix44 right) => left.Equals(right);
     public static bool operator !=(in Matrix44 left, in Matrix44 right) => !left.Equals(right);
+
+    public override readonly string ToString()
+    {
+        return $"{_c0r0} {_c1r0} {_c2r0} {_c3r0}\n{_c0r1} {_c1r1} {_c2r1} {_c3r1}\n{_c0r2} {_c1r2} {_c2r2} {_c3r2}\n{_c0r3} {_c1r3} {_c2r3} {_c3r3}\n";
+    }
 }
