@@ -101,6 +101,64 @@ public struct Transform
         EnsureFullMatrix().set_rc(row, col, v);
     }
 
+    public void Translate(float x, float y)
+    {
+        if (!full_matrix_)
+        {
+            axis_2d_.PreTranslate(new Vector2DF(x, y));
+        }
+        else
+        {
+            matrix_.PreTranslate(x, y);
+        }
+    }
+
+    public void Translate(in Vector2DF offset)
+    {
+        Translate(offset.X, offset.Y);
+    }
+
+    void PostTranslate(float x, float y)
+    {
+        if (!full_matrix_)
+        {
+            axis_2d_.PostTranslate(new Vector2DF(x, y));
+        }
+        else
+        {
+            matrix_.PostTranslate(x, y);
+        }
+    }
+
+    void PostTranslate(in Vector2DF offset)
+    {
+        PostTranslate(offset.X, offset.Y);
+    }
+
+    public void Scale(float x, float y)
+    {
+        if (!full_matrix_)
+        {
+            axis_2d_.PreScale(new Vector2DF(x, y));
+        }
+        else
+        {
+            matrix_.PreScale(x, y);
+        }
+    }
+
+    public void PostScale(float x, float y)
+    {
+        if (!full_matrix_)
+        {
+            axis_2d_.PostScale(new Vector2DF(x, y));
+        }
+        else
+        {
+            matrix_.PostScale(x, y);
+        }
+    }
+
     public void PreConcat(in AxisTransform2D transform)
     {
         Translate(transform.Translation);
@@ -150,10 +208,7 @@ public struct Transform
     }
 
     // Translate3D
-    // PreConcat
     // Scale3D
-    // Scale
-    // Translate
 
     // Composes a transform from the given |decomp|, following the routines
     // detailed in this specs:
