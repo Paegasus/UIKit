@@ -47,10 +47,10 @@ public struct Transform
     {
         full_matrix_ = true;
 
-        matrix_(r0c0, r1c0, r2c0, r3c0,
+        matrix_ = new(r0c0, r1c0, r2c0, r3c0,
                 r0c1, r1c1, r2c1, r3c1,
                 r0c2, r1c2, r2c2, r3c2,
-                r0c3, r1c3, r2c3, r3c3) 
+                r0c3, r1c3, r2c3, r3c3);
     }
 
     Transform(in Quaternion q) : this(
@@ -103,8 +103,8 @@ public struct Transform
 
     public void PreConcat(in AxisTransform2D transform)
     {
-        Translate(transform.translation());
-        Scale(transform.scale().x(), transform.scale().y());
+        Translate(transform.Translation);
+        Scale(transform.Scale.X, transform.Scale.Y);
     }
 
     public void PreConcat(in Transform transform)
@@ -127,8 +127,8 @@ public struct Transform
 
     public void PostConcat(in AxisTransform2D transform)
     {
-        PostScale(transform.scale().x(), transform.scale().y());
-        PostTranslate(transform.translation());
+        PostScale(transform.Scale.X, transform.Scale.Y);
+        PostTranslate(transform.Translation);
     }
 
     public void PostConcat(in Transform transform)
@@ -174,14 +174,14 @@ public struct Transform
         if (decomp.Perspective.W != 1)
             result.set_rc(3, 3, decomp.Perspective.W);
 
-        //result.Translate3D(decomp.Translate.X, decomp.Translate.Y, decomp.Translate.Z);
+        result.Translate3D(decomp.Translate.X, decomp.Translate.Y, decomp.Translate.Z);
 
         result.PreConcat(new Transform(decomp.Quaternion));
 
         if (decomp.Skew.X != 0 || decomp.Skew.Y != 0 || decomp.Skew.Z != 0)
             result.EnsureFullMatrix().ApplyDecomposedSkews(decomp.Skew);
 
-        //result.Scale3D(decomp.Scale.X, decomp.Scale.Y, decomp.Scale.Z);
+        result.Scale3D(decomp.Scale.X, decomp.Scale.Y, decomp.Scale.Z);
 
         return result;
         
