@@ -6,21 +6,21 @@ namespace UI.GFX.Geometry;
 // corner radii in the order: top-left, top-right, bottom-right, bottom-left.
 public struct RoundedCornersF
 {
-    float upper_left_ = 0.0f;
-    float upper_right_ = 0.0f;
-    float lower_right_ = 0.0f;
-    float lower_left_ = 0.0f;
+    float m_UpperLeft = 0.0f;
+    float m_UpperRight = 0.0f;
+    float m_LowerRight = 0.0f;
+    float m_LowerLeft = 0.0f;
 
     static float kTrivial = 8.0f * float.MachineEpsilon;
 
     // Prevents values which are smaller than zero or negligibly small.
     // Uses the same logic as Size.
-    static float clamp(float f) => f > kTrivial ? f : 0.0f;
+    static float Clamp(float f) => f > kTrivial ? f : 0.0f;
 
-    public float upper_left { readonly get => upper_left_; set => upper_left_ = clamp(upper_left); }
-    public float upper_right { readonly get => upper_right_; set => upper_right_ = clamp(upper_right); }
-    public float lower_right { readonly get => lower_right_; set => lower_right_ = clamp(lower_right); }
-    public float lower_left { readonly get => lower_left_; set => lower_left_ = clamp(lower_left); }
+    public float UpperLeft { readonly get => m_UpperLeft; set => m_UpperLeft = Clamp(UpperLeft); }
+    public float UpperRight { readonly get => m_UpperRight; set => m_UpperRight = Clamp(UpperRight); }
+    public float LowerRight { readonly get => m_LowerRight; set => m_LowerRight = Clamp(LowerRight); }
+    public float LowerLeft { readonly get => m_LowerLeft; set => m_LowerLeft = Clamp(LowerLeft); }
 
     // Creates an empty RoundedCornersF with all corners having zero radius.
     public RoundedCornersF() : this(0.0f) {}
@@ -31,24 +31,24 @@ public struct RoundedCornersF
     // Creates a RoundedCornersF with four different corner radii.
     public RoundedCornersF(float upper_left, float upper_right, float lower_right, float lower_left)
     {
-        upper_left_ = clamp(upper_left);
-        upper_right_ = clamp(upper_right);
-        lower_right_ = clamp(lower_right);
-        lower_left_ = clamp(lower_left);
+        m_UpperLeft = Clamp(upper_left);
+        m_UpperRight = Clamp(upper_right);
+        m_LowerRight = Clamp(lower_right);
+        m_LowerLeft = Clamp(lower_left);
     }
 
     // Returns true if all of the corners are square (zero effective radius).
-    public readonly bool IsEmpty => upper_left_ == 0.0f && upper_right_ == 0.0f && lower_right_ == 0.0f && lower_left_ == 0.0f;
+    public readonly bool IsEmpty => m_UpperLeft == 0.0f && m_UpperRight == 0.0f && m_LowerRight == 0.0f && m_LowerLeft == 0.0f;
 
     // Print members in the same order of the constructor parameters.
-    public override readonly string ToString() => $"{upper_left_},{upper_right_},{lower_right_},{lower_left_}";
+    public override readonly string ToString() => $"{m_UpperLeft},{m_UpperRight},{m_LowerRight},{m_LowerLeft}";
 
-    public override readonly int GetHashCode() => HashCode.Combine(upper_left, upper_right, lower_right, lower_left);
+    public override readonly int GetHashCode() => HashCode.Combine(UpperLeft, UpperRight, LowerRight, LowerLeft);
 
-    public readonly bool Equals(in RoundedCornersF other) => upper_left == other.upper_left && 
-                                                             upper_right == other.upper_right &&
-                                                             lower_right == other.lower_right &&
-                                                             lower_left == other.lower_left;
+    public readonly bool Equals(in RoundedCornersF other) => UpperLeft == other.UpperLeft && 
+                                                             UpperRight == other.UpperRight &&
+                                                             LowerRight == other.LowerRight &&
+                                                             LowerLeft == other.LowerLeft;
 
     public override readonly bool Equals(object? obj) => obj is RoundedCornersF other && Equals(other);
 
