@@ -6,10 +6,10 @@ namespace UI.GFX.Geometry;
 // corner radii in the order: top-left, top-right, bottom-right, bottom-left.
 public struct RoundedCornersF
 {
-    float m_UpperLeft = 0.0f;
-    float m_UpperRight = 0.0f;
-    float m_LowerRight = 0.0f;
-    float m_LowerLeft = 0.0f;
+    private float m_UpperLeft = 0.0f;
+    private float m_UpperRight = 0.0f;
+    private float m_LowerRight = 0.0f;
+    private float m_LowerLeft = 0.0f;
 
     private static readonly float Trivial = 8.0f * float.MachineEpsilon;
 
