@@ -17,22 +17,22 @@ public static class LayoutUnitTest
         Assert.Equal(IntegerMin, new LayoutUnit(IntegerMin).ToInteger());
         Assert.Equal(IntegerMin + 1, new LayoutUnit(IntegerMin + 1).ToInteger());
         Assert.Equal(IntegerMin / 2, new LayoutUnit(IntegerMin / 2).ToInteger());
-        Assert.Equal(-10000,  new LayoutUnit(-10000).ToInteger());
-        Assert.Equal(-1000,  new LayoutUnit(-1000).ToInteger());
-        Assert.Equal(-100,  new LayoutUnit(-100).ToInteger());
-        Assert.Equal(-10,  new LayoutUnit(-10).ToInteger());
-        Assert.Equal(-1,  new LayoutUnit(-1).ToInteger());
-        Assert.Equal(0,  new LayoutUnit(0).ToInteger());
-        Assert.Equal(1,  new LayoutUnit(1).ToInteger());
-        Assert.Equal(100,  new LayoutUnit(100).ToInteger());
-        Assert.Equal(1000,  new LayoutUnit(1000).ToInteger());
-        Assert.Equal(10000,  new LayoutUnit(10000).ToInteger());
+        Assert.Equal(-10000, new LayoutUnit(-10000).ToInteger());
+        Assert.Equal(-1000, new LayoutUnit(-1000).ToInteger());
+        Assert.Equal(-100, new LayoutUnit(-100).ToInteger());
+        Assert.Equal(-10, new LayoutUnit(-10).ToInteger());
+        Assert.Equal(-1, new LayoutUnit(-1).ToInteger());
+        Assert.Equal(0, new LayoutUnit(0).ToInteger());
+        Assert.Equal(1, new LayoutUnit(1).ToInteger());
+        Assert.Equal(100, new LayoutUnit(100).ToInteger());
+        Assert.Equal(1000, new LayoutUnit(1000).ToInteger());
+        Assert.Equal(10000, new LayoutUnit(10000).ToInteger());
         Assert.Equal(IntegerMax / 2, new LayoutUnit(IntegerMax / 2).ToInteger());
         Assert.Equal(IntegerMax - 1, new LayoutUnit(IntegerMax - 1).ToInteger());
-        Assert.Equal(IntegerMax,  new LayoutUnit(IntegerMax).ToInteger());
-        Assert.Equal(IntegerMax,  new LayoutUnit(IntegerMax + 1).ToInteger());
-        Assert.Equal(IntegerMax,  new LayoutUnit(int.MaxValue / 2).ToInteger());
-        Assert.Equal(IntegerMax,  new LayoutUnit(int.MaxValue).ToInteger());
+        Assert.Equal(IntegerMax, new LayoutUnit(IntegerMax).ToInteger());
+        Assert.Equal(IntegerMax, new LayoutUnit(IntegerMax + 1).ToInteger());
+        Assert.Equal(IntegerMax, new LayoutUnit(int.MaxValue / 2).ToInteger());
+        Assert.Equal(IntegerMax, new LayoutUnit(int.MaxValue).ToInteger());
 
         // Test the raw unsaturated value
         Assert.Equal(0, new LayoutUnit(0).RawValue());
