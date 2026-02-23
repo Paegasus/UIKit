@@ -476,22 +476,22 @@ public struct Matrix44
     // this = this * |0    1    skew[2] 0|
     //               |0    0      1     0|
     //               |0    0      0     1|
-    public void ApplyDecomposedSkews(ReadOnlySpan<double> skews)
+    public void ApplyDecomposedSkews(in Vector3D skews)
     {
         //                  / |1 0 0  0|   |1 0 s1 0|   |1 s0 0 0|   |1 s0 s1 0| \
         // |c0 c1 c2 c3| * |  |0 1 s2 0| * |0 1  0 0| * |0  1 0 0| = |0  1 s2 0|  |
         //                 |  |0 0 1  0|   |0 0  1 0|   |0  0 1 0|   |0  0  1 0|  |
         //                  \ |0 0 0  1|   |0 0  0 1|   |0  0 0 1|   |0  0  0 1| /
 
-        _c1r0 += _c0r0 * skews[0];
-        _c1r1 += _c0r1 * skews[0];
-        _c1r2 += _c0r2 * skews[0];
-        _c1r3 += _c0r3 * skews[0];
+        _c1r0 += _c0r0 * skews.X;
+        _c1r1 += _c0r1 * skews.X;
+        _c1r2 += _c0r2 * skews.X;
+        _c1r3 += _c0r3 * skews.X;
 
-        _c2r0 = _c0r0 * skews[1] + _c1r0 * skews[2] + _c2r0;
-        _c2r1 = _c0r1 * skews[1] + _c1r1 * skews[2] + _c2r1;
-        _c2r2 = _c0r2 * skews[1] + _c1r2 * skews[2] + _c2r2;
-        _c2r3 = _c0r3 * skews[1] + _c1r3 * skews[2] + _c2r3;
+        _c2r0 = _c0r0 * skews.Y + _c1r0 * skews.Z + _c2r0;
+        _c2r1 = _c0r1 * skews.Y + _c1r1 * skews.Z + _c2r1;
+        _c2r2 = _c0r2 * skews.Y + _c1r2 * skews.Z + _c2r2;
+        _c2r3 = _c0r3 * skews.Y + _c1r3 * skews.Z + _c2r3;
     }
 
     // this = this * perspective.

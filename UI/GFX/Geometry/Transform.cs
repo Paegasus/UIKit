@@ -66,10 +66,11 @@ public struct Transform
     // PreConcat
     // Scale3D
 
+    // Composes a transform from the given |decomp|, following the routines
+    // detailed in this specs:
+    // https://www.w3.org/TR/css-transforms-2/#recomposing-to-a-3d-matrix
     public static Transform Compose(in DecomposedTransform decomp)
     {
-        throw new NotImplementedException();
-        
         Transform result = new();
 
         if (decomp.Perspective.X != 0)
@@ -87,13 +88,13 @@ public struct Transform
         result.Translate3D(decomp.Translate.X, decomp.Translate.Y, decomp.Translate.Z);
 
         result.PreConcat(new Transform(decomp.Quaternion));
-
-        if (decomp.Skew.X || decomp.Skew.Y || decomp.Skew.Z)
+*/
+        if (decomp.Skew.X != 0 || decomp.Skew.Y != 0 || decomp.Skew.Z != 0)
             result.EnsureFullMatrix().ApplyDecomposedSkews(decomp.Skew);
-
+/*
         result.Scale3D(decomp.Scale.X, decomp.Scale.Y, decomp.Scale.Z);
-
+*/
         return result;
-        */
+        
     }
 }
