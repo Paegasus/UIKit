@@ -552,15 +552,32 @@ public struct Matrix44
 
     // Same as above, but assumes the vec[2] is 0 and vec[3] is 1, discards
     // vec[2], and returns vec[3].
-    public readonly double MapVector2(ReadOnlySpan<double> vec)
+    public readonly double MapVector2(Span<double> vec)
     {
-        throw new NotImplementedException();
+        double v0 = vec[0];
+        double v1 = vec[1];
+        double x = v0 * _c0r0 + v1 * _c1r0 + _c3r0;
+        double y = v0 * _c0r1 + v1 * _c1r1 + _c3r1;
+        double w = v0 * _c0r3 + v1 * _c1r3 + _c3r3;
+        vec[0] = x;
+        vec[1] = y;
+        return w;
     }
 
     // Applies the matrix to the vector in place.
     public readonly void MapVector4(double[] vec)
     {
-        throw new NotImplementedException();
+        Double4 v = new(vec[0], vec[1], vec[2], vec[3]);
+
+        Double4 r0 = new(_c0r0, _c1r0, _c2r0, _c3r0);
+        Double4 r1 = new(_c0r1, _c1r1, _c2r1, _c3r1);
+        Double4 r2 = new(_c0r2, _c1r2, _c2r2, _c3r2);
+        Double4 r3 = new(_c0r3, _c1r3, _c2r3, _c3r3);
+        
+        vec[0] = Double4.Sum(r0 * v);
+        vec[1] = Double4.Sum(r1 * v);
+        vec[2] = Double4.Sum(r2 * v);
+        vec[3] = Double4.Sum(r3 * v);
     }
 
     public void Flatten()
