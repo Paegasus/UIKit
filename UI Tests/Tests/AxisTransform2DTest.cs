@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using UI.GFX.Geometry;
 using Xunit;
 
