@@ -30,8 +30,47 @@ public struct Transform
 
     public Transform()
     {
-        
+        axis_2d_ = new AxisTransform2D();
     }
+
+    public Transform(in AxisTransform2D axis_2d)
+    {
+        axis_2d_ = axis_2d;
+    }
+
+    // Used internally to construct Transform with parameters in col-major order.
+    // clang-format off
+    Transform(double r0c0, double r1c0, double r2c0, double r3c0,
+                      double r0c1, double r1c1, double r2c1, double r3c1,
+                      double r0c2, double r1c2, double r2c2, double r3c2,
+                      double r0c3, double r1c3, double r2c3, double r3c3)
+    {
+        full_matrix_ = true;
+
+        matrix_(r0c0, r1c0, r2c0, r3c0,
+                r0c1, r1c1, r2c1, r3c1,
+                r0c2, r1c2, r2c2, r3c2,
+                r0c3, r1c3, r2c3, r3c3) 
+    }
+
+    Transform(in Quaternion q) : this(
+          // Col 0.
+          1.0 - 2.0 * (q.Y * q.Y + q.Z * q.Z),
+          2.0 * (q.X * q.Y + q.Z * q.W),
+          2.0 * (q.X * q.Z - q.Y * q.W),
+          0,
+          // Col 1.
+          2.0 * (q.X * q.Y - q.Z * q.W),
+          1.0 - 2.0 * (q.X * q.X + q.Z * q.Z),
+          2.0 * (q.Y * q.Z + q.X * q.W),
+          0,
+          // Col 2.
+          2.0 * (q.X * q.Z + q.Y * q.W),
+          2.0 * (q.Y * q.Z - q.X * q.W),
+          1.0 - 2.0 * (q.X * q.X + q.Y * q.Y),
+          0,
+          // Col 3.
+          0, 0, 0, 1) {}
 
     public Matrix44 AxisTransform2dToMatrix44(in AxisTransform2D axis_2d)
     {
@@ -62,9 +101,59 @@ public struct Transform
         EnsureFullMatrix().set_rc(row, col, v);
     }
 
+    public void PreConcat(in AxisTransform2D transform)
+    {
+        Translate(transform.translation());
+        Scale(transform.scale().x(), transform.scale().y());
+    }
+
+    public void PreConcat(in Transform transform)
+    {
+        if (!transform.full_matrix_)
+        {
+            PreConcat(transform.axis_2d_);
+        }
+        else if (!full_matrix_)
+        {
+            AxisTransform2D self = axis_2d_;
+            this = transform;
+            PostConcat(self);
+        }
+        else
+        {
+            matrix_.PreConcat(transform.matrix_);
+        }
+    }
+
+    public void PostConcat(in AxisTransform2D transform)
+    {
+        PostScale(transform.scale().x(), transform.scale().y());
+        PostTranslate(transform.translation());
+    }
+
+    public void PostConcat(in Transform transform)
+    {
+        if (!transform.full_matrix_)
+        {
+            PostConcat(transform.axis_2d_);
+        }
+        else if (!full_matrix_)
+        {
+            AxisTransform2D self = axis_2d_;
+            this = transform;
+            PreConcat(self);
+        }
+        else
+        {
+            matrix_.PostConcat(transform.matrix_);
+        }
+    }
+
     // Translate3D
     // PreConcat
     // Scale3D
+    // Scale
+    // Translate
 
     // Composes a transform from the given |decomp|, following the routines
     // detailed in this specs:
@@ -84,16 +173,16 @@ public struct Transform
         
         if (decomp.Perspective.W != 1)
             result.set_rc(3, 3, decomp.Perspective.W);
-/*
-        result.Translate3D(decomp.Translate.X, decomp.Translate.Y, decomp.Translate.Z);
+
+        //result.Translate3D(decomp.Translate.X, decomp.Translate.Y, decomp.Translate.Z);
 
         result.PreConcat(new Transform(decomp.Quaternion));
-*/
+
         if (decomp.Skew.X != 0 || decomp.Skew.Y != 0 || decomp.Skew.Z != 0)
             result.EnsureFullMatrix().ApplyDecomposedSkews(decomp.Skew);
-/*
-        result.Scale3D(decomp.Scale.X, decomp.Scale.Y, decomp.Scale.Z);
-*/
+
+        //result.Scale3D(decomp.Scale.X, decomp.Scale.Y, decomp.Scale.Z);
+
         return result;
         
     }
