@@ -33,11 +33,16 @@ public struct Transform
         
     }
 
+    public Matrix44 AxisTransform2dToMatrix44(in AxisTransform2D axis_2d)
+    {
+        return new Matrix44(axis_2d.Scale.X, 0, 0, 0,  // col 0
+                            0, axis_2d.Scale.Y, 0, 0,  // col 1
+                            0, 0, 1, 0,                // col 2
+                            axis_2d.Translation.X, axis_2d.Translation.Y, 0, 1);
+    }
+    
     public Matrix44 EnsureFullMatrix()
     {
-        throw new NotImplementedException();
-        
-        /*
         if (!full_matrix_)
         {
             full_matrix_ = true;
@@ -45,7 +50,6 @@ public struct Transform
         }
         
         return matrix_;
-        */
     }
 
     // Sets a value in the matrix at |row|, |col|. It forces full double precision 4x4 matrix.
