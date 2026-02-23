@@ -17,10 +17,10 @@ public struct RoundedCornersF
     // Uses the same logic as Size.
     static float Clamp(float f) => f > kTrivial ? f : 0.0f;
 
-    public float UpperLeft { readonly get => m_UpperLeft; set => m_UpperLeft = Clamp(UpperLeft); }
-    public float UpperRight { readonly get => m_UpperRight; set => m_UpperRight = Clamp(UpperRight); }
-    public float LowerRight { readonly get => m_LowerRight; set => m_LowerRight = Clamp(LowerRight); }
-    public float LowerLeft { readonly get => m_LowerLeft; set => m_LowerLeft = Clamp(LowerLeft); }
+    public float UpperLeft { readonly get => m_UpperLeft; set => m_UpperLeft = Clamp(value); }
+    public float UpperRight { readonly get => m_UpperRight; set => m_UpperRight = Clamp(value); }
+    public float LowerRight { readonly get => m_LowerRight; set => m_LowerRight = Clamp(value); }
+    public float LowerLeft { readonly get => m_LowerLeft; set => m_LowerLeft = Clamp(value); }
 
     // Creates an empty RoundedCornersF with all corners having zero radius.
     public RoundedCornersF() : this(0.0f) {}
