@@ -270,6 +270,8 @@ public struct Transform
         return matrix_;
     }
 
+    // It's not easy to get a hash code
+    // because a Transform either uses a AxisTransform2D or a Matrix44
     //public override readonly int GetHashCode() => HashCode.Combine();
 
     public override readonly bool Equals(object? obj) => obj is Transform other && Equals(other);
