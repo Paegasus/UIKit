@@ -1,5 +1,4 @@
 using System.Diagnostics;
-using static UI.Numerics.ClampedMath;
 
 namespace UI.GFX.Geometry;
 
@@ -39,18 +38,17 @@ public struct Transform
     }
 
     // Used internally to construct Transform with parameters in col-major order.
-    // clang-format off
     Transform(double r0c0, double r1c0, double r2c0, double r3c0,
-                      double r0c1, double r1c1, double r2c1, double r3c1,
-                      double r0c2, double r1c2, double r2c2, double r3c2,
-                      double r0c3, double r1c3, double r2c3, double r3c3)
+              double r0c1, double r1c1, double r2c1, double r3c1,
+              double r0c2, double r1c2, double r2c2, double r3c2,
+              double r0c3, double r1c3, double r2c3, double r3c3)
     {
         full_matrix_ = true;
 
         matrix_ = new(r0c0, r1c0, r2c0, r3c0,
-                r0c1, r1c1, r2c1, r3c1,
-                r0c2, r1c2, r2c2, r3c2,
-                r0c3, r1c3, r2c3, r3c3);
+                      r0c1, r1c1, r2c1, r3c1,
+                      r0c2, r1c2, r2c2, r3c2,
+                      r0c3, r1c3, r2c3, r3c3);
     }
 
     Transform(in Quaternion q) : this(
@@ -72,7 +70,7 @@ public struct Transform
           // Col 3.
           0, 0, 0, 1) {}
 
-    public Matrix44 AxisTransform2dToMatrix44(in AxisTransform2D axis_2d)
+    public static Matrix44 AxisTransform2dToMatrix44(in AxisTransform2D axis_2d)
     {
         return new Matrix44(axis_2d.Scale.X, 0, 0, 0,  // col 0
                             0, axis_2d.Scale.Y, 0, 0,  // col 1
@@ -262,4 +260,13 @@ public struct Transform
         return result;
         
     }
+
+    //public override readonly int GetHashCode() => HashCode.Combine();
+
+    public override readonly bool Equals(object? obj) => obj is Transform other && Equals(other);
+
+    public readonly bool Equals(Transform other) => m_Origin.Equals(other.m_Origin) && m_Width == other.m_Width && m_Height == other.m_Height && m_Depth == other.m_Depth;
+
+    public static bool operator ==(in Transform left, in Transform right) => left.Equals(right);
+    public static bool operator !=(in Transform left, in Transform right) => !left.Equals(right);
 }

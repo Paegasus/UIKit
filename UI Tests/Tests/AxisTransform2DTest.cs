@@ -6,88 +6,75 @@ namespace UI.Tests;
 
 public static class AxisTransform2DTest
 {
-    public static void Run()
-    {
-        TestMapping();
-        TestScaling();
-        TestTranslating();
-        TestConcat();
-        TestInverse();
-        TestClampOutput();
-        TestDecompose();
-
-        Debug.WriteLine("All AxisTransform2D tests passed!");
-    }
-
-    private static bool FloatEqual(float a, float b) => MathF.Abs(a - b) <= 1e-6f;
-
-    private static bool FloatNear(float val1, float val2, float abs_error) => MathF.Abs(val1 - val2) <= abs_error;
-
-
+    [Fact]
     private static void TestMapping()
     {
         AxisTransform2D t = new(1.25f, new Vector2DF(3.75f, 55.0f));
 
         PointF p = new(150.0f, 100.0f);
-        Debug.Assert(new PointF(191.25f, 180.0f) == t.MapPoint(p));
-        Debug.Assert(new PointF(117.0f, 36.0f) == t.InverseMapPoint(p));
+        Assert.Equal(new PointF(191.25f, 180.0f), t.MapPoint(p));
+        Assert.Equal(new PointF(117.0f, 36.0f), t.InverseMapPoint(p));
 
         RectF r = new(150.0f, 100.0f, 22.5f, 37.5f);
-        Debug.Assert(new RectF(191.25f, 180.0f, 28.125f, 46.875f) == t.MapRect(r));
-        Debug.Assert(new RectF(117.0f, 36.0f, 18.0f, 30.0f) == t.InverseMapRect(r));
+        Assert.Equal(new RectF(191.25f, 180.0f, 28.125f, 46.875f), t.MapRect(r));
+        Assert.Equal(new RectF(117.0f, 36.0f, 18.0f, 30.0f), t.InverseMapRect(r));
     }
 
+    [Fact]
     private static void TestScaling()
     {
         {
             AxisTransform2D t = new(1.25f, new Vector2DF(3.75f, 55.0f));
-            Debug.Assert(new AxisTransform2D(1.5625f, new Vector2DF(3.75f, 55.0f)) == AxisTransform2D.PreScaleAxisTransform2D(t, 1.25f));
+            Assert.Equal(new AxisTransform2D(1.5625f, new Vector2DF(3.75f, 55.0f)), AxisTransform2D.PreScaleAxisTransform2D(t, 1.25f));
             t.PreScale(new Vector2DF(1.25f, 1.25f));
-            Debug.Assert(new AxisTransform2D(1.5625f, new Vector2DF(3.75f, 55.0f)) == t);
+            Assert.Equal(new AxisTransform2D(1.5625f, new Vector2DF(3.75f, 55.0f)), t);
         }
 
         {
             AxisTransform2D t = new(1.25f, new Vector2DF(3.75f, 55.0f));
-            Debug.Assert(new AxisTransform2D(1.5625f, new Vector2DF(4.6875f, 68.75f)) == AxisTransform2D.PostScaleAxisTransform2D(t, 1.25f));
+            Assert.Equal(new AxisTransform2D(1.5625f, new Vector2DF(4.6875f, 68.75f)), AxisTransform2D.PostScaleAxisTransform2D(t, 1.25f));
             t.PostScale(new Vector2DF(1.25f, 1.25f));
-            Debug.Assert(new AxisTransform2D(1.5625f, new Vector2DF(4.6875f, 68.75f)) == t);
+            Assert.Equal(new AxisTransform2D(1.5625f, new Vector2DF(4.6875f, 68.75f)), t);
         }
     }
 
+    [Fact]
     private static void TestTranslating()
     {
         Vector2DF tr = new(3.0f, -5.0f);
         {
             AxisTransform2D t = new(1.25f, new Vector2DF(3.75f, 55.0f));
-            Debug.Assert(new AxisTransform2D(1.25f, new Vector2DF(7.5f, 48.75f)) == AxisTransform2D.PreTranslateAxisTransform2D(t, tr));
+            Assert.Equal(new AxisTransform2D(1.25f, new Vector2DF(7.5f, 48.75f)), AxisTransform2D.PreTranslateAxisTransform2D(t, tr));
             t.PreTranslate(tr);
-            Debug.Assert(new AxisTransform2D(1.25f, new Vector2DF(7.5f, 48.75f)) == t);
+            Assert.Equal(new AxisTransform2D(1.25f, new Vector2DF(7.5f, 48.75f)), t);
         }
 
         {
             AxisTransform2D t = new(1.25f, new Vector2DF(3.75f, 55.0f));
-            Debug.Assert(new AxisTransform2D(1.25f, new Vector2DF(6.75f, 50.0f)) == AxisTransform2D.PostTranslateAxisTransform2D(t, tr));
+            Assert.Equal(new AxisTransform2D(1.25f, new Vector2DF(6.75f, 50.0f)), AxisTransform2D.PostTranslateAxisTransform2D(t, tr));
             t.PostTranslate(tr);
-            Debug.Assert(new AxisTransform2D(1.25f, new Vector2DF(6.75f, 50.0f)) == t);
+            Assert.Equal(new AxisTransform2D(1.25f, new Vector2DF(6.75f, 50.0f)), t);
         }
     }
 
+    [Fact]
     private static void TestConcat()
     {
         AxisTransform2D pre = new(1.25f, new Vector2DF(3.75f, 55.0f));
         AxisTransform2D post = new(0.5f, new Vector2DF(10.0f, 5.0f));
         AxisTransform2D expectation = new(0.625f, new Vector2DF(11.875f, 32.5f));
-        Debug.Assert(expectation == AxisTransform2D.ConcatAxisTransform2D(post, pre));
+        Assert.Equal(expectation, AxisTransform2D.ConcatAxisTransform2D(post, pre));
 
         AxisTransform2D post_concat = pre;
         post_concat.PostConcat(post);
-        Debug.Assert(expectation == post_concat);
+        Assert.Equal(expectation, post_concat);
 
         AxisTransform2D pre_concat = post;
         pre_concat.PreConcat(pre);
-        Debug.Assert(expectation == pre_concat);
+        Assert.Equal(expectation, pre_concat);
     }
 
+    [Fact]
     private static void TestInverse()
     {
         AxisTransform2D t = new(1.25f, new Vector2DF(3.75f, 55.0f));
@@ -95,11 +82,12 @@ public static class AxisTransform2DTest
         inv_inplace.Invert();
         AxisTransform2D inv_out_of_place = AxisTransform2D.InvertAxisTransform2D(t);
 
-        Debug.Assert(inv_inplace == inv_out_of_place);
-        Debug.Assert(new AxisTransform2D() == AxisTransform2D.ConcatAxisTransform2D(t, inv_inplace));
-        Debug.Assert(new AxisTransform2D() == AxisTransform2D.ConcatAxisTransform2D(inv_inplace, t));
+        Assert.Equal(inv_inplace, inv_out_of_place);
+        Assert.Equal(new AxisTransform2D(), AxisTransform2D.ConcatAxisTransform2D(t, inv_inplace));
+        Assert.Equal(new AxisTransform2D(), AxisTransform2D.ConcatAxisTransform2D(inv_inplace, t));
     }
 
+    [Fact]
     private static void TestClampOutput()
     {
         (float, float)[] entries =
@@ -124,13 +112,13 @@ public static class AxisTransform2DTest
             {
                 //Debug.WriteLine($"m: {m} factor: {factor}");
                 PointF p = m.MapPoint(new PointF(factor, factor));
-                Debug.Assert(is_valid_point(p));
+                Assert.True(is_valid_point(p));
 
                 // AxisTransform2d::MapRect() requires non-negative scales.
                 if (m.Scale.X >= 0 && m.Scale.Y >= 0)
                 {
                     RectF r = m.MapRect(new RectF(factor, factor, factor, factor));
-                    Debug.Assert(is_valid_rect(r));
+                    Assert.True(is_valid_rect(r));
                 }
             }
 
@@ -140,6 +128,7 @@ public static class AxisTransform2DTest
         }
     }
 
+    [Fact]
     private static void TestDecompose()
     {
         {
@@ -153,7 +142,7 @@ public static class AxisTransform2DTest
             expected.SetPerspective(0f, 0f, 0f, 1f);
             expected.SetQuaternion(0f, 0f, 0f, 1f);
 
-            Debug.Assert(expected == decomp);
+            Assert.Equal(expected, decomp);
             //Debug.Assert(new Transform(transform), Transform.Compose(decomp));
         }
         {
@@ -167,8 +156,8 @@ public static class AxisTransform2DTest
             expected.SetPerspective(0f, 0f, 0f, 1f);
             expected.SetQuaternion(0f, 0f, 1f, 0f);
 
-            Debug.Assert(expected == decomp);
-            //Debug.Assert(new Transform(transform) == Transform.Compose(decomp));
+            Assert.Equal(expected, decomp);
+            Assert.Equal(new Transform(transform), Transform.Compose(decomp));
         }
         {
             var transform =
@@ -182,8 +171,8 @@ public static class AxisTransform2DTest
             expected.SetPerspective(0f, 0f, 0f, 1f);
             expected.SetQuaternion(0f, 0f, 0f, 1f);
 
-            Debug.Assert(expected == decomp);
-            //Debug.Assert(new Transform(transform) == Transform.Compose(decomp));
+            Assert.Equal(expected, decomp);
+            Assert.Equal(new Transform(transform), Transform.Compose(decomp));
         }
     }
 }
