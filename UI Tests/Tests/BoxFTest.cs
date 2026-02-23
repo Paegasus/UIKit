@@ -75,6 +75,98 @@ public static class BoxFTest
     [Fact]
     private static void TestExpandTo()
     {
-        
+        BoxF box1 = new();
+        BoxF box2 = new(0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f);
+        BoxF box3 = new(1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f);
+
+        Point3F point1 = new(0.5f, 0.5f, 0.5f);
+        Point3F point2 = new(-0.5f, -0.5f, -0.5f);
+
+        BoxF expected1_1 = new(0.0f, 0.0f, 0.0f, 0.5f, 0.5f, 0.5f);
+        BoxF expected1_2 = new(-0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 1.0f);
+
+        BoxF expected2_1 = box2;
+        BoxF expected2_2 = new(-0.5f, -0.5f, -0.5f, 1.5f, 1.5f, 1.5f);
+
+        BoxF expected3_1 = new(0.5f, 0.5f, 0.5f, 0.5f, 0.5f, 0.5f);
+        BoxF expected3_2 = new(-0.5f, -0.5f, -0.5f, 1.5f, 1.5f, 1.5f);
+
+        box1.ExpandTo(point1);
+        Assert.Equal(expected1_1.ToString(), box1.ToString());
+        box1.ExpandTo(point2);
+        Assert.Equal(expected1_2.ToString(), box1.ToString());
+
+        box2.ExpandTo(point1);
+        Assert.Equal(expected2_1.ToString(), box2.ToString());
+        box2.ExpandTo(point2);
+        Assert.Equal(expected2_2.ToString(), box2.ToString());
+
+        box3.ExpandTo(point1);
+        Assert.Equal(expected3_1.ToString(), box3.ToString());
+        box3.ExpandTo(point2);
+        Assert.Equal(expected3_2.ToString(), box3.ToString());
+    }
+
+    [Fact]
+    private static void TestScale()
+    {
+        BoxF box1 = new(2.0f, 3.0f, 4.0f, 5.0f, 6.0f, 7.0f);
+
+        Assert.Equal(new BoxF().ToString(), BoxF.ScaleBox(box1, 0.0f).ToString());
+        Assert.Equal(box1.ToString(), BoxF.ScaleBox(box1, 1.0f).ToString());
+        Assert.Equal(new BoxF(4.0f, 12.0f, 24.0f, 10.0f, 24.0f, 42.0f).ToString(), BoxF.ScaleBox(box1, 2.0f, 4.0f, 6.0f).ToString());
+
+        BoxF box2 = box1;
+        box2.Scale(0.0f);
+        Assert.Equal(new BoxF().ToString(), box2.ToString());
+
+        box2 = box1;
+        box2.Scale(1.0f);
+        Assert.Equal(box1.ToString(), box2.ToString());
+
+        box2.Scale(2.0f, 4.0f, 6.0f);
+        Assert.Equal(new BoxF(4.0f, 12.0f, 24.0f, 10.0f, 24.0f, 42.0f).ToString(), box2.ToString());
+    }
+
+    [Fact]
+    private static void TestEquals()
+    {
+        Assert.True(new BoxF() == new BoxF());
+        Assert.True(new BoxF(2.0f, 3.0f, 4.0f, 6.0f, 8.0f, 10.0f) == new BoxF(2.0f, 3.0f, 4.0f, 6.0f, 8.0f, 10.0f));
+        Assert.False(new BoxF() == new BoxF(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f));
+        Assert.False(new BoxF() == new BoxF(0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f));
+        Assert.False(new BoxF() == new BoxF(0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f));
+        Assert.False(new BoxF() == new BoxF(0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f));
+        Assert.False(new BoxF() == new BoxF(0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f));
+        Assert.False(new BoxF() == new BoxF(1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f));
+    }
+
+    [Fact]
+    private static void TestNotEquals()
+    {
+        Assert.False(new BoxF() != new BoxF());
+        Assert.False(new BoxF(2.0f, 3.0f, 4.0f, 6.0f, 8.0f, 10.0f) != new BoxF(2.0f, 3.0f, 4.0f, 6.0f, 8.0f, 10.0f));
+        Assert.True(new BoxF() != new BoxF(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f));
+        Assert.True(new BoxF() != new BoxF(0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f));
+        Assert.True(new BoxF() != new BoxF(0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f));
+        Assert.True(new BoxF() != new BoxF(0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f));
+        Assert.True(new BoxF() != new BoxF(0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f));
+        Assert.True(new BoxF() != new BoxF(1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f));
+    }
+
+    [Fact]
+    private static void TestOffset()
+    {
+        BoxF box1 = new(2.0f, 3.0f, 4.0f, 5.0f, 6.0f, 7.0f);
+
+        Assert.Equal(box1.ToString(), (box1 + new Vector3DF(0.0f, 0.0f, 0.0f)).ToString());
+        Assert.Equal(new BoxF(3.0f, 1.0f, 0.0f, 5.0f, 6.0f, 7.0f).ToString(), (box1 + new Vector3DF(1.0f, -2.0f, -4.0f)).ToString());
+
+        BoxF box2 = box1;
+        box2 += new Vector3DF(0.0f, 0.0f, 0.0f);
+        Assert.Equal(box1.ToString(), box2.ToString());
+
+        box2 += new Vector3DF(1.0f, -2.0f, -4.0f);
+        Assert.Equal(new BoxF(3.0f, 1.0f, 0.0f, 5.0f, 6.0f, 7.0f).ToString(), box2.ToString());
     }
 }
