@@ -1,44 +1,22 @@
-using System.Diagnostics;
-using UI.GFX.Geometry;
 using Xunit;
+
+using UI.GFX.Geometry;
 
 namespace UI.Tests;
 
 public static class Vector3DFTest
 {
-    public static void Run()
-    {
-        TestIsZero();
-        TestAdd();
-        TestNegative();
-        TestScale();
-        TestLength();
-        TestDotProduct();
-        TestCrossProduct();
-        TestClampVector3dF();
-        TestAngleBetweenVectorsInDegress();
-        TestClockwiseAngleBetweenVectorsInDegress();
-        TestGetNormalized();
-        TestToString();
-
-        Debug.WriteLine("All Vector3DF tests passed!");
-    }
-
-    private static bool FloatEqual(float a, float b) => MathF.Abs(a - b) <= 1e-6f;
-
-    private static bool FloatNear(float val1, float val2, float abs_error) => MathF.Abs(val1 - val2) <= abs_error;
-
-    private static bool DoubleNear(double val1, double val2, double abs_error) => Math.Abs(val1 - val2) <= abs_error;
-
+    [Fact]
     private static void TestIsZero()
     {
         Vector3DF float_zero = new(0, 0, 0);
         Vector3DF float_nonzero = new(0.1f, -0.1f, 0.1f);
 
-        Debug.Assert(float_zero.IsZero());
-        Debug.Assert(!float_nonzero.IsZero());
+        Assert.True(float_zero.IsZero());
+        Assert.False(float_nonzero.IsZero());
     }
 
+    [Fact]
     private static void TestAdd()
     {
         Vector3DF f1 = new(3.1f, 5.1f, 2.7f);
@@ -53,10 +31,11 @@ public static class Vector3DFTest
 
         foreach (var (expected, actual) in values)
         {
-            Debug.Assert(expected.ToString() == actual.ToString());
+            Assert.Equal(expected.ToString(), actual.ToString());
         }
     }
 
+    [Fact]
     private static void TestNegative()
     {
         (Vector3DF expected, Vector3DF actual)[] values =
@@ -70,9 +49,10 @@ public static class Vector3DFTest
         ];
 
         foreach (var (expected, actual) in values)
-            Debug.Assert(expected.ToString() == actual.ToString());
+            Assert.Equal(expected.ToString(), actual.ToString());
     }
 
+    [Fact]
     private static void TestScale()
     {
         (float, float, float, float, float, float)[] triple_values =
@@ -107,14 +87,14 @@ public static class Vector3DFTest
         {
             Vector3DF v = new(ONE, TWO, THREE);
             v.Scale(FOUR, FIVE, SIX);
-            Debug.Assert(ONE * FOUR == v.X);
-            Debug.Assert(TWO * FIVE == v.Y);
-            Debug.Assert(THREE * SIX == v.Z);
+            Assert.Equal(ONE * FOUR, v.X);
+            Assert.Equal(TWO * FIVE, v.Y);
+            Assert.Equal(THREE * SIX, v.Z);
 
             Vector3DF v2 = Vector3DF.ScaleVector3D(new Vector3DF(ONE, TWO, THREE), FOUR, FIVE, SIX);
-            Debug.Assert(ONE * FOUR == v2.X);
-            Debug.Assert(TWO * FIVE == v2.Y);
-            Debug.Assert(THREE * SIX == v2.Z);
+            Assert.Equal(ONE * FOUR, v2.X);
+            Assert.Equal(TWO * FIVE, v2.Y);
+            Assert.Equal(THREE * SIX, v2.Z);
         }
 
         (float, float, float, float)[] single_values =
@@ -139,17 +119,18 @@ public static class Vector3DFTest
         {
             Vector3DF v = new(ONE, TWO, THREE);
             v.Scale(FOUR);
-            Debug.Assert(ONE * FOUR == v.X);
-            Debug.Assert(TWO * FOUR == v.Y);
-            Debug.Assert(THREE * FOUR == v.Z);
+            Assert.Equal(ONE * FOUR, v.X);
+            Assert.Equal(TWO * FOUR, v.Y);
+            Assert.Equal(THREE * FOUR, v.Z);
 
             Vector3DF v2 = Vector3DF.ScaleVector3D(new Vector3DF(ONE, TWO, THREE), FOUR);
-            Debug.Assert(ONE * FOUR == v2.X);
-            Debug.Assert(TWO * FOUR == v2.Y);
-            Debug.Assert(THREE * FOUR == v2.Z);
+            Assert.Equal(ONE * FOUR, v2.X);
+            Assert.Equal(TWO * FOUR, v2.Y);
+            Assert.Equal(THREE * FOUR, v2.Z);
         }
     }
 
+    [Fact]
     private static void TestLength()
     {
         float kFloatTolerance = 1e-7f;
@@ -188,11 +169,12 @@ public static class Vector3DFTest
 
             Vector3DF vector = new(v0, v1, v2);
             
-            Debug.Assert(DoubleNear(length_squared, vector.LengthSquared(), kDoubleTolerance));
-            Debug.Assert(FloatNear((float)length, vector.Length(), kFloatTolerance));
+            Assert.Equal(length_squared, vector.LengthSquared(), kDoubleTolerance);
+            Assert.Equal((float)length, vector.Length(), kFloatTolerance);
         }
     }
 
+    [Fact]
     private static void TestDotProduct()
     {
         (float, Vector3DF, Vector3DF)[] tests =
@@ -212,10 +194,11 @@ public static class Vector3DFTest
         foreach (var (expected, input1, input2) in tests)
         {
             float actual = Vector3DF.DotProduct(input1, input2);
-            Debug.Assert(expected == actual);
+            Assert.Equal(expected, actual);
         }
     }
 
+    [Fact]
     private static void TestCrossProduct()
     {
         (Vector3DF, Vector3DF, Vector3DF)[] tests =
@@ -237,43 +220,45 @@ public static class Vector3DFTest
         foreach (var (expected, input1, input2) in tests)
         {
             Vector3DF actual = Vector3DF.CrossProduct(input1, input2);
-            Debug.Assert(expected.ToString() == actual.ToString());
+            Assert.Equal(expected.ToString(), actual.ToString());
         }
     }
 
+    [Fact]
     private static void TestClampVector3dF()
     {
         Vector3DF a;
 
         a = new Vector3DF(3.5f, 5.5f, 7.5f);
-        Debug.Assert(new Vector3DF(3.5f, 5.5f, 7.5f).ToString() == a.ToString());
+        Assert.Equal(new Vector3DF(3.5f, 5.5f, 7.5f).ToString(), a.ToString());
         a.SetToMax(new Vector3DF(2, 4.5f, 6.5f));
-        Debug.Assert(new Vector3DF(3.5f, 5.5f, 7.5f).ToString() == a.ToString());
+        Assert.Equal(new Vector3DF(3.5f, 5.5f, 7.5f).ToString(), a.ToString());
         a.SetToMax(new Vector3DF(3.5f, 5.5f, 7.5f));
-        Debug.Assert(new Vector3DF(3.5f, 5.5f, 7.5f).ToString() == a.ToString());
+        Assert.Equal(new Vector3DF(3.5f, 5.5f, 7.5f).ToString(), a.ToString());
         a.SetToMax(new Vector3DF(4.5f, 2, 6.5f));
-        Debug.Assert(new Vector3DF(4.5f, 5.5f, 7.5f).ToString() == a.ToString());
+        Assert.Equal(new Vector3DF(4.5f, 5.5f, 7.5f).ToString(), a.ToString());
         a.SetToMax(new Vector3DF(3.5f, 6.5f, 6.5f));
-        Debug.Assert(new Vector3DF(4.5f, 6.5f, 7.5f).ToString() == a.ToString());
+        Assert.Equal(new Vector3DF(4.5f, 6.5f, 7.5f).ToString(), a.ToString());
         a.SetToMax(new Vector3DF(3.5f, 5.5f, 8.5f));
-        Debug.Assert(new Vector3DF(4.5f, 6.5f, 8.5f).ToString() == a.ToString());
+        Assert.Equal(new Vector3DF(4.5f, 6.5f, 8.5f).ToString(), a.ToString());
         a.SetToMax(new Vector3DF(8.5f, 10.5f, 12.5f));
-        Debug.Assert(new Vector3DF(8.5f, 10.5f, 12.5f).ToString() == a.ToString());
+        Assert.Equal(new Vector3DF(8.5f, 10.5f, 12.5f).ToString(), a.ToString());
 
         a.SetToMin(new Vector3DF(9.5f, 11.5f, 13.5f));
-        Debug.Assert(new Vector3DF(8.5f, 10.5f, 12.5f).ToString() == a.ToString());
+        Assert.Equal(new Vector3DF(8.5f, 10.5f, 12.5f).ToString(), a.ToString());
         a.SetToMin(new Vector3DF(8.5f, 10.5f, 12.5f));
-        Debug.Assert(new Vector3DF(8.5f, 10.5f, 12.5f).ToString() == a.ToString());
+        Assert.Equal(new Vector3DF(8.5f, 10.5f, 12.5f).ToString(), a.ToString());
         a.SetToMin(new Vector3DF(7.5f, 11.5f, 13.5f));
-        Debug.Assert(new Vector3DF(7.5f, 10.5f, 12.5f).ToString() == a.ToString());
+        Assert.Equal(new Vector3DF(7.5f, 10.5f, 12.5f).ToString(), a.ToString());
         a.SetToMin(new Vector3DF(9.5f, 9.5f, 13.5f));
-        Debug.Assert(new Vector3DF(7.5f, 9.5f, 12.5f).ToString() == a.ToString());
+        Assert.Equal(new Vector3DF(7.5f, 9.5f, 12.5f).ToString(), a.ToString());
         a.SetToMin(new Vector3DF(9.5f, 11.5f, 11.5f));
-        Debug.Assert(new Vector3DF(7.5f, 9.5f, 11.5f).ToString() == a.ToString());
+        Assert.Equal(new Vector3DF(7.5f, 9.5f, 11.5f).ToString(), a.ToString());
         a.SetToMin(new Vector3DF(3.5f, 5.5f, 7.5f));
-        Debug.Assert(new Vector3DF(3.5f, 5.5f, 7.5f).ToString() == a.ToString());
+        Assert.Equal(new Vector3DF(3.5f, 5.5f, 7.5f).ToString(), a.ToString());
     }
 
+    [Fact]
     private static void TestAngleBetweenVectorsInDegress()
     {
         float kTolerance = 1e-7f;
@@ -295,12 +280,13 @@ public static class Vector3DFTest
         foreach (var (expected, input1, input2) in tests)
         {
             float actual = Vector3DF.AngleBetweenVectorsInDegrees(input1, input2);
-            Debug.Assert(FloatNear(expected, actual, kTolerance));
+            Assert.Equal(expected, actual, kTolerance);
             actual = Vector3DF.AngleBetweenVectorsInDegrees(input2, input1);
-            Debug.Assert(FloatNear(expected, actual, kTolerance));
+            Assert.Equal(expected, actual, kTolerance);
         }
     }
 
+    [Fact]
     private static void TestClockwiseAngleBetweenVectorsInDegress()
     {
         float kTolerance = 1e-7f;
@@ -320,17 +306,18 @@ public static class Vector3DFTest
         {
             float actual = Vector3DF.ClockwiseAngleBetweenVectorsInDegrees(input1, input2, normal_vector);
             
-            Debug.Assert(FloatNear(expected, actual, kTolerance));
+            Assert.Equal(expected, actual, kTolerance);
             
             actual = -Vector3DF.ClockwiseAngleBetweenVectorsInDegrees(input2, input1, normal_vector);
 
             if (actual < 0.0f)
                 actual += 360.0f;
 
-            Debug.Assert(FloatNear(expected, actual, kTolerance));
+            Assert.Equal(expected, actual, kTolerance);
         }
     }
 
+    [Fact]
     private static void TestGetNormalized()
     {
         (bool, Vector3DF, Vector3DF)[] tests =
@@ -344,13 +331,14 @@ public static class Vector3DFTest
         foreach(var (expected, v, normalized) in tests)
         {
             Vector3DF n;
-            Debug.Assert(expected == v.GetNormalized(out n));
-            Debug.Assert(normalized.ToString() == n.ToString());
+            Assert.Equal(expected, v.GetNormalized(out n));
+            Assert.Equal(normalized.ToString(), n.ToString());
         }
     }
 
+    [Fact]
     private static void TestToString()
     {
-        Debug.Assert("[1.03125 2.5 -3]" == new Vector3DF(1.03125f, 2.5f, -3f).ToString());
+        Assert.Equal("[1.03125 2.5 -3]", new Vector3DF(1.03125f, 2.5f, -3f).ToString());
     }
 }

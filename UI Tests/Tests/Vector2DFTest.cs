@@ -6,10 +6,6 @@ namespace UI.Tests;
 
 public static class Vector2DFTest
 {
-    private static bool FloatEqual(float a, float b) => MathF.Abs(a - b) <= 1e-6f;
-
-    private static bool FloatNear(float val1, float val2, float abs_error) => MathF.Abs(val1 - val2) <= abs_error;
-
     [Fact]
     private static void TestVector2DToVector2DF()
     {
@@ -123,11 +119,9 @@ public static class Vector2DFTest
     [Fact]
     private static void TestLength()
     {
-        float tolerance = 1e-6f;
-
         Assert.Equal(0.0f, new Vector2DF(0, 0).Length());
         Assert.Equal(1.0f, new Vector2DF(1, 0).Length());
-        Assert.Equal(1.414214f, new Vector2DF(1, 1).Length(), tolerance);
+        Assert.Equal(1.414214f, new Vector2DF(1, 1).Length(), 1e-6f);
         Assert.Equal(2.236068f, new Vector2DF(-1, -2).Length());
 
         // The Pythagorean triples 3-4-5 and 5-12-13.
@@ -150,15 +144,15 @@ public static class Vector2DFTest
     private static void TestSlopeAngleRadians()
     {
         // The function is required to be very accurate, so we use a smaller tolerance than EXPECT_FLOAT_EQ().
-        float kTolerance = 1e-7f;
-        float kPi = 3.1415927f;
-        Assert.True(FloatNear(0, new Vector2DF(0, 0).SlopeAngleRadians(), kTolerance));
-        Assert.True(FloatNear(0, new Vector2DF(1, 0).SlopeAngleRadians(), kTolerance));
-        Assert.True(FloatNear(kPi / 4, new Vector2DF(1, 1).SlopeAngleRadians(), kTolerance));
-        Assert.True(FloatNear(kPi / 2, new Vector2DF(0, 1).SlopeAngleRadians(), kTolerance));
-        Assert.True(FloatNear(kPi, new Vector2DF(-50, 0).SlopeAngleRadians(), kTolerance));
-        Assert.True(FloatNear(-kPi * 3 / 4, new Vector2DF(-50, -50).SlopeAngleRadians(), kTolerance));
-        Assert.True(FloatNear(-kPi / 4, new Vector2DF(1, -1).SlopeAngleRadians(), kTolerance));
+        float Tolerance = 1e-7f;
+        float Pi = 3.1415927f;
+        Assert.Equal(0, new Vector2DF(0, 0).SlopeAngleRadians(), Tolerance);
+        Assert.Equal(0, new Vector2DF(1, 0).SlopeAngleRadians(), Tolerance);
+        Assert.Equal(Pi / 4, new Vector2DF(1, 1).SlopeAngleRadians(), Tolerance);
+        Assert.Equal(Pi / 2, new Vector2DF(0, 1).SlopeAngleRadians(), Tolerance);
+        Assert.Equal(Pi, new Vector2DF(-50, 0).SlopeAngleRadians(), Tolerance);
+        Assert.Equal(-Pi * 3 / 4, new Vector2DF(-50, -50).SlopeAngleRadians(), Tolerance);
+        Assert.Equal(-Pi / 4, new Vector2DF(1, -1).SlopeAngleRadians(), Tolerance);
     }
 
     [Fact]
