@@ -11,11 +11,11 @@ public struct RoundedCornersF
     float m_LowerRight = 0.0f;
     float m_LowerLeft = 0.0f;
 
-    static float kTrivial = 8.0f * float.MachineEpsilon;
+    static readonly float Trivial = 8.0f * float.MachineEpsilon;
 
     // Prevents values which are smaller than zero or negligibly small.
     // Uses the same logic as Size.
-    static float Clamp(float f) => f > kTrivial ? f : 0.0f;
+    static float Clamp(float f) => f > Trivial ? f : 0.0f;
 
     public float UpperLeft { readonly get => m_UpperLeft; set => m_UpperLeft = Clamp(value); }
     public float UpperRight { readonly get => m_UpperRight; set => m_UpperRight = Clamp(value); }
