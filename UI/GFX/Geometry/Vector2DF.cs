@@ -2,7 +2,7 @@ using System.Runtime.CompilerServices;
 
 namespace UI.GFX.Geometry;
 
-public struct Vector2DF : IEquatable<Vector2DF>
+public struct Vector2DF
 {
     public float X;
     public float Y;
