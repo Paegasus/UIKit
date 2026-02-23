@@ -11,7 +11,7 @@ public struct RoundedCornersF
     float m_LowerRight = 0.0f;
     float m_LowerLeft = 0.0f;
 
-    static readonly float Trivial = 8.0f * float.MachineEpsilon;
+    private static readonly float Trivial = 8.0f * float.MachineEpsilon;
 
     // Prevents values which are smaller than zero or negligibly small.
     // Uses the same logic as Size.
