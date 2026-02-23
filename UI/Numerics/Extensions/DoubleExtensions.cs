@@ -9,6 +9,6 @@ public static class DoubleExtensions
         /// Also known as the "machine epsilon" for IEEE-754 double.
         /// Equivalent to C++ std::numeric_limits<double>::epsilon().
         /// </summary>
-        public static double MachineEpsilon => Math.Pow(2, -52);
+        public static double MachineEpsilon => Math.BitIncrement(1f) - 1f;
     }
 }

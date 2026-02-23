@@ -1,5 +1,3 @@
-using System.Diagnostics;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 namespace UI.GFX.Geometry;
@@ -20,6 +18,6 @@ public struct Double4(double v0, double v1, double v2, double v3)
     // {v[1], v[0], v[3], v[2]}
     public static Double4 SwapInPairs(in Double4 v) => new(v.V1, v.V0, v.V3, v.V2);
 
-    public static double Sum(Double4 v) => v.V0 + v.V1 + v.V2 + v.V3;
+    public static double Sum(in Double4 v) => v.V0 + v.V1 + v.V2 + v.V3;
 }
   

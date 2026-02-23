@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using UI.Extensions;
 
 namespace UI.GFX.Geometry;
 
@@ -559,7 +560,7 @@ public struct Matrix44
     // Applies the matrix to the vector in place.
     public readonly void MapVector4(double[] vec)
     {
-        
+        throw new NotImplementedException();
     }
 
     public void Flatten()
@@ -685,6 +686,229 @@ public struct Matrix44
         decomp.Quaternion.Y = 0;
         decomp.Quaternion.Z = Math.Sin(0.5 * angle);
         decomp.Quaternion.W = Math.Cos(0.5 * angle);
+
+        return decomp;
+    }
+
+    public readonly DecomposedTransform? Decompose()
+    {
+        // See documentation of Transform::Decompose() for why we need the 2d branch.
+        if (Is2DTransform)
+            return Decompose2D();
+
+        // https://www.w3.org/TR/css-transforms-2/#decomposing-a-3d-matrix.
+
+        Double4 c0 = new(_c0r0, _c0r1, _c0r2, _c0r3);
+        Double4 c1 = new(_c1r0, _c1r1, _c1r2, _c1r3);
+        Double4 c2 = new(_c2r0, _c2r1, _c2r2, _c2r3);
+        Double4 c3 = new(_c3r0, _c3r1, _c3r2, _c3r3);
+
+        // Normalize the matrix.
+        if (!double.IsNormal(c3.V3))
+            return null;
+
+        double inv_w = 1.0 / c3.V3;
+        c0 *= inv_w;
+        c1 *= inv_w;
+        c2 *= inv_w;
+        c3 *= inv_w;
+
+        Double4 perspective = new (c0.V3, c1.V3, c2.V3, 1.0);
+
+        // Clear the perspective partition.
+        c0.V3 = c1.V3 = c2.V3 = 0;
+        c3.V3 = 1;
+
+        Double4 inverse_c0 = c0;
+        Double4 inverse_c1 = c1;
+        Double4 inverse_c2 = c2;
+        Double4 inverse_c3 = c3;
+
+        if (!InverseWithDouble4Cols(ref inverse_c0, ref inverse_c1, ref inverse_c2, ref inverse_c3))
+            return null;
+
+        DecomposedTransform decomp = new();
+
+        // First, isolate perspective.
+        if (perspective.V0 != 0 || perspective.V1 != 0 || perspective.V2 != 0 || perspective.V3 != 1)
+        {
+            // Solve the equation by multiplying perspective by the inverse.
+            decomp.Perspective.X = Double4.Sum(perspective * inverse_c0);
+            decomp.Perspective.Y = Double4.Sum(perspective * inverse_c1);
+            decomp.Perspective.Z = Double4.Sum(perspective * inverse_c2);
+            decomp.Perspective.W = Double4.Sum(perspective * inverse_c3);
+        }
+
+        // Next take care of translation (easy).
+        decomp.Translate.X = c3.V0;
+        c3.V0 = 0;
+        decomp.Translate.Y = c3.V1;
+        c3.V1 = 0;
+        decomp.Translate.Z = c3.V2;
+        c3.V2 = 0;
+
+        // Note: Deviating from the spec in terms of variable naming. The matrix is
+        // stored on column major order and not row major. Using the variable 'row'
+        // instead of 'column' in the spec pseudocode has been the source of
+        // confusion, specifically in sorting out rotations.
+
+        // From now on, only the first 3 components of the Double4 column is used.
+
+        static double sum3(in Double4 c)
+        {
+            return c.V0 + c.V1 + c.V2;
+        }
+
+        static bool extract_scale(ref Double4 c, out double scale)
+        {
+            scale = Math.Sqrt(sum3(c * c));
+
+            if (!double.IsNormal(scale))
+                return false;
+
+            c *= 1.0 / scale;
+
+            return true;
+        }
+
+        static double epsilon_to_zero(double d)
+        {
+            return Math.Abs(d) < float.MachineEpsilon ? 0.0 : d;
+        }
+
+        // Compute X scale factor and normalize the first column.
+        if (!extract_scale(ref c0, out decomp.Scale.X))
+            return null;
+
+        // Compute XY shear factor and make 2nd column orthogonal to 1st.
+        decomp.Skew.X = epsilon_to_zero(sum3(c0 * c1));
+        c1 -= c0 * decomp.Skew.X;
+
+        // Now, compute Y scale and normalize 2nd column.
+        if (!extract_scale(ref c1, out decomp.Scale.Y))
+            return null;
+
+        decomp.Skew.X /= decomp.Scale.Y;
+
+        // Compute XZ and YZ shears, and orthogonalize the 3rd column.
+        decomp.Skew.Y = epsilon_to_zero(sum3(c0 * c2));
+        c2 -= c0 * decomp.Skew.Y;
+        decomp.Skew.Z = epsilon_to_zero(sum3(c1 * c2));
+        c2 -= c1 * decomp.Skew.Z;
+
+        // Next, get Z scale and normalize the 3rd column.
+        if (!extract_scale(ref c2, out decomp.Scale.Z))
+            return null;
+
+        decomp.Skew.Y /= decomp.Scale.Z;
+        decomp.Skew.Z /= decomp.Scale.Z;
+
+        // At this point, the matrix is orthonormal.
+        // Check for a coordinate system flip.  If the determinant is -1, then negate
+        // the matrix and the scaling factors.
+        static Double4 cross3(in Double4 a, in Double4 b)
+        {
+            return new Double4(a.V1, a.V2, a.V0, a.V3) * new Double4(b.V2, b.V0, b.V1, b.V3) - new Double4(a.V2, a.V0, a.V1, a.V3) * new Double4(b.V1, b.V2, b.V0, b.V3);
+        };
+
+        Double4 pdum3 = cross3(c1, c2);
+
+        if (sum3(c0 * pdum3) < 0)
+        {
+            // Flip all 3 scaling factors, following the 3d decomposition spec. See
+            // documentation of Transform::Decompose() about the difference between
+            // the 2d spec and and 3d spec about scale flipping.
+            decomp.Scale.X *= -1;
+            decomp.Scale.Y *= -1;
+            decomp.Scale.Z *= -1;
+            c0 *= -1;
+            c1 *= -1;
+            c2 *= -1;
+        }
+
+        // Lastly, compute the quaternions.
+        // See https://en.wikipedia.org/wiki/Rotation_matrix#Quaternion.
+        // Note: deviating from spec (http://www.w3.org/TR/css3-transforms/)
+        // which has a degenerate case when the trace (t) of the orthonormal matrix
+        // (Q) approaches -1. In the Wikipedia article, Q_ij is indexing on row then
+        // column. Thus, Q_ij = column[j][i].
+
+        // The following are equivalent representations of the rotation matrix:
+        //
+        // Axis-angle form:
+        //
+        //      [ c+(1-c)x^2  (1-c)xy-sz  (1-c)xz+sy ]    c = cos theta
+        // R =  [ (1-c)xy+sz  c+(1-c)y^2  (1-c)yz-sx ]    s = sin theta
+        //      [ (1-c)xz-sy  (1-c)yz+sx  c+(1-c)z^2 ]    [x,y,z] = axis or rotation
+        //
+        // The sum of the diagonal elements (trace) is a simple function of the cosine
+        // of the angle. The w component of the quaternion is cos(theta/2), and we
+        // make use of the double angle formula to directly compute w from the
+        // trace. Differences between pairs of skew symmetric elements in this matrix
+        // isolate the remaining components. Since w can be zero (also numerically
+        // unstable if near zero), we cannot rely solely on this approach to compute
+        // the quaternion components.
+        //
+        // Quaternion form:
+        //
+        //       [ 1-2(y^2+z^2)    2(xy-zw)      2(xz+yw)   ]
+        //  r =  [   2(xy+zw)    1-2(x^2+z^2)    2(yz-xw)   ]    q = (x,y,z,w)
+        //       [   2(xz-yw)      2(yz+xw)    1-2(x^2+y^2) ]
+        //
+        // Different linear combinations of the diagonal elements isolates x, y or z.
+        // Sums or differences between skew symmetric elements isolate the remainder.
+
+        double r, s, t, x, y, z, w;
+
+        t = c0.V0 + c1.V1 + c2.V2;  // trace of Q
+
+        // https://en.wikipedia.org/wiki/Rotation_matrix#Quaternion
+        if (1 + t > 0.001)
+        {
+            // Numerically stable as long as 1+t is not close to zero. Otherwise use the
+            // diagonal element with the greatest value to compute the quaternions.
+            r = Math.Sqrt(1.0 + t);
+            s = 0.5 / r;
+            w = 0.5 * r;
+            x = (c1.V2 - c2.V1) * s;
+            y = (c2.V0 - c0.V2) * s;
+            z = (c0.V1 - c1.V0) * s;
+        }
+        else if (c0.V0 > c1.V1 && c0.V0 > c2.V2)
+        {
+            // Q_xx is largest.
+            r = Math.Sqrt(1.0 + c0.V0 - c1.V1 - c2.V2);
+            s = 0.5 / r;
+            x = 0.5 * r;
+            y = (c1.V0 + c0.V1) * s;
+            z = (c2.V0 + c0.V2) * s;
+            w = (c1.V2 - c2.V1) * s;
+        }
+        else if (c1.V1 > c2.V2)
+        {
+            // Q_yy is largest.
+            r = Math.Sqrt(1.0 - c0.V0 + c1.V1 - c2.V2);
+            s = 0.5 / r;
+            x = (c1.V0 + c0.V1) * s;
+            y = 0.5 * r;
+            z = (c2.V1 + c1.V2) * s;
+            w = (c2.V0 - c0.V2) * s;
+        }
+        else
+        {
+            // Q_zz is largest.
+            r = Math.Sqrt(1.0 - c0.V0 - c1.V1 + c2.V2);
+            s = 0.5 / r;
+            x = (c2.V0 + c0.V2) * s;
+            y = (c2.V1 + c1.V2) * s;
+            z = 0.5 * r;
+            w = (c0.V1 - c1.V0) * s;
+        }
+
+        decomp.Quaternion.X = x;
+        decomp.Quaternion.Y = y;
+        decomp.Quaternion.Z = z;
+        decomp.Quaternion.W = w;
 
         return decomp;
     }

@@ -11,6 +11,6 @@ public static class FloatExtensions
         /// Also known as the "machine epsilon" for IEEE-754 float.
         /// Equivalent to C++ std::numeric_limits<float>::epsilon().
         /// </summary>
-        public static float MachineEpsilon => MathF.Pow(2, -23);
+        public static float MachineEpsilon => MathF.BitIncrement(1f) - 1f;
     }
 }
