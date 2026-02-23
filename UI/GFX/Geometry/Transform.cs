@@ -40,7 +40,7 @@ public struct Transform
                             0, 0, 1, 0,                // col 2
                             axis_2d.Translation.X, axis_2d.Translation.Y, 0, 1);
     }
-    
+
     public Matrix44 EnsureFullMatrix()
     {
         if (!full_matrix_)
@@ -55,15 +55,11 @@ public struct Transform
     // Sets a value in the matrix at |row|, |col|. It forces full double precision 4x4 matrix.
     public void set_rc(int row, int col, double v)
     {
-        throw new NotImplementedException();
-
-        /*
 #if DEBUG
         Debug.Assert((uint)row <= 3u);
         Debug.Assert((uint)col <= 3u);
 #endif
         EnsureFullMatrix().set_rc(row, col, v);
-        */
     }
 
     public static Transform Compose(in DecomposedTransform decomp)
