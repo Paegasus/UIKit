@@ -8,116 +8,82 @@ namespace UI.Tests;
 
 public static class LayoutUnitTest
 {
-    public static void Run()
-    {
-        TestInt();
-        TestUnsigned();
-        TestInt64();
-        TestFloat();
-        TestFromFloatCeil();
-        TestFromFloatFloor();
-        TestFromFloatRound();
-        TestRounding();
-        TestFromFloatEncompassRound();
-        TestSnapSizeToPixel();
-        TestMultiplication();
-        TestMultiplicationByInt();
-        TestDivision();
-        TestDivisionByInt();
-        TestMulDiv();
-        TestCeil();
-        TestFloor();
-        TestFloatOverflow();
-        TestUnaryMinus();
-        TestPlusPlus();
-        TestIntMod();
-        TestFraction();
-        TestFixedConsts();
-        TestFixed();
-        TestRaw64FromInt32();
-        TestRaw64FromRaw32();
-        TestTo();
-        TestToClampSameFractional64To32();
-        TestToClampLessFractional64To32();
-        TestToClampMoreFractional();
-        TestRaw64Ceil();
-
-        Debug.WriteLine("All LayoutUnit tests passed!");
-    }
-
     private static bool FloatEqual(float a, float b) => MathF.Abs(a - b) <= 1e-6f;
 
     private static bool FloatNear(float val1, float val2, float abs_error) => MathF.Abs(val1 - val2) <= abs_error;
 
+    [Fact]
     private static void TestInt()
     {
-        Debug.Assert(IntegerMin == new LayoutUnit(int.MinValue).ToInteger());
-        Debug.Assert(IntegerMin == new LayoutUnit(int.MinValue / 2).ToInteger());
-        Debug.Assert(IntegerMin == new LayoutUnit(IntegerMin - 1).ToInteger());
-        Debug.Assert(IntegerMin == new LayoutUnit(IntegerMin).ToInteger());
-        Debug.Assert(IntegerMin + 1 == new LayoutUnit(IntegerMin + 1).ToInteger());
-        Debug.Assert(IntegerMin / 2 == new LayoutUnit(IntegerMin / 2).ToInteger());
-        Debug.Assert(-10000 ==  new LayoutUnit(-10000).ToInteger());
-        Debug.Assert(-1000 ==  new LayoutUnit(-1000).ToInteger());
-        Debug.Assert(-100 ==  new LayoutUnit(-100).ToInteger());
-        Debug.Assert(-10 ==  new LayoutUnit(-10).ToInteger());
-        Debug.Assert(-1 ==  new LayoutUnit(-1).ToInteger());
-        Debug.Assert(0 ==  new LayoutUnit(0).ToInteger());
-        Debug.Assert(1 ==  new LayoutUnit(1).ToInteger());
-        Debug.Assert(100 ==  new LayoutUnit(100).ToInteger());
-        Debug.Assert(1000 ==  new LayoutUnit(1000).ToInteger());
-        Debug.Assert(10000 ==  new LayoutUnit(10000).ToInteger());
-        Debug.Assert(IntegerMax / 2 == new LayoutUnit(IntegerMax / 2).ToInteger());
-        Debug.Assert(IntegerMax - 1 == new LayoutUnit(IntegerMax - 1).ToInteger());
-        Debug.Assert(IntegerMax ==  new LayoutUnit(IntegerMax).ToInteger());
-        Debug.Assert(IntegerMax ==  new LayoutUnit(IntegerMax + 1).ToInteger());
-        Debug.Assert(IntegerMax ==  new LayoutUnit(int.MaxValue / 2).ToInteger());
-        Debug.Assert(IntegerMax ==  new LayoutUnit(int.MaxValue).ToInteger());
+        Assert.Equal(IntegerMin, new LayoutUnit(int.MinValue).ToInteger());
+        Assert.Equal(IntegerMin, new LayoutUnit(int.MinValue / 2).ToInteger());
+        Assert.Equal(IntegerMin, new LayoutUnit(IntegerMin - 1).ToInteger());
+        Assert.Equal(IntegerMin, new LayoutUnit(IntegerMin).ToInteger());
+        Assert.Equal(IntegerMin + 1, new LayoutUnit(IntegerMin + 1).ToInteger());
+        Assert.Equal(IntegerMin / 2, new LayoutUnit(IntegerMin / 2).ToInteger());
+        Assert.Equal(-10000,  new LayoutUnit(-10000).ToInteger());
+        Assert.Equal(-1000,  new LayoutUnit(-1000).ToInteger());
+        Assert.Equal(-100,  new LayoutUnit(-100).ToInteger());
+        Assert.Equal(-10,  new LayoutUnit(-10).ToInteger());
+        Assert.Equal(-1,  new LayoutUnit(-1).ToInteger());
+        Assert.Equal(0,  new LayoutUnit(0).ToInteger());
+        Assert.Equal(1,  new LayoutUnit(1).ToInteger());
+        Assert.Equal(100,  new LayoutUnit(100).ToInteger());
+        Assert.Equal(1000,  new LayoutUnit(1000).ToInteger());
+        Assert.Equal(10000,  new LayoutUnit(10000).ToInteger());
+        Assert.Equal(IntegerMax / 2, new LayoutUnit(IntegerMax / 2).ToInteger());
+        Assert.Equal(IntegerMax - 1, new LayoutUnit(IntegerMax - 1).ToInteger());
+        Assert.Equal(IntegerMax,  new LayoutUnit(IntegerMax).ToInteger());
+        Assert.Equal(IntegerMax,  new LayoutUnit(IntegerMax + 1).ToInteger());
+        Assert.Equal(IntegerMax,  new LayoutUnit(int.MaxValue / 2).ToInteger());
+        Assert.Equal(IntegerMax,  new LayoutUnit(int.MaxValue).ToInteger());
 
         // Test the raw unsaturated value
-        Debug.Assert(0 == new LayoutUnit(0).RawValue());
+        Assert.Equal(0, new LayoutUnit(0).RawValue());
         // Internally the max number we can represent (without saturating)
         // is all the (non-sign) bits set except for the bottom n fraction bits
         const int max_internal_representation = int.MaxValue ^ ((1 << FractionalBits) - 1);
-        Debug.Assert(max_internal_representation == new LayoutUnit(IntegerMax).RawValue());
-        Debug.Assert(RawValueMax == new LayoutUnit(IntegerMax + 100).RawValue());
-        Debug.Assert((IntegerMax - 100) << FractionalBits == new LayoutUnit(IntegerMax - 100).RawValue());
-        Debug.Assert(RawValueMin == new LayoutUnit(IntegerMin).RawValue());
-        Debug.Assert(RawValueMin == new LayoutUnit(IntegerMin - 100).RawValue());
+        Assert.Equal(max_internal_representation, new LayoutUnit(IntegerMax).RawValue());
+        Assert.Equal(RawValueMax, new LayoutUnit(IntegerMax + 100).RawValue());
+        Assert.Equal((IntegerMax - 100) << FractionalBits, new LayoutUnit(IntegerMax - 100).RawValue());
+        Assert.Equal(RawValueMin, new LayoutUnit(IntegerMin).RawValue());
+        Assert.Equal(RawValueMin, new LayoutUnit(IntegerMin - 100).RawValue());
         // Shifting negative numbers left has undefined behavior, so use
         // multiplication instead of direct shifting here.
-        Debug.Assert((IntegerMin + 100) * (1 << FractionalBits) == new LayoutUnit(IntegerMin + 100).RawValue());
+        Assert.Equal((IntegerMin + 100) * (1 << FractionalBits), new LayoutUnit(IntegerMin + 100).RawValue());
     }
 
+    [Fact]
     private static void TestUnsigned()
     {
         // Test the raw unsaturated value
-        Debug.Assert(0 == new LayoutUnit((uint)0).RawValue());
-        Debug.Assert(RawValueMax == new LayoutUnit((uint)IntegerMax).RawValue());
+        Assert.Equal(0, new LayoutUnit((uint)0).RawValue());
+        Assert.Equal(RawValueMax, new LayoutUnit((uint)IntegerMax).RawValue());
         const uint kOverflowed = IntegerMax + 100;
-        Debug.Assert(RawValueMax == new LayoutUnit(kOverflowed).RawValue());
+        Assert.Equal(RawValueMax,new LayoutUnit(kOverflowed).RawValue());
         const uint kNotOverflowed = IntegerMax - 100;
-        Debug.Assert((IntegerMax - 100) << FractionalBits == new LayoutUnit(kNotOverflowed).RawValue());
+        Assert.Equal((IntegerMax - 100) << FractionalBits, new LayoutUnit(kNotOverflowed).RawValue());
     }
 
+    [Fact]
     private static void TestInt64()
     {
         const int raw_min = int.MinValue;
         const int raw_max = int.MaxValue;
 
-        Debug.Assert(new LayoutUnit((long)raw_min - 100) == MinValue);
-        Debug.Assert(new LayoutUnit((long)raw_max + 100) == MaxValue);
-        Debug.Assert(new LayoutUnit((long)raw_max + 100) == MaxValue);
+        Assert.Equal(new LayoutUnit((long)raw_min - 100), MinValue);
+        Assert.Equal(new LayoutUnit((long)raw_max + 100), MaxValue);
+        Assert.Equal(new LayoutUnit((long)raw_max + 100), MaxValue);
     }
 
     private static void TestFloat()
     {
         const float Tolerance = 1.0f / FixedPointDenominator;
 
-        Debug.Assert(1.0f == new LayoutUnit(1.0f).ToFloat());
-        Debug.Assert(1.25f == new LayoutUnit(1.25f).ToFloat());
-        Debug.Assert(new LayoutUnit(1.25f) == new LayoutUnit(1.25f + Tolerance / 2));
-        Debug.Assert(new LayoutUnit(-2.0f) == new LayoutUnit(-2.0f - Tolerance / 2));
+        Assert.Equal(1.0f, new LayoutUnit(1.0f).ToFloat());
+        Assert.Equal(1.25f, new LayoutUnit(1.25f).ToFloat());
+        Assert.Equal(new LayoutUnit(1.25f), new LayoutUnit(1.25f + Tolerance / 2));
+        Assert.Equal(new LayoutUnit(-2.0f), new LayoutUnit(-2.0f - Tolerance / 2));
         Debug.Assert(FloatNear(new LayoutUnit(1.1f).ToFloat(), 1.1f, Tolerance));
         Debug.Assert(FloatNear(new LayoutUnit(1.33f).ToFloat(), 1.33f, Tolerance));
         Debug.Assert(FloatNear(new LayoutUnit(1.3333f).ToFloat(), 1.3333f, Tolerance));
