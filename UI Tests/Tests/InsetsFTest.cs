@@ -1,7 +1,6 @@
 using Xunit;
 
 using UI.GFX.Geometry;
-using UI.Extensions;
 
 namespace UI.Tests;
 
