@@ -1,6 +1,7 @@
 using Xunit;
 
 using UI.GFX.Geometry;
+using System.Diagnostics;
 
 namespace UI.Tests;
 
@@ -42,7 +43,7 @@ public static class LinearGradientTest
     }
 
     [Fact]
-    private static void Reverse()
+    private static void TestReverse()
     {
         LinearGradient gradient = new(45);
 
@@ -58,11 +59,43 @@ public static class LinearGradientTest
         Assert.Equal(45, gradient.Angle);
         Assert.Equal(3, gradient.StepCount);
 
-        Assert.Equal(0.2f, gradient.Steps[0].Fraction, 0.0000001);
+        float tolerance = 1E-7f;
+
+        Assert.Equal(0.2f, gradient.Steps[0].Fraction, tolerance);
         Assert.Equal(1, gradient.Steps[0].Alpha);
-        Assert.Equal(0.5f, gradient.Steps[1].Fraction);
+        Assert.Equal(0.5f, gradient.Steps[1].Fraction, tolerance);
         Assert.Equal(50, gradient.Steps[1].Alpha);
-        Assert.Equal(0.9f, gradient.Steps[2].Fraction);
+        Assert.Equal(0.9f, gradient.Steps[2].Fraction, tolerance);
         Assert.Equal(0, gradient.Steps[2].Alpha);
+    }
+
+    [Fact]
+    private static void TestApplyTransform()
+    {
+        {
+            LinearGradient gradient = new(45);
+            Transform transform = new();
+            transform.Translate(10, 50);
+            gradient.ApplyTransform(transform);
+            Assert.Equal(45, gradient.Angle);
+        }
+        // Scale can change the angle.
+        {
+            LinearGradient gradient = new(45);
+            Transform transform = new();
+            transform.Scale(1, 10);
+            gradient.ApplyTransform(transform);
+            Assert.Equal(84, gradient.Angle);
+        }
+        {
+            LinearGradient gradient = new(45);
+            Transform transform = new();
+            transform.Rotate(45);
+
+            //Debug.WriteLine(transform.GetFullMatrix());
+
+            gradient.ApplyTransform(transform);
+            Assert.Equal(0, gradient.Angle); // Fails, Expected: 0, Actual: -23
+        }
     }
 }

@@ -19,7 +19,7 @@ namespace UI.GFX.Geometry;
 //   in the method comments.
 // - On assignment, the new matrix will keep the choice of the rhs matrix.
 //
-public struct Transform
+public class Transform
 {
     // axis_2d_ is used if full_matrix_ is false, otherwise matrix_ is used.
     // See the class documentation for more details about how we use them.
@@ -74,9 +74,9 @@ public struct Transform
           0, 0, 0, 1) {}
 
     // Returns true if the matrix is either identity or pure translation.
-    public readonly bool IsIdentityOrTranslation => !full_matrix_ ? axis_2d_.Scale == new Vector2DF(1, 1) : matrix_.IsIdentityOrTranslation;
+    public bool IsIdentityOrTranslation => !full_matrix_ ? axis_2d_.Scale == new Vector2DF(1, 1) : matrix_.IsIdentityOrTranslation;
 
-    public readonly PointF MapPointInternal(in Matrix44 matrix, in PointF point)
+    public PointF MapPointInternal(in Matrix44 matrix, in PointF point)
     {
 #if DEBUG
         Debug.Assert(full_matrix_);
@@ -96,12 +96,12 @@ public struct Transform
         return new PointF(ClampFloatGeometry(p[0]), ClampFloatGeometry(p[1]));
     }
 
-    public readonly Point MapPoint(in Point point)
+    public Point MapPoint(in Point point)
     {
         return ToRoundedPoint(MapPoint(new PointF(point)));
     }
 
-    public readonly PointF MapPoint(in PointF point)
+    public PointF MapPoint(in PointF point)
     {
         if (!full_matrix_)
         {
@@ -118,7 +118,7 @@ public struct Transform
                             axis_2d.Translation.X, axis_2d.Translation.Y, 0, 1);
     }
 
-    public Matrix44 EnsureFullMatrix()
+    public ref Matrix44 EnsureFullMatrix()
     {
         if (!full_matrix_)
         {
@@ -126,7 +126,7 @@ public struct Transform
             matrix_ = AxisTransform2DToMatrix44(axis_2d_);
         }
         
-        return matrix_;
+        return ref matrix_;
     }
 
     // Sets a value in the matrix at |row|, |col|. It forces full double precision 4x4 matrix.
@@ -233,7 +233,10 @@ public struct Transform
         else if (!full_matrix_)
         {
             AxisTransform2D self = axis_2d_;
-            this = transform;
+            // Copy from the transform
+            full_matrix_ = transform.full_matrix_;
+            axis_2d_ = transform.axis_2d_;
+            matrix_ = transform.matrix_;
             PostConcat(self);
         }
         else
@@ -257,7 +260,10 @@ public struct Transform
         else if (!full_matrix_)
         {
             AxisTransform2D self = axis_2d_;
-            this = transform;
+            // Copy from the trasnform
+            full_matrix_ = transform.full_matrix_;
+            axis_2d_ = transform.axis_2d_;
+            matrix_ = transform.matrix_;
             PreConcat(self);
         }
         else
@@ -266,8 +272,23 @@ public struct Transform
         }
     }
 
-    // Translate3D
-    // Scale3D
+    // Applies the current transformation on an axis-angle rotation and assigns
+    // the result to |this|.
+
+    public void RotateAboutZAxis(double degrees)
+    {
+        SinCos sin_cos = SinCos.SinCosDegrees(degrees);
+        if (sin_cos.IsZeroAngle())
+            return;
+        EnsureFullMatrix().RotateAboutZAxisSinCos(sin_cos.sin, sin_cos.cos);
+    }
+
+    // Applies the current transformation on a 2d rotation and assigns the result
+    // to |this|, i.e. this = this * rotation.
+    public void Rotate(double degrees)
+    {
+        RotateAboutZAxis(degrees);
+    }
 
     // Composes a transform from the given |decomp|, following the routines
     // detailed in this specs:
@@ -301,7 +322,7 @@ public struct Transform
         
     }
 
-    public readonly Matrix44 GetFullMatrix()
+    public Matrix44 GetFullMatrix()
     {
         if (!full_matrix_)
         {
@@ -312,9 +333,9 @@ public struct Transform
 
     // It's not easy to get a hash code
     // because a Transform either uses a AxisTransform2D or a Matrix44
-    //public override readonly int GetHashCode() => HashCode.Combine();
+    //public override int GetHashCode() => HashCode.Combine();
 
-    public readonly bool Equals(in Transform other)
+    public bool Equals(Transform other)
     {
         if (!full_matrix_ && !other.full_matrix_)
         {
@@ -327,7 +348,7 @@ public struct Transform
         return GetFullMatrix() == other.GetFullMatrix();
     }
 
-    public override readonly bool Equals(object? obj) => obj is Transform other && Equals(other);
+    public override bool Equals(object? obj) => obj is Transform other && Equals(other);
 
     public static bool operator ==(in Transform left, in Transform right) => left.Equals(right);
     public static bool operator !=(in Transform left, in Transform right) => !left.Equals(right);

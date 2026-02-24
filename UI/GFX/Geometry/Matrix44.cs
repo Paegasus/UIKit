@@ -297,21 +297,14 @@ public struct Matrix44
     {
         if (sx == 1 && sy == 1 && sz == 1)
             return;
-        
-        _c0r0 *= sx;
-        _c0r1 *= sx;
-        _c0r2 *= sx;
-        _c0r3 *= sx;
 
-        _c1r0 *= sy;
-        _c1r1 *= sy;
-        _c1r2 *= sy;
-        _c1r3 *= sy;
-
-        _c2r0 *= sz;
-        _c2r1 *= sz;
-        _c2r2 *= sz;
-        _c2r3 *= sz;
+        // Multiplies each column element-wise by {sx, sy, sz, 1},
+        // equivalent to diag(sx, sy, sz, 1) * this (post-multiply).
+        _c0r0 *= sx; _c0r1 *= sy; _c0r2 *= sz;
+        _c1r0 *= sx; _c1r1 *= sy; _c1r2 *= sz;
+        _c2r0 *= sx; _c2r1 *= sy; _c2r2 *= sz;
+        _c3r0 *= sx; _c3r1 *= sy; _c3r2 *= sz;
+        // row 3 is multiplied by 1, so _c*r3 are unchanged.
     }
 
     // this = this * m.
@@ -375,43 +368,55 @@ public struct Matrix44
     // Special case for x axis of RotateUnitSinCos().
     public void RotateAboutXAxisSinCos(double sin_angle, double cos_angle)
     {
-        _c1r0 = _c1r0 * cos_angle + _c2r0 * sin_angle;
-        _c1r1 = _c1r1 * cos_angle + _c2r1 * sin_angle;
-        _c1r2 = _c1r2 * cos_angle + _c2r2 * sin_angle;
-        _c1r3 = _c1r3 * cos_angle + _c2r3 * sin_angle;
+        // Snapshot c1 and c2 before overwriting
+        double c1r0 = _c1r0, c1r1 = _c1r1, c1r2 = _c1r2, c1r3 = _c1r3;
+        double c2r0 = _c2r0, c2r1 = _c2r1, c2r2 = _c2r2, c2r3 = _c2r3;
 
-        _c2r0 = _c2r0 * cos_angle - _c1r0 * sin_angle;
-        _c2r1 = _c2r1 * cos_angle - _c1r1 * sin_angle;
-        _c2r2 = _c2r2 * cos_angle - _c1r2 * sin_angle;
-        _c2r3 = _c2r3 * cos_angle - _c1r3 * sin_angle;
+        _c1r0 = c1r0 * cos_angle + c2r0 * sin_angle;
+        _c1r1 = c1r1 * cos_angle + c2r1 * sin_angle;
+        _c1r2 = c1r2 * cos_angle + c2r2 * sin_angle;
+        _c1r3 = c1r3 * cos_angle + c2r3 * sin_angle;
+
+        _c2r0 = c2r0 * cos_angle - c1r0 * sin_angle;
+        _c2r1 = c2r1 * cos_angle - c1r1 * sin_angle;
+        _c2r2 = c2r2 * cos_angle - c1r2 * sin_angle;
+        _c2r3 = c2r3 * cos_angle - c1r3 * sin_angle;
     }
 
     // Special case for y axis of RotateUnitSinCos().
     public void RotateAboutYAxisSinCos(double sin_angle, double cos_angle)
     {
-        _c0r0 = _c0r0 * cos_angle - _c2r0 * sin_angle;
-        _c0r1 = _c0r1 * cos_angle - _c2r1 * sin_angle;
-        _c0r2 = _c0r2 * cos_angle - _c2r2 * sin_angle;
-        _c0r3 = _c0r3 * cos_angle - _c2r3 * sin_angle;
+        // Snapshot c0 and c2 before overwriting
+        double c0r0 = _c0r0, c0r1 = _c0r1, c0r2 = _c0r2, c0r3 = _c0r3;
+        double c2r0 = _c2r0, c2r1 = _c2r1, c2r2 = _c2r2, c2r3 = _c2r3;
 
-        _c2r0 = _c2r0 * cos_angle + _c0r0 * sin_angle;
-        _c2r1 = _c2r1 * cos_angle + _c0r1 * sin_angle;
-        _c2r2 = _c2r2 * cos_angle + _c0r2 * sin_angle;
-        _c2r3 = _c2r3 * cos_angle + _c0r3 * sin_angle;
+        _c0r0 = c0r0 * cos_angle - c2r0 * sin_angle;
+        _c0r1 = c0r1 * cos_angle - c2r1 * sin_angle;
+        _c0r2 = c0r2 * cos_angle - c2r2 * sin_angle;
+        _c0r3 = c0r3 * cos_angle - c2r3 * sin_angle;
+
+        _c2r0 = c2r0 * cos_angle + c0r0 * sin_angle;
+        _c2r1 = c2r1 * cos_angle + c0r1 * sin_angle;
+        _c2r2 = c2r2 * cos_angle + c0r2 * sin_angle;
+        _c2r3 = c2r3 * cos_angle + c0r3 * sin_angle;
     }
 
     // Special case for z axis of RotateUnitSinCos().
     public void RotateAboutZAxisSinCos(double sin_angle, double cos_angle)
     {
-        _c0r0 = _c0r0 * cos_angle + _c1r0 * sin_angle;
-        _c0r1 = _c0r1 * cos_angle + _c1r1 * sin_angle;
-        _c0r2 = _c0r2 * cos_angle + _c1r2 * sin_angle;
-        _c0r3 = _c0r3 * cos_angle + _c1r3 * sin_angle;
+        // Snapshot c0 and c1 before overwriting
+        double c0r0 = _c0r0, c0r1 = _c0r1, c0r2 = _c0r2, c0r3 = _c0r3;
+        double c1r0 = _c1r0, c1r1 = _c1r1, c1r2 = _c1r2, c1r3 = _c1r3;
 
-        _c1r0 = _c1r0 * cos_angle - _c0r0 * sin_angle;
-        _c1r1 = _c1r1 * cos_angle - _c0r1 * sin_angle;
-        _c1r2 = _c1r2 * cos_angle - _c0r2 * sin_angle;
-        _c1r3 = _c1r3 * cos_angle - _c0r3 * sin_angle;
+        _c0r0 = c0r0 * cos_angle + c1r0 * sin_angle;
+        _c0r1 = c0r1 * cos_angle + c1r1 * sin_angle;
+        _c0r2 = c0r2 * cos_angle + c1r2 * sin_angle;
+        _c0r3 = c0r3 * cos_angle + c1r3 * sin_angle;
+
+        _c1r0 = c1r0 * cos_angle - c0r0 * sin_angle;
+        _c1r1 = c1r1 * cos_angle - c0r1 * sin_angle;
+        _c1r2 = c1r2 * cos_angle - c0r2 * sin_angle;
+        _c1r3 = c1r3 * cos_angle - c0r3 * sin_angle;
     }
 
     // Rotates this matrix about the specified unit-length axis vector,
@@ -461,15 +466,18 @@ public struct Matrix44
     // this = this * skew.
     public void Skew(double tan_skew_x, double tan_skew_y)
     {
-        _c0r0 += _c1r0 * tan_skew_y;
-        _c0r1 += _c1r1 * tan_skew_y;
-        _c0r2 += _c1r2 * tan_skew_y;
-        _c0r3 += _c1r3 * tan_skew_y;
+        double c0r0 = _c0r0, c0r1 = _c0r1, c0r2 = _c0r2, c0r3 = _c0r3;
+        double c1r0 = _c1r0, c1r1 = _c1r1, c1r2 = _c1r2, c1r3 = _c1r3;
 
-        _c1r0 += _c0r0 * tan_skew_x;
-        _c1r1 += _c0r1 * tan_skew_x;
-        _c1r2 += _c0r2 * tan_skew_x;
-        _c1r3 += _c0r3 * tan_skew_x;
+        _c0r0 = c0r0 + c1r0 * tan_skew_y;
+        _c0r1 = c0r1 + c1r1 * tan_skew_y;
+        _c0r2 = c0r2 + c1r2 * tan_skew_y;
+        _c0r3 = c0r3 + c1r3 * tan_skew_y;
+
+        _c1r0 = c1r0 + c0r0 * tan_skew_x;
+        _c1r1 = c1r1 + c0r1 * tan_skew_x;
+        _c1r2 = c1r2 + c0r2 * tan_skew_x;
+        _c1r3 = c1r3 + c0r3 * tan_skew_x;
     }
 
     //               |1 skew[0] skew[1] 0|
@@ -483,15 +491,18 @@ public struct Matrix44
         //                 |  |0 0 1  0|   |0 0  1 0|   |0  0 1 0|   |0  0  1 0|  |
         //                  \ |0 0 0  1|   |0 0  0 1|   |0  0 0 1|   |0  0  0 1| /
 
-        _c1r0 += _c0r0 * skews.X;
-        _c1r1 += _c0r1 * skews.X;
-        _c1r2 += _c0r2 * skews.X;
-        _c1r3 += _c0r3 * skews.X;
+        double c0r0 = _c0r0, c0r1 = _c0r1, c0r2 = _c0r2, c0r3 = _c0r3;
+        double c1r0 = _c1r0, c1r1 = _c1r1, c1r2 = _c1r2, c1r3 = _c1r3;
 
-        _c2r0 = _c0r0 * skews.Y + _c1r0 * skews.Z + _c2r0;
-        _c2r1 = _c0r1 * skews.Y + _c1r1 * skews.Z + _c2r1;
-        _c2r2 = _c0r2 * skews.Y + _c1r2 * skews.Z + _c2r2;
-        _c2r3 = _c0r3 * skews.Y + _c1r3 * skews.Z + _c2r3;
+        _c1r0 = c1r0 + c0r0 * skews.X;
+        _c1r1 = c1r1 + c0r1 * skews.X;
+        _c1r2 = c1r2 + c0r2 * skews.X;
+        _c1r3 = c1r3 + c0r3 * skews.X;
+
+        _c2r0 = c0r0 * skews.Y + c1r0 * skews.Z + _c2r0;
+        _c2r1 = c0r1 * skews.Y + c1r1 * skews.Z + _c2r1;
+        _c2r2 = c0r2 * skews.Y + c1r2 * skews.Z + _c2r2;
+        _c2r3 = c0r3 * skews.Y + c1r3 * skews.Z + _c2r3;
     }
 
     // this = this * perspective.
@@ -1053,32 +1064,32 @@ public struct Matrix44
         }
 
         Double4 c0 = new(_c0r0, _c0r1, _c0r2, _c0r3);
-        Double4 c1 = new(_c0r0, _c0r1, _c0r2, _c0r3);
-        Double4 c2 = new(_c0r0, _c0r1, _c0r2, _c0r3);
-        Double4 c3 = new(_c0r0, _c0r1, _c0r2, _c0r3);
+        Double4 c1 = new(_c1r0, _c1r1, _c1r2, _c1r3);
+        Double4 c2 = new(_c2r0, _c2r1, _c2r2, _c2r3);
+        Double4 c3 = new(_c3r0, _c3r1, _c3r2, _c3r3);
 
         if(!InverseWithDouble4Cols(ref c0, ref c1, ref c2, ref c3))
             return false;
         
-        result._c0r0 = _c0r0;
-        result._c0r1 = _c0r1;
-        result._c0r2 = _c0r2;
-        result._c0r3 = _c0r3;
+        result._c0r0 = c0.V0;
+        result._c0r1 = c0.V1;
+        result._c0r2 = c0.V2;
+        result._c0r3 = c0.V3;
 
-        result._c1r0 = _c1r0;
-        result._c1r1 = _c1r1;
-        result._c1r2 = _c1r2;
-        result._c1r3 = _c1r3;
+        result._c1r0 = c1.V0;
+        result._c1r1 = c1.V1;
+        result._c1r2 = c1.V2;
+        result._c1r3 = c1.V3;
 
-        result._c2r0 = _c2r0;
-        result._c2r1 = _c2r1;
-        result._c2r2 = _c2r2;
-        result._c2r3 = _c2r3;
+        result._c2r0 = c2.V0;
+        result._c2r1 = c2.V1;
+        result._c2r2 = c2.V2;
+        result._c2r3 = c2.V3;
         
-        result._c3r0 = _c3r0;
-        result._c3r1 = _c3r1;
-        result._c3r2 = _c3r2;
-        result._c3r3 = _c3r3;
+        result._c3r0 = c3.V0;
+        result._c3r1 = c3.V1;
+        result._c3r2 = c3.V2;
+        result._c3r3 = c3.V3;
 
         return true;
     }
