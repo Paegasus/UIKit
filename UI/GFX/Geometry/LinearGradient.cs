@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+using System.Diagnostics;
 using System.Text;
 
 namespace UI.GFX.Geometry;
@@ -52,15 +53,15 @@ public class LinearGradient
     // Add a new step. Fraction must be in [0, 1] and monotonically increasing.
     public void AddStep(float fraction, byte alpha)
     {
-        if (_stepCount >= MaxStepSize)
-            throw new InvalidOperationException($"Cannot add more than {MaxStepSize} steps.");
+#if DEBUG
+        Debug.Assert(_stepCount < MaxStepSize);
+        Debug.Assert(fraction >= 0);
+        Debug.Assert(fraction <= 1);
 
-        if (fraction < 0 || fraction > 1)
-            throw new ArgumentOutOfRangeException(nameof(fraction), "Fraction must be between 0 and 1.");
-
-        if (_stepCount > 0 && _steps[_stepCount - 1].Fraction >= fraction)
-            throw new ArgumentException($"Step fractions must be monotonically increasing: prev[{_stepCount - 1}]={_steps[_stepCount - 1].Fraction}, next[{_stepCount}]={fraction}");
-
+        // make sure the step's fraction is monotonically increasing.
+        Debug.Assert(_stepCount != 0 ? _steps[_stepCount - 1].Fraction < fraction : true);
+        //Debug.WriteLine($"prev[{_stepCount - 1}]={_steps[_stepCount - 1].Fraction}, next[{_stepCount}]={fraction}");
+#endif
         _steps[_stepCount].Fraction = fraction;
         _steps[_stepCount].Alpha = alpha;
         _stepCount++;
