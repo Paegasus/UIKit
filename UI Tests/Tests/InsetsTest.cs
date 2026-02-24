@@ -537,10 +537,76 @@ public static class InsetsTest
         Insets insets = new(-10);
         insets.Offset(min_vector);
 
-        Insets expected = new Insets();
+        Insets expected = new();
         expected.SetLeftRight(int_min, -10 - int_min);
         expected.SetTopBottom(int_min, -10 - int_min);
-        
+
         Assert.Equal(expected, insets);
+    }
+
+    [Fact]
+    private static void TestSize()
+    {
+        Insets insets = new();
+        insets.SetLeftRight(2, 4);
+        insets.SetTopBottom(1, 3);
+
+        Assert.Equal(new Size(6, 4), insets.Size);
+    }
+
+    [Fact]
+    private static void TestSetToMax()
+    {
+        Insets insets1 = new();
+        Insets insets2 = new Insets();
+        insets2.SetLeftRight(2, 4);
+        insets2.SetTopBottom(-1, -3);
+        insets1.SetToMax(insets2);
+        Insets expected = new Insets();
+        expected.SetLeftRight(2, 4);
+        Assert.Equal(expected, insets1);
+
+        insets1.SetToMax(new Insets());
+        expected = new Insets();
+        expected.SetLeftRight(2, 4);
+        Assert.Equal(expected, insets1);
+
+        insets2 = new Insets();
+        insets2.SetTopBottom(1, 3);
+        insets1.SetToMax(insets2);
+        expected = new Insets();
+        expected.SetLeftRight(2, 4);
+        expected.SetTopBottom(1, 3);
+        Assert.Equal(expected, insets1);
+
+        insets2 = new Insets();
+        insets2.SetLeftRight(30, 50);
+        insets2.SetTopBottom(20, 40);
+        insets1.SetToMax(insets2);
+        expected = new Insets();
+        expected.SetLeftRight(30, 50);
+        expected.SetTopBottom(20, 40);
+        Assert.Equal(expected, insets1);
+
+        insets2 = new Insets();
+        insets2.SetLeftRight(-2, -4);
+        insets2.SetTopBottom(-2, -4);
+        insets2.SetToMax(new Insets());
+        Assert.Equal(new Insets(), insets2);
+    }
+
+    [Fact]
+    private static void TestConversionFromToOutsets()
+    {
+        Insets insets = new Insets();
+        insets.SetLeftRight(2, 4);
+        insets.SetTopBottom(-1, -3);
+
+        Outsets expected = new();
+        expected.SetLeftRight(-2, -4);
+        expected.SetTopBottom(1, 3);
+        
+        Assert.Equal(expected, insets.ToOutsets());
+        Assert.Equal(insets, insets.ToOutsets().ToInsets());
     }
 }
