@@ -44,28 +44,24 @@ public struct OutsetsF
     //   InsetsF b = InsetsF().set_left(2).set_bottom(3); // 0, 2, 3, 0
     //   InsetsF c = InsetsF(1).set_top(5);               // 5, 1, 1, 1
 
-    public OutsetsF SetTop(float top)
+    public void SetTop(float top)
     {
         m_Top = top;
-        return this;
     }
 
-    public OutsetsF SetLeft(float left)
+    public void SetLeft(float left)
     {
         m_Left = left;
-        return this;
     }
 
-    public OutsetsF SetBottom(float bottom)
+    public void SetBottom(float bottom)
     {
         m_Bottom = bottom;
-        return this;
     }
 
-    public OutsetsF SetRight(float right)
+    public void SetRight(float right)
     {
         m_Right = right;
-        return this;
     }
 
     // In addition to the above, we can also use the following methods to

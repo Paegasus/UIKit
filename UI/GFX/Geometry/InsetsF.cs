@@ -46,28 +46,24 @@ public struct InsetsF
     //   InsetsF b = InsetsF().set_left(2).set_bottom(3); // 0, 2, 3, 0
     //   InsetsF c = InsetsF(1).set_top(5);               // 5, 1, 1, 1
 
-    public InsetsF SetTop(float top)
+    public void SetTop(float top)
     {
         m_Top = top;
-        return this;
     }
 
-    public InsetsF SetLeft(float left)
+    public void SetLeft(float left)
     {
         m_Left = left;
-        return this;
     }
 
-    public InsetsF SetBottom(float bottom)
+    public void SetBottom(float bottom)
     {
         m_Bottom = bottom;
-        return this;
     }
 
-    public InsetsF SetRight(float right)
+    public void SetRight(float right)
     {
         m_Right = right;
-        return this;
     }
 
     // In addition to the above, we can also use the following methods to

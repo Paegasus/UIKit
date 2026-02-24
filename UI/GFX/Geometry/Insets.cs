@@ -85,47 +85,41 @@ public struct Insets
     //   Insets c = Insets().set_left_right(1, 2).set_top_bottom(3, 4); // 3, 1, 4, 2
     //   Insets d = Insets(1).set_top(5);                               // 5, 1, 1, 1
 
-    public Insets SetTop(int top)
+    public void SetTop(int top)
     {
         m_Top = top;
         m_Bottom = ClampBottomOrRight(m_Top, m_Bottom);
-        return this;
     }
 
-    public Insets SetLeft(int left)
+    public void SetLeft(int left)
     {
         m_Left = left;
         m_Right = ClampBottomOrRight(m_Left, m_Right);
-        return this;
     }
 
-    public Insets SetBottom(int bottom)
+    public void SetBottom(int bottom)
     {
         m_Bottom = ClampBottomOrRight(m_Top, bottom);
-        return this;
     }
 
-    public Insets SetRight(int right)
+    public void SetRight(int right)
     {
         m_Right = ClampBottomOrRight(m_Left, right);
-        return this;
     }
 
     // These are preferred to the above setters when setting a pair of edges
     // because these have less clamping and better performance.
     
-    public Insets SetLeftRight(int left, int right)
+    public void SetLeftRight(int left, int right)
     {
         m_Left = left;
         m_Right = ClampBottomOrRight(m_Left, right);
-        return this;
     }
 
-    public Insets SetTopBottom(int top, int bottom)
+    public void SetTopBottom(int top, int bottom)
     {
         m_Top = top;
         m_Bottom = ClampBottomOrRight(m_Top, bottom);
-        return this;
     }
 
     // In addition to the above, we can also use the following methods to
