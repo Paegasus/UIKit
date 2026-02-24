@@ -15,4 +15,57 @@ public static class InsetsTest
         Assert.Equal(0, insets.Bottom);
         Assert.Equal(0, insets.Right);
     }
+
+    [Fact]
+    private static void TestTLBR()
+    {
+        Insets insets = Insets.TLBR(1, 2, 3, 4);
+        Assert.Equal(1, insets.Top);
+        Assert.Equal(2, insets.Left);
+        Assert.Equal(3, insets.Bottom);
+        Assert.Equal(4, insets.Right);
+    }
+
+    [Fact]
+    private static void TestVH()
+    {
+        Insets insets = Insets.VH(1, 2);
+        Assert.Equal(1, insets.Top);
+        Assert.Equal(2, insets.Left);
+        Assert.Equal(1, insets.Bottom);
+        Assert.Equal(2, insets.Right);
+    }
+
+    [Fact]
+    private static void TestSetLeftRight()
+    {
+        Insets insets = new(1);
+        insets.SetLeftRight(3, 4);
+
+        Assert.Equal(1, insets.Top);
+        Assert.Equal(3, insets.Left);
+        Assert.Equal(1, insets.Bottom);
+        Assert.Equal(4, insets.Right);
+
+        Insets insets2 = new Insets(1);
+        insets2.SetLeftRight(3, 4);
+
+        Assert.Equal(insets, insets2);
+    }
+
+    [Fact]
+    private static void TestSetTopBottom()
+    {
+        Insets insets = new(1);
+        insets.SetTopBottom(3, 4);
+        Assert.Equal(3, insets.Top);
+        Assert.Equal(1, insets.Left);
+        Assert.Equal(4, insets.Bottom);
+        Assert.Equal(1, insets.Right);
+
+        Insets insets2 = new Insets(1);
+        insets2.SetTopBottom(3, 4);
+
+        Assert.Equal(insets, insets2);
+    }
 }
