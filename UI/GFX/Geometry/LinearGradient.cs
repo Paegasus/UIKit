@@ -3,6 +3,15 @@ using System.Text;
 
 namespace UI.GFX.Geometry;
 
+// A class that defines a linear gradient mask.
+// Up to 6 steps are supported.
+//
+// ex. Horizontal linear gradient that starts in the middle.
+// LinearGradient gradient(0);
+// gradient.AddStep(20, 0);
+// gradient.AddStep(30, 255);
+// gradient.AddStep(70, 255);
+// gradient.AddStep(80, 0);
 public class LinearGradient
 {
     public struct Step

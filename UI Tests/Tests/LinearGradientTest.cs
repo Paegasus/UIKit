@@ -91,11 +91,28 @@ public static class LinearGradientTest
             LinearGradient gradient = new(45);
             Transform transform = new();
             transform.Rotate(45);
-
-            //Debug.WriteLine(transform.GetFullMatrix());
-
             gradient.ApplyTransform(transform);
-            Assert.Equal(0, gradient.Angle); // Fails, Expected: 0, Actual: -23
+            Assert.Equal(0, gradient.Angle);
+        }
+    }
+
+    [Fact]
+    private static void TestApplyAxisTransform2d()
+    {
+        {
+            LinearGradient gradient = new(45);
+            var transform = AxisTransform2D.FromScaleAndTranslation(
+                new Vector2DF(1, 1), new Vector2DF(10, 50));
+            gradient.ApplyTransform(transform);
+            Assert.Equal(45, gradient.Angle);
+        }
+        // Scale can change the angle.
+        {
+            LinearGradient gradient = new(45);
+            var transform = AxisTransform2D.FromScaleAndTranslation(
+                new Vector2DF(1, 10), new Vector2DF(10, 50));
+            gradient.ApplyTransform(transform);
+            Assert.Equal(84, gradient.Angle);
         }
     }
 }
