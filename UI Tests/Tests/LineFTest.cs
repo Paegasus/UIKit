@@ -67,9 +67,7 @@ public static class LineFTest
             p2 = new (50f, 100f)
         };
 
-        var intersection = line1.IntersectionWith(line2);
-
-        Assert.Equal(intersection, new PointF(50, 10));
+        Assert.Equal(line1.IntersectionWith(line2), new PointF(50, 10));
 
         line2 = new()
         {
@@ -118,8 +116,7 @@ public static class LineFTest
             p1 = new (-10f, 20f),
             p2 = new (-100f, -100f)
         };
-
-        Assert.Equal(ToRoundedPoint(line1.IntersectionWith(line2).Value),
-                     ToRoundedPoint(new PointF(-15.2941f, 12.9412f)));
+        
+        Assert.Equal(ToRoundedPoint(line1.IntersectionWith(line2)!.Value), ToRoundedPoint(new PointF(-15.2941f, 12.9412f)));
     }
 }
