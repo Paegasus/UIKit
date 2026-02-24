@@ -106,6 +106,7 @@ public struct Vector2DF
         return ScaleVector2D(v, scale, scale);
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static Vector2DF TransposeVector2D(in Vector2DF v)
     {
         return new Vector2DF(v.Y, v.X);
