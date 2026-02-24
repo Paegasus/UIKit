@@ -346,12 +346,89 @@ public static class InsetsFTest
     [Fact]
     private static void TestSetToMax()
     {
+        InsetsF insets = new();
+
+        var insets2 = new InsetsF();
+        insets2.SetLeft(2.5f);
+        insets2.SetRight(4.5f);
+        insets2.SetTop(-1.25f);
+        insets2.SetBottom(-2.5f);
         
+        insets.SetToMax(insets2);
+        
+        var expected = new InsetsF();
+        expected.SetLeft(2.5f);
+        expected.SetRight(4.5f);
+
+        Assert.Equal(expected, insets);
+
+        insets.SetToMax(new InsetsF());
+
+        expected = new InsetsF();
+        expected.SetLeft(2.5f);
+        expected.SetRight(4.5f);
+
+        Assert.Equal(expected, insets);
+
+        insets2 = new InsetsF();
+        insets2.SetTop(1.25f);
+        insets2.SetBottom(3.75f);
+
+        insets.SetToMax(insets2);
+
+        expected = new InsetsF();
+        expected.SetLeft(2.5f);
+        expected.SetRight(4.5f);
+        expected.SetTop(1.25f);
+        expected.SetBottom(3.75f);
+
+        Assert.Equal(expected, insets);
+
+        insets2 = new InsetsF();
+        insets2.SetLeft(30);
+        insets2.SetRight(50);
+        insets2.SetTop(20);
+        insets2.SetBottom(40);
+        
+        insets.SetToMax(insets2);
+
+        expected = new InsetsF();
+        expected.SetLeft(30);
+        expected.SetRight(50);
+        expected.SetTop(20);
+        expected.SetBottom(40);
+        
+        Assert.Equal(expected, insets);
+
+        insets2 = new InsetsF();
+        insets2.SetLeft(-2);
+        insets2.SetRight(-4);
+        insets2.SetTop(-1);
+        insets2.SetBottom(-3);
+
+        InsetsF insets1 = insets2;
+        
+        insets1.SetToMax(new InsetsF());
+
+        Assert.Equal(new InsetsF(), insets1);
     }
 
     [Fact]
     private static void TestConversionFromToOutsetsF()
     {
-        
+        InsetsF insets = new InsetsF();
+        insets.SetLeft(2.5f);
+        insets.SetRight(4.5f);
+        insets.SetTop(-1.25f);
+        insets.SetBottom(-2.5f);
+
+        OutsetsF outsets = new OutsetsF();
+        outsets.SetLeft(-2.5f);
+        outsets.SetRight(-4.5f);
+        outsets.SetTop(1.25f);
+        outsets.SetBottom(2.5f);
+
+        Assert.Equal(outsets, insets.ToOutsets());
+        Assert.Equal(insets, insets.ToOutsets().ToInsets());
     }
 }
