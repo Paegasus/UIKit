@@ -75,7 +75,7 @@ public struct RectF
     public readonly InsetsF InsetsFrom(in RectF inner) => InsetsF.TLBR(inner.Y - Y, inner.X - X, Bottom - inner.Bottom, Right - inner.Right);
 
     // Returns true if the area of the rectangle is zero.
-    public readonly bool IsEmpty() => m_Size.IsEmpty();
+    public readonly bool IsEmpty() => m_Size.IsEmpty;
 
     // Returns true if the point identified by point_x and point_y falls inside
     // this rectangle (including the left and the top edges, excluding the right
@@ -486,7 +486,7 @@ public struct RectF
         // a or b.
         RectF intersection = a;
         intersection.InclusiveIntersect(b);
-        if (!intersection.m_Size.IsZero())
+        if (!intersection.m_Size.IsZero)
         {
             RectF vert_expanded_intersection = intersection;
             vert_expanded_intersection.Y = MathF.Min(a.Y, b.Y);

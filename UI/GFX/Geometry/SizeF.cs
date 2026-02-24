@@ -13,7 +13,7 @@ public struct SizeF
     // Threshold for treating very small values as effectively zero.
     // 8 * MachineEpsilon is slightly above float precision noise, and helps avoid
     // tiny rounding artifacts (and denormal-ish values) from propagating into geometry/layout computations.
-    private static readonly float Trivial = 8.0f * float.MachineEpsilon;
+    public static readonly float Trivial = 8.0f * float.MachineEpsilon;
 
     // Clamps extremely small values to 0 to suppress floating-point noise.
     // This improves stability of repeated UI math operations (offsetting/scaling),
@@ -76,8 +76,8 @@ public struct SizeF
     public void SetToNextWidth() => Width = Next(Width);
     public void SetToNextHeight() => Height = Next(Height);
 
-    public readonly bool IsEmpty() => Width == 0.0f || Height == 0.0f;
-    public readonly bool IsZero() => Width == 0.0f && Height == 0.0f;
+    public readonly bool IsEmpty => Width == 0.0f || Height == 0.0f;
+    public readonly bool IsZero => Width == 0.0f && Height == 0.0f;
 
     public void Scale(float scale) => Scale(scale, scale);
 
