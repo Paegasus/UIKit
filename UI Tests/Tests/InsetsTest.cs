@@ -68,4 +68,72 @@ public static class InsetsTest
 
         Assert.Equal(insets, insets2);
     }
+
+    [Fact]
+    private static void TestSetTop()
+    {
+        Insets insets = new(1);
+        insets.SetTop(2);
+
+        Assert.Equal(2, insets.Top);
+        Assert.Equal(1, insets.Left);
+        Assert.Equal(1, insets.Bottom);
+        Assert.Equal(1, insets.Right);
+
+        Insets insets2 = new Insets(1);
+        insets2.SetTop(2);
+
+        Assert.Equal(insets, insets2);
+    }
+
+    [Fact]
+    private static void TestSetBottom()
+    {
+        Insets insets = new(1);
+        insets.SetBottom(2);
+
+        Assert.Equal(1, insets.Top);
+        Assert.Equal(1, insets.Left);
+        Assert.Equal(2, insets.Bottom);
+        Assert.Equal(1, insets.Right);
+
+        Insets insets2 = new Insets(1);
+        insets2.SetBottom(2);
+
+        Assert.Equal(insets, insets2);
+    }
+
+    [Fact]
+    private static void TestSetLeft()
+    {
+        Insets insets = new(1);
+        insets.SetLeft(2);
+
+        Assert.Equal(1, insets.Top);
+        Assert.Equal(2, insets.Left);
+        Assert.Equal(1, insets.Bottom);
+        Assert.Equal(1, insets.Right);
+
+        Insets insets2 = new Insets(1);
+        insets2.SetLeft(2);
+
+        Assert.Equal(insets, insets2);
+    }
+
+    [Fact]
+    private static void TestSetRight()
+    {
+        Insets insets = new(1);
+        insets.SetRight(2);
+
+        Assert.Equal(1, insets.Top);
+        Assert.Equal(1, insets.Left);
+        Assert.Equal(1, insets.Bottom);
+        Assert.Equal(2, insets.Right);
+
+        Insets insets2 = new Insets(1);
+        insets2.SetRight(2);
+
+        Assert.Equal(insets, insets2);
+    }
 }
