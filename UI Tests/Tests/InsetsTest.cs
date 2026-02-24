@@ -224,4 +224,145 @@ public static class InsetsTest
         Assert.Equal(10, insets.Bottom);
         Assert.Equal(30, insets.Right);
     }
+
+    [Fact]
+    private static void TestEquality()
+    {
+        Insets insets1 = new Insets();
+        insets1.SetLeftRight(2, 4);
+        insets1.SetTopBottom(1, 3);
+
+        Insets insets2 = new();
+
+        // Test operator== and operator!=.
+        Assert.False(insets1 == insets2);
+        Assert.True(insets1 != insets2);
+
+        insets2.SetLeftRight(2, 4);
+        insets2.SetTopBottom(1, 3);
+
+        Assert.True(insets1 == insets2);
+        Assert.False(insets1 != insets2);
+    }
+
+    [Fact]
+    private static void TestToString()
+    {
+        Insets insets = new Insets();
+        insets.SetLeftRight(2, 4);
+        insets.SetTopBottom(1, 3);
+        Assert.Equal("x:2,4 y:1,3", insets.ToString());
+    }
+
+    [Fact]
+    private static void TestOffset()
+    {
+        Insets insets = new Insets();
+        insets.SetLeftRight(2, 4);
+        insets.SetTopBottom(1, 3);
+
+        Rect rect = new(5, 6, 7, 8);
+        Vector2D vector = new(9, 10);
+
+        // Whether you inset then offset the rect, offset then inset the rect, or
+        // offset the insets then apply to the rect, the outcome should be the same.
+        Rect inset_first = rect;
+        inset_first.Inset(insets);
+        inset_first.Offset(vector);
+
+        Rect offset_first = rect;
+        offset_first.Offset(vector);
+        offset_first.Inset(insets);
+
+        Insets insets_with_offset = insets;
+        insets_with_offset.Offset(vector);
+
+        Insets expected = new Insets();
+        expected.SetLeftRight(11, -5);
+        expected.SetTopBottom(11, -7);
+
+        Assert.Equal(expected, insets_with_offset);
+        Assert.Equal(insets_with_offset, insets + vector);
+
+        Rect inset_by_offset = rect;
+        inset_by_offset.Inset(insets_with_offset);
+
+        Assert.Equal(inset_first, offset_first);
+        Assert.Equal(inset_by_offset, inset_first);
+    }
+
+    [Fact]
+    private static void TestScale()
+    {
+        Insets insets = new Insets();
+        insets.SetLeftRight(5, 1);
+        insets.SetTopBottom(7, 3);
+
+        Insets test = Insets.ScaleToFlooredInsets(insets, 2.5f, 3.5f);
+
+        Insets expected = new Insets();
+        expected.SetLeftRight(12, 2);
+        expected.SetTopBottom(24, 10);
+        Assert.Equal(expected, test);
+
+        test = Insets.ScaleToFlooredInsets(insets, 2.5f);
+
+        expected = new Insets();
+        expected.SetLeftRight(12, 2);
+        expected.SetTopBottom(17, 7);
+
+        Assert.Equal(expected, test);
+
+        test = Insets.ScaleToCeiledInsets(insets, 2.5f, 3.5f);
+
+        expected = new Insets();
+        expected.SetLeftRight(13, 3);
+        expected.SetTopBottom(25, 11);
+
+        Assert.Equal(expected, test);
+
+        test = Insets.ScaleToCeiledInsets(insets, 2.5f);
+
+        expected = new Insets();
+        expected.SetLeftRight(13, 3);
+        expected.SetTopBottom(18, 8);
+
+        Assert.Equal(expected, test);
+
+        test = Insets.ScaleToRoundedInsets(insets, 2.49f, 3.49f);
+
+        expected = new Insets();
+        expected.SetLeftRight(12, 2);
+        expected.SetTopBottom(24, 10);
+
+        Assert.Equal(expected, test);
+
+        test = Insets.ScaleToRoundedInsets(insets, 2.49f);
+
+        expected = new Insets();
+        expected.SetLeftRight(12, 2);
+        expected.SetTopBottom(17, 7);
+
+        Assert.Equal(expected, test);
+
+        test = Insets.ScaleToRoundedInsets(insets, 2.5f, 3.5f);
+
+        expected = new Insets();
+        expected.SetLeftRight(13, 3);
+        expected.SetTopBottom(25, 11);
+
+        // Expected: x:13,3 y:25,11
+        // Actual:   x:12,2 y:24,10
+        Assert.Equal(expected, test); // FAILING
+
+        test = Insets.ScaleToRoundedInsets(insets, 2.5f);
+
+        expected = new Insets();
+        expected.SetLeftRight(13, 3);
+        expected.SetTopBottom(18, 8);
+
+        // Expected: x:13,3 y:18,8
+        // Actual:   x:12,2 y:18,8
+        Assert.Equal(expected, test); // FAILING
+    }
 }
