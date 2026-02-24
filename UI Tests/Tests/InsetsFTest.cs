@@ -207,4 +207,27 @@ public static class InsetsFTest
         Assert.Equal(10.01f, insets.Bottom, 1e-6);
         Assert.Equal(30.201f, insets.Right, 1e-6);
     }
+
+    [Fact]
+    private static void TestEquality()
+    {
+        InsetsF insets1 = new InsetsF();
+        insets1.SetLeft(2.2f);
+        insets1.SetRight(4.4f);
+        insets1.SetTop(1.1f);
+        insets1.SetBottom(3.3f);
+
+        InsetsF insets2 = new();
+        // Test operator== and operator!=.
+        Assert.False(insets1 == insets2);
+        Assert.True(insets1 != insets2);
+
+        insets2.SetLeft(2.2f);
+        insets2.SetRight(4.4f);
+        insets2.SetTop(1.1f);
+        insets2.SetBottom(3.3f);
+        
+        Assert.True(insets1 == insets2);
+        Assert.False(insets1 != insets2);
+    }
 }
