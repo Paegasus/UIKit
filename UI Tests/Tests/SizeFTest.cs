@@ -200,4 +200,32 @@ public static class SizeFTest
 
         Assert.Equal(new SizeF(0.0f, 0.0f), test);
     }
+
+    [Fact]
+    private static void TestConsistentClamping()
+    {
+        SizeF resized = new();
+
+        resized.SetSize(SizeF.Trivial, 0.0f);
+        Assert.Equal(new SizeF(SizeF.Trivial, 0.0f), resized);
+
+        resized.SetSize(0.0f, SizeF.Trivial);
+        Assert.Equal(new SizeF(0.0f, SizeF.Trivial), resized);
+    }
+
+    [Fact]
+    private static void TestTranspose()
+    {
+        SizeF s = new(1.5f, 2.5f);
+        Assert.Equal(new SizeF(2.5f, 1.5f), SizeF.TransposeSize(s));
+        s.Transpose();
+        Assert.Equal(new SizeF(2.5f, 1.5f), s);
+    }
+
+    [Fact]
+    private static void TestToString()
+    {
+        Assert.Equal("1x2", new SizeF(1, 2).ToString());
+        Assert.Equal("1.03125x2.5", new SizeF(1.03125f, 2.5f).ToString());
+    }
 }
