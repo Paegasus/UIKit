@@ -68,7 +68,7 @@ public static class SafeConversions
 
     public static int ClampRound(float value)
     {
-        value = MathF.Round(value);
+        value = MathF.Round(value, MidpointRounding.AwayFromZero);
 
         if (float.IsNaN(value)) return 0;
         if (value > int.MaxValue) return int.MaxValue;
@@ -79,7 +79,7 @@ public static class SafeConversions
 
     public static int ClampRound(double value)
     {
-        value = Math.Round(value);
+        value = Math.Round(value, MidpointRounding.AwayFromZero);
 
         if (double.IsNaN(value)) return 0;
         if (value > int.MaxValue) return int.MaxValue;
