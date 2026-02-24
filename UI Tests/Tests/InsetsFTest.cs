@@ -230,4 +230,128 @@ public static class InsetsFTest
         Assert.True(insets1 == insets2);
         Assert.False(insets1 != insets2);
     }
+
+    [Fact]
+    private static void TestToString()
+    {
+        InsetsF insets = new InsetsF();
+        insets.SetLeft(2.2f);
+        insets.SetRight(4.4f);
+        insets.SetTop(1.1f);
+        insets.SetBottom(3.3f);
+
+        Assert.Equal("x:2.2,4.4 y:1.1,3.3", insets.ToString());
+    }
+
+    [Fact]
+    private static void TestScale()
+    {
+        InsetsF inset = new InsetsF();
+        inset.SetLeft(5);
+        inset.SetRight(1);
+        inset.SetTop(7);
+        inset.SetBottom(3);
+
+        InsetsF inset2 = InsetsF.ScaleInsets(inset, 2.5f, 3.5f);
+
+        InsetsF expected = new();
+        expected.SetLeft(12.5f);
+        expected.SetRight(2.5f);
+        expected.SetTop(24.5f);
+        expected.SetBottom(10.5f);
+
+        Assert.Equal(expected, inset2);
+
+        inset2 = InsetsF.ScaleInsets(inset, 2.5f);
+
+        expected = new InsetsF();
+        expected.SetLeft(12.5f);
+        expected.SetRight(2.5f);
+        expected.SetTop(17.5f);
+        expected.SetBottom(7.5f);
+
+        Assert.Equal(expected, inset2);
+
+        inset.Scale(2.5f, 3.5f);
+
+        expected = new InsetsF();
+        expected.SetLeft(12.5f);
+        expected.SetRight(2.5f);
+        expected.SetTop(24.5f);
+        expected.SetBottom(10.5f);
+
+        Assert.Equal(expected, inset);
+
+        inset.Scale(-2.5f);
+
+        expected = new InsetsF();
+        expected.SetLeft(-31.25f);
+        expected.SetRight(-6.25f);
+        expected.SetTop(-61.25f);
+        expected.SetBottom(-26.25f);
+
+        Assert.Equal(expected, inset);
+    }
+
+    [Fact]
+    private static void TestScaleNegative()
+    {
+        InsetsF inset = new InsetsF();
+        inset.SetLeft(-5);
+        inset.SetRight(-1);
+        inset.SetTop(-7);
+        inset.SetBottom(-3);
+
+        InsetsF inset2 = InsetsF.ScaleInsets(inset, 2.5f, 3.5f);
+
+        InsetsF expected = new InsetsF();
+        expected.SetLeft(-12.5f);
+        expected.SetRight(-2.5f);
+        expected.SetTop(-24.5f);
+        expected.SetBottom(-10.5f);
+
+        Assert.Equal(expected, inset2);
+
+        inset2 = InsetsF.ScaleInsets(inset, 2.5f);
+
+        expected = new InsetsF();
+        expected.SetLeft(-12.5f);
+        expected.SetRight(-2.5f);
+        expected.SetTop(-17.5f);
+        expected.SetBottom(-7.5f);
+
+        Assert.Equal(expected, inset2);
+
+        inset.Scale(2.5f, 3.5f);
+
+        expected = new InsetsF();
+        expected.SetLeft(-12.5f);
+        expected.SetRight(-2.5f);
+        expected.SetTop(-24.5f);
+        expected.SetBottom(-10.5f);
+
+        Assert.Equal(expected, inset);
+
+        inset.Scale(-2.5f);
+
+        expected = new InsetsF();
+        expected.SetLeft(31.25f);
+        expected.SetRight(6.25f);
+        expected.SetTop(61.25f);
+        expected.SetBottom(26.25f);
+
+        Assert.Equal(expected, inset);
+    }
+
+    [Fact]
+    private static void TestSetToMax()
+    {
+        
+    }
+
+    [Fact]
+    private static void TestConversionFromToOutsetsF()
+    {
+        
+    }
 }
