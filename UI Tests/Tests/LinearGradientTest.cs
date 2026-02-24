@@ -2,8 +2,6 @@ using Xunit;
 
 using UI.GFX.Geometry;
 
-using static UI.GFX.Geometry.PointConversions;
-
 namespace UI.Tests;
 
 public static class LinearGradientTest
@@ -19,29 +17,52 @@ public static class LinearGradientTest
         gradient.AddStep(0.8f, 1);
 
         Assert.False(gradient.IsEmpty);
+        Assert.Equal(45, gradient.Angle);
+        Assert.Equal(3, gradient.StepCount);
+        Assert.Equal(0.1f, gradient.Steps[0].Fraction);
+        Assert.Equal(0, gradient.Steps[0].Alpha);
+        Assert.Equal(0.5f, gradient.Steps[1].Fraction);
+        Assert.Equal(50, gradient.Steps[1].Alpha);
+        Assert.Equal(0.8f, gradient.Steps[2].Fraction);
+        Assert.Equal(1, gradient.Steps[2].Alpha);
 
-        /*
-        EXPECT_EQ(45, gradient.angle());
-        EXPECT_EQ(3u, gradient.step_count());
-        EXPECT_FLOAT_EQ(gradient.steps()[0].fraction, .1);
-        EXPECT_EQ(gradient.steps()[0].alpha, 0);
-        EXPECT_FLOAT_EQ(gradient.steps()[1].fraction, .5);
-        EXPECT_EQ(gradient.steps()[1].alpha, 50);
-        EXPECT_FLOAT_EQ(gradient.steps()[2].fraction, .8);
-        EXPECT_EQ(gradient.steps()[2].alpha, 1);
+        
+        LinearGradient gradient2 = new(90);
+        gradient2.AddStep(0.1f, 0);
+        gradient2.AddStep(0.5f, 50);
+        gradient2.AddStep(0.8f, 1);
 
-        LinearGradient gradient2(90);
-        gradient2.AddStep(.1, 0);
-        gradient2.AddStep(.5, 50);
-        gradient2.AddStep(.8, 1);
+        Assert.NotEqual(gradient, gradient2);
 
-        EXPECT_NE(gradient, gradient2);
+        gradient2.Angle = 45;
+        Assert.Equal(gradient, gradient2);
 
-        gradient2.set_angle(45);
-        EXPECT_EQ(gradient, gradient2);
+        gradient2.AddStep(0.9f, 0);
+        Assert.NotEqual(gradient, gradient2);
+    }
 
-        gradient2.AddStep(.9, 0);
-        EXPECT_NE(gradient, gradient2);
-        */
+    [Fact]
+    private static void Reverse()
+    {
+        LinearGradient gradient = new(45);
+
+        // Make sure reversing an empty LinearGradient doesn't cause an issue.
+        gradient.ReverseSteps();
+
+        gradient.AddStep(0.1f, 0);
+        gradient.AddStep(0.5f, 50);
+        gradient.AddStep(0.8f, 1);
+
+        gradient.ReverseSteps();
+
+        Assert.Equal(45, gradient.Angle);
+        Assert.Equal(3, gradient.StepCount);
+
+        Assert.Equal(0.2f, gradient.Steps[0].Fraction, 0.0000001);
+        Assert.Equal(1, gradient.Steps[0].Alpha);
+        Assert.Equal(0.5f, gradient.Steps[1].Fraction);
+        Assert.Equal(50, gradient.Steps[1].Alpha);
+        Assert.Equal(0.9f, gradient.Steps[2].Fraction);
+        Assert.Equal(0, gradient.Steps[2].Alpha);
     }
 }

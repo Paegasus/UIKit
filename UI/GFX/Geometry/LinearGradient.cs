@@ -60,7 +60,7 @@ public class LinearGradient
 
         // make sure the step's fraction is monotonically increasing.
         Debug.Assert(_stepCount != 0 ? _steps[_stepCount - 1].Fraction < fraction : true);
-        //Debug.WriteLine($"prev[{_stepCount - 1}]={_steps[_stepCount - 1].Fraction}, next[{_stepCount}]={fraction}");
+        //Debug.WriteLine($"prev[{_stepCount - 1}]={_steps[_stepCount - 1].Fraction}, next[{_stepCount}]={fraction}"
 #endif
         _steps[_stepCount].Fraction = fraction;
         _steps[_stepCount].Alpha = alpha;
