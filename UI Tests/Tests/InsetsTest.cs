@@ -443,4 +443,104 @@ public static class InsetsTest
         scale_test = Insets.ScaleToRoundedInsets(scale_test, 2.0f);
         Assert.Equal(new Insets(int_min), scale_test);
     }
+
+    [Fact]
+    private static void TestIntegerOverflowSetVariants()
+    {
+        int int_max = int.MaxValue;
+
+        Insets set_test = new(20);
+        set_test.SetTop(int_max);
+        Assert.Equal(int_max, set_test.Top);
+        Assert.Equal(0, set_test.Bottom);
+
+        set_test.SetLeft(int_max);
+        Assert.Equal(int_max, set_test.Left);
+        Assert.Equal(0, set_test.Right);
+
+        set_test = new Insets(30);
+        set_test.SetBottom(int_max);
+        Assert.Equal(int_max - 30, set_test.Bottom);
+        Assert.Equal(30, set_test.Top);
+
+        set_test.SetRight(int_max);
+        Assert.Equal(int_max - 30, set_test.Right);
+        Assert.Equal(30, set_test.Left);
+    }
+    
+    [Fact]
+    private static void TestIntegerUnderflowSetVariants()
+    {
+        int int_min = int.MinValue;
+
+        Insets set_test = new(-20);
+        set_test.SetTop(int_min);
+        Assert.Equal(int_min, set_test.Top);
+        Assert.Equal(0, set_test.Bottom);
+
+        set_test.SetLeft(int_min);
+        Assert.Equal(int_min, set_test.Left);
+        Assert.Equal(0, set_test.Right);
+
+        set_test = new Insets(-30);
+        set_test.SetBottom(int_min);
+        Assert.Equal(int_min + 30, set_test.Bottom);
+        Assert.Equal(-30, set_test.Top);
+
+        set_test.SetRight(int_min);
+        Assert.Equal(int_min + 30, set_test.Right);
+        Assert.Equal(-30, set_test.Left);
+    }
+
+    [Fact]
+    private static void TestIntegerOverflowSet()
+    {
+        int int_max = int.MaxValue;
+
+        Insets set_all_test = new Insets();
+        set_all_test.SetLeftRight(int_max, 20);
+        set_all_test.SetTopBottom(10, int_max);
+
+        Insets expected = new Insets();
+        expected.SetLeftRight(int_max, 0);
+        expected.SetTopBottom(10, int_max - 10);
+
+        Assert.Equal(expected, set_all_test);
+    }
+
+    [Fact]
+    private static void TestIntegerOverflowOffset()
+    {
+        int int_max = int.MaxValue;
+
+        Vector2D max_vector = new(int_max, int_max);
+
+        Insets insets = new Insets();
+        insets.SetLeftRight(2, 4);
+        insets.SetTopBottom(1, 3);
+        insets.Offset(max_vector);
+
+        Insets expected = new Insets();
+        expected.SetLeftRight(int_max, 4 - int_max);
+        expected.SetTopBottom(int_max, 3 - int_max);
+
+        Assert.Equal(expected, insets);
+    }
+
+    [Fact]
+    private static void TestIntegerUnderflowOffset()
+    {
+        int int_min = int.MinValue;
+
+        Vector2D min_vector = new(int_min, int_min);
+
+        Insets insets = new(-10);
+        insets.Offset(min_vector);
+
+        Insets expected = new Insets();
+        expected.SetLeftRight(int_min, -10 - int_min);
+        expected.SetTopBottom(int_min, -10 - int_min);
+        
+        Assert.Equal(expected, insets);
+    }
 }
