@@ -52,17 +52,17 @@ public struct SinCos
             double s = Math.Sin(rad);
             double c = Math.Cos(rad);
 
-            if (((octant + 1) & 2) == 1)
+            if (((octant + 1) & 2) != 0)
             {
                 (s, c) = (c, s);
             }
 
-            if ((octant & 4) == 1)
+            if ((octant & 4) != 0)
             {
                 s = -s;
             }
 
-            if (((octant + 2) & 4) == 1)
+            if (((octant + 2) & 4) != 0)
             {
                 c = -c;
             }
