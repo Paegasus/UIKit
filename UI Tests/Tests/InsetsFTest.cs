@@ -152,10 +152,10 @@ public static class InsetsFTest
 
         insets += insets2;
 
-        Assert.Equal(6.8f, insets.Top, 1e-6); // FAILING
-        Assert.Equal(9.2f, insets.Left, 1e-6); // FAILING
-        Assert.Equal(10.9f, insets.Bottom, 1e-6); // FAILING
-        Assert.Equal(12.6f, insets.Right, 1e-6); // FAILING
+        Assert.Equal(6.8f, insets.Top, 1e-6);
+        Assert.Equal(9.2f, insets.Left, 1e-6);
+        Assert.Equal(10.9f, insets.Bottom, 1e-6);
+        Assert.Equal(12.6f, insets.Right, 1e-6);
         
         insets2 = new();
         insets2.SetLeft(0);
