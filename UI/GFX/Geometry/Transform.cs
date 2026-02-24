@@ -1,5 +1,8 @@
 using System.Diagnostics;
 
+using static UI.GFX.Geometry.ClampFloatGeometryHelper;
+using static UI.GFX.Geometry.PointConversions;
+
 namespace UI.GFX.Geometry;
 
 // 4x4 Transformation matrix. Depending on the complexity of the matrix, it may
@@ -69,6 +72,43 @@ public struct Transform
           0,
           // Col 3.
           0, 0, 0, 1) {}
+
+    // Returns true if the matrix is either identity or pure translation.
+    public readonly bool IsIdentityOrTranslation => !full_matrix_ ? axis_2d_.Scale == new Vector2DF(1, 1) : matrix_.IsIdentityOrTranslation;
+
+    public readonly PointF MapPointInternal(in Matrix44 matrix, in PointF point)
+    {
+#if DEBUG
+        Debug.Assert(full_matrix_);
+#endif
+
+        Span<double> p = [point.X, point.Y];
+
+        double w = matrix.MapVector2(p);
+
+        if (w != 1.0 && double.IsNormal(w))
+        {
+            double w_inverse = 1.0 / w;
+
+            return new PointF(ClampFloatGeometry(p[0] * w_inverse), ClampFloatGeometry(p[1] * w_inverse));
+        }
+
+        return new PointF(ClampFloatGeometry(p[0]), ClampFloatGeometry(p[1]));
+    }
+
+    public readonly Point MapPoint(in Point point)
+    {
+        return ToRoundedPoint(MapPoint(new PointF(point)));
+    }
+
+    public readonly PointF MapPoint(in PointF point)
+    {
+        if (!full_matrix_)
+        {
+            return axis_2d_.MapPoint(point);
+        }
+        return MapPointInternal(matrix_, point);
+    }
 
     public static Matrix44 AxisTransform2DToMatrix44(in AxisTransform2D axis_2d)
     {
@@ -274,8 +314,6 @@ public struct Transform
     // because a Transform either uses a AxisTransform2D or a Matrix44
     //public override readonly int GetHashCode() => HashCode.Combine();
 
-    public override readonly bool Equals(object? obj) => obj is Transform other && Equals(other);
-
     public readonly bool Equals(in Transform other)
     {
         if (!full_matrix_ && !other.full_matrix_)
@@ -289,6 +327,13 @@ public struct Transform
         return GetFullMatrix() == other.GetFullMatrix();
     }
 
+    public override readonly bool Equals(object? obj) => obj is Transform other && Equals(other);
+
     public static bool operator ==(in Transform left, in Transform right) => left.Equals(right);
     public static bool operator !=(in Transform left, in Transform right) => !left.Equals(right);
+
+    public override int GetHashCode()
+    {
+        throw new NotImplementedException();
+    }
 }
