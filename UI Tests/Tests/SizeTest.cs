@@ -68,4 +68,70 @@ public static class SizeTest
         test.Enlarge(int_min, int_min);
         Assert.Equal(test, min_size);
     }
+
+    [Fact]
+    private static void TestOperatorAddSub()
+    {
+        Size lhs = new(100, 20);
+        Size rhs = new(50, 10);
+
+        lhs += rhs;
+        Assert.Equal(new Size(150, 30), lhs);
+
+        lhs = new Size(100, 20);
+        Assert.Equal(new Size(150, 30), lhs + rhs);
+
+        lhs = new Size(100, 20);
+        lhs -= rhs;
+        Assert.Equal(new Size(50, 10), lhs);
+
+        lhs = new Size(100, 20);
+        Assert.Equal(new Size(50, 10), lhs - rhs);
+    }
+
+    [Fact]
+    private static void TestOperatorAddOverflow()
+    {
+        int int_max = int.MaxValue;
+
+        Size lhs = new(int_max, int_max);
+        Size rhs = new(int_max, int_max);
+        Assert.Equal(new Size(int_max, int_max), lhs + rhs);
+    }
+
+    [Fact]
+    private static void TestOperatorSubClampAtZero()
+    {
+        Size lhs = new(10, 10);
+        Size rhs = new(100, 100);
+        Assert.Equal(new Size(0, 0), lhs - rhs);
+
+        lhs = new Size(10, 10);
+        rhs = new Size(100, 100);
+        lhs -= rhs;
+        Assert.Equal(new Size(0, 0), lhs);
+    }
+
+    [Fact]
+    private static void TestOperatorCompare()
+    {
+        Size lhs = new(100, 20);
+        Size rhs = new(50, 10);
+
+        Assert.True(lhs != rhs);
+        Assert.False(lhs == rhs);
+
+        rhs = new Size(100, 20);
+        Assert.True(lhs == rhs);
+        Assert.False(lhs != rhs);
+    }
+
+    [Fact]
+    private static void TestTranspose()
+    {
+        Size s = new(1, 2);
+        Assert.Equal(new Size(2, 1), Size.TransposeSize(s));
+        s.Transpose();
+        Assert.Equal(new Size(2, 1), s);
+    }
 }
