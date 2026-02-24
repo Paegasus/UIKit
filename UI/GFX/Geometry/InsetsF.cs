@@ -1,3 +1,5 @@
+using UI.Numerics;
+
 namespace UI.GFX.Geometry;
 
 //// <summary>
