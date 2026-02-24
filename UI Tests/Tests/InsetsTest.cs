@@ -294,75 +294,153 @@ public static class InsetsTest
     [Fact]
     private static void TestScale()
     {
-        Insets insets = new Insets();
+        Insets insets = new();
         insets.SetLeftRight(5, 1);
         insets.SetTopBottom(7, 3);
 
         Insets test = Insets.ScaleToFlooredInsets(insets, 2.5f, 3.5f);
-
-        Insets expected = new Insets();
+        Insets expected = new();
         expected.SetLeftRight(12, 2);
         expected.SetTopBottom(24, 10);
         Assert.Equal(expected, test);
 
         test = Insets.ScaleToFlooredInsets(insets, 2.5f);
-
         expected = new Insets();
         expected.SetLeftRight(12, 2);
         expected.SetTopBottom(17, 7);
-
         Assert.Equal(expected, test);
 
         test = Insets.ScaleToCeiledInsets(insets, 2.5f, 3.5f);
-
         expected = new Insets();
         expected.SetLeftRight(13, 3);
         expected.SetTopBottom(25, 11);
-
         Assert.Equal(expected, test);
 
         test = Insets.ScaleToCeiledInsets(insets, 2.5f);
-
         expected = new Insets();
         expected.SetLeftRight(13, 3);
         expected.SetTopBottom(18, 8);
-
         Assert.Equal(expected, test);
 
         test = Insets.ScaleToRoundedInsets(insets, 2.49f, 3.49f);
-
         expected = new Insets();
         expected.SetLeftRight(12, 2);
         expected.SetTopBottom(24, 10);
-
         Assert.Equal(expected, test);
 
         test = Insets.ScaleToRoundedInsets(insets, 2.49f);
-
         expected = new Insets();
         expected.SetLeftRight(12, 2);
         expected.SetTopBottom(17, 7);
-
         Assert.Equal(expected, test);
 
         test = Insets.ScaleToRoundedInsets(insets, 2.5f, 3.5f);
-
         expected = new Insets();
         expected.SetLeftRight(13, 3);
         expected.SetTopBottom(25, 11);
-
-        // Expected: x:13,3 y:25,11
-        // Actual:   x:12,2 y:24,10
-        Assert.Equal(expected, test); // FAILING
+        Assert.Equal(expected, test);
 
         test = Insets.ScaleToRoundedInsets(insets, 2.5f);
-
         expected = new Insets();
         expected.SetLeftRight(13, 3);
         expected.SetTopBottom(18, 8);
+        Assert.Equal(expected, test);
+    }
 
-        // Expected: x:13,3 y:18,8
-        // Actual:   x:12,2 y:18,8
-        Assert.Equal(expected, test); // FAILING
+    [Fact]
+    private static void TestScaleNegative()
+    {
+        Insets insets = new();
+        insets.SetLeftRight(-5, -1);
+        insets.SetTopBottom(-7, -3);
+
+        Insets test = Insets.ScaleToFlooredInsets(insets, 2.5f, 3.5f);
+        Insets expected = new();
+        expected.SetLeftRight(-13, -3);
+        expected.SetTopBottom(-25, -11);
+        Assert.Equal(expected, test);
+
+        test = Insets.ScaleToFlooredInsets(insets, 2.5f);
+        expected = new Insets();
+        expected.SetLeftRight(-13, -3);
+        expected.SetTopBottom(-18, -8);
+        Assert.Equal(expected, test);
+
+        test = Insets.ScaleToCeiledInsets(insets, 2.5f, 3.5f);
+        expected = new Insets();
+        expected.SetLeftRight(-12, -2);
+        expected.SetTopBottom(-24, -10);
+        Assert.Equal(expected, test);
+
+        test = Insets.ScaleToCeiledInsets(insets, 2.5f);
+        expected = new Insets();
+        expected.SetLeftRight(-12, -2);
+        expected.SetTopBottom(-17, -7);
+        Assert.Equal(expected, test);
+
+        test = Insets.ScaleToRoundedInsets(insets, 2.49f, 3.49f);
+        expected = new Insets();
+        expected.SetLeftRight(-12, -2);
+        expected.SetTopBottom(-24, -10);
+        Assert.Equal(expected, test);
+
+        test = Insets.ScaleToRoundedInsets(insets, 2.49f);
+        expected = new Insets();
+        expected.SetLeftRight(-12, -2);
+        expected.SetTopBottom(-17, -7);
+        Assert.Equal(expected, test);
+
+        test = Insets.ScaleToRoundedInsets(insets, 2.5f, 3.5f);
+        expected = new Insets();
+        expected.SetLeftRight(-13, -3);
+        expected.SetTopBottom(-25, -11);
+        Assert.Equal(expected, test);
+
+        test = Insets.ScaleToRoundedInsets(insets, 2.5f);
+        expected = new Insets();
+        expected.SetLeftRight(-13, -3);
+        expected.SetTopBottom(-18, -8);
+        Assert.Equal(expected, test);
+    }
+
+    [Fact]
+    private static void TestIntegerOverflow()
+    {
+        int int_min = int.MinValue;
+        int int_max = int.MaxValue;
+
+        Insets width_height_test = new(int_max);
+        Assert.Equal(int_max, width_height_test.Width);
+        Assert.Equal(int_max, width_height_test.Height);
+
+        Insets plus_test = new(int_max);
+        plus_test += new Insets(int_max);
+        Assert.Equal(new Insets(int_max), plus_test);
+
+        Insets negation_test = -new Insets(int_min);
+        Assert.Equal(new Insets(int_max), negation_test);
+
+        Insets scale_test = new(int_max);
+        scale_test = Insets.ScaleToRoundedInsets(scale_test, 2.0f);
+        Assert.Equal(new Insets(int_max), scale_test);
+    }
+
+    [Fact]
+    private static void TestIntegerUnderflow()
+    {
+        int int_min = int.MinValue;
+        int int_max = int.MaxValue;
+
+        Insets width_height_test = new(int_min);
+        Assert.Equal(int_min, width_height_test.Width);
+        Assert.Equal(int_min, width_height_test.Height);
+
+        Insets minus_test = new(int_min);
+        minus_test -= new Insets(int_max);
+        Assert.Equal(new Insets(int_min), minus_test);
+
+        Insets scale_test = new(int_min);
+        scale_test = Insets.ScaleToRoundedInsets(scale_test, 2.0f);
+        Assert.Equal(new Insets(int_min), scale_test);
     }
 }
