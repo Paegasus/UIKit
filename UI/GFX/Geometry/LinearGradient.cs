@@ -96,7 +96,8 @@ public class LinearGradient
         PointF end    = transform.MapPoint(new PointF(x, y));
         Vector2DF diff = end - origin;
         float newAngle = float.RadiansToDegrees(MathF.Atan2(diff.Y, diff.X));
-        _angle = -(short)MathF.Round(newAngle, MidpointRounding.AwayFromZero);
+        //_angle = (short)-(short)MathF.Round(newAngle, MidpointRounding.AwayFromZero);
+        _angle = (short)-MathF.Round(newAngle, MidpointRounding.AwayFromZero);
     }
 
     // Transforms the gradient angle by an AxisTransform2D (scale only — translation
@@ -110,7 +111,8 @@ public class LinearGradient
         float y = -MathF.Sin(radian) * transform.Scale.Y;
         float x =  MathF.Cos(radian) * transform.Scale.X;
         float newAngle = float.RadiansToDegrees(MathF.Atan2(y, x));
-        _angle = -(short)MathF.Round(newAngle, MidpointRounding.AwayFromZero);
+        //_angle = (short)-(short)MathF.Round(newAngle, MidpointRounding.AwayFromZero);
+        _angle = (short)-MathF.Round(newAngle, MidpointRounding.AwayFromZero);
     }
 
     public override string ToString()
