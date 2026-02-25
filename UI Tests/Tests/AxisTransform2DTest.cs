@@ -1,6 +1,6 @@
-using System.Diagnostics;
-using UI.GFX.Geometry;
 using Xunit;
+
+using UI.GFX.Geometry;
 
 namespace UI.Tests;
 

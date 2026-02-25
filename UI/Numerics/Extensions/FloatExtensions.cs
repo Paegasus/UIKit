@@ -1,5 +1,3 @@
-using System.Numerics;
-
 namespace UI.Extensions;
 
 public static class FloatExtensions
@@ -12,5 +10,10 @@ public static class FloatExtensions
         /// Equivalent to C++ std::numeric_limits<float>::epsilon().
         /// </summary>
         public static float MachineEpsilon => MathF.BitIncrement(1f) - 1f;
+        
+        /// <summary>
+        /// Equivalent to C++ std::numeric_limits<float>::min().
+        /// </summary>
+        public static float MinNormal => BitConverter.Int32BitsToSingle(0x0080_0000);
     }
 }

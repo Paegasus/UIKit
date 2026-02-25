@@ -2,8 +2,6 @@ using Xunit;
 
 using UI.GFX.Geometry;
 
-using static UI.GFX.Geometry.PointConversions;
-
 namespace UI.Tests;
 
 public static class PointTest
