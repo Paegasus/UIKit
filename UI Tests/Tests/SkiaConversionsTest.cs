@@ -72,12 +72,21 @@ public static class SkiaConversionsTest
     [Fact]
     private static void TestTransformSkM44Conversions()
     {
-        ReadOnlySpan<float> v = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16];
+        ReadOnlySpan<float> v =
+        [
+            1, 2, 3, 4,
+            5, 6, 7, 8,
+            9, 10, 11, 12,
+            13, 14, 15, 16
+        ];
 
         Transform t = Transform.ColMajorF(v);
+
         SKMatrix44 m = TransformToSkM44(t);
+
         Span<float> v1 = stackalloc float[16]; 
         m.ToRowMajor(v1);
+        
         Assert.Equal(v, v1);
         Assert.Equal(t, SkM44ToTransform(m));
     }
