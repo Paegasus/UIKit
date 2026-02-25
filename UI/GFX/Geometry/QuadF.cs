@@ -143,10 +143,10 @@ public struct QuadF
     }
 
     // Scale each point in the quad by the |scale| factor.
-    void Scale(float scale) => Scale(scale, scale);
+    public void Scale(float scale) => Scale(scale, scale);
 
     // Scale each point in the quad by the scale factors along each axis.
-    void Scale(float x_scale, float y_scale)
+    public void Scale(float x_scale, float y_scale)
     {
         p1_.Scale(x_scale, y_scale);
         p2_.Scale(x_scale, y_scale);
