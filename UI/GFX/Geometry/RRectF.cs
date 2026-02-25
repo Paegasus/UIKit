@@ -26,154 +26,148 @@ public struct RRectF
     // SkRRect::Corner.
     public enum RoundRectCorner
     {
-        kUpperLeft = SKRoundRectCorner.UpperLeft,
+        kUpperLeft  = SKRoundRectCorner.UpperLeft,
         kUpperRight = SKRoundRectCorner.UpperRight,
         kLowerRight = SKRoundRectCorner.LowerRight,
-        kLowerLeft = SKRoundRectCorner.LowerLeft
+        kLowerLeft  = SKRoundRectCorner.LowerLeft
     }
 
-    private SKRoundRect skrrect_;
+    // Plain value-type fields — no heap allocation, true struct copy semantics.
+    private SKRect  _rect;
+    private SKPoint _radiiUpperLeft;
+    private SKPoint _radiiUpperRight;
+    private SKPoint _radiiLowerRight;
+    private SKPoint _radiiLowerLeft;
 
-    public RRectF() => skrrect_ = new();
+    public RRectF() { }
 
-    public RRectF(in SKRoundRect rect) => skrrect_ = rect;
+    public RRectF(in SKRoundRect rrect)
+    {
+        _rect           = rrect.Rect;
+        _radiiUpperLeft  = rrect.GetRadii(SKRoundRectCorner.UpperLeft);
+        _radiiUpperRight = rrect.GetRadii(SKRoundRectCorner.UpperRight);
+        _radiiLowerRight = rrect.GetRadii(SKRoundRectCorner.LowerRight);
+        _radiiLowerLeft  = rrect.GetRadii(SKRoundRectCorner.LowerLeft);
+        Normalize();
+    }
 
     public RRectF(in RectF rect) : this(rect, 0.0f) {}
 
     public RRectF(in RectF rect, float radius) : this(rect, radius, radius) {}
-    public RRectF(in RectF rect, float x_rad, float y_rad) : this(rect.X, rect.Y, rect.Width, rect.Height, x_rad, y_rad) {}
-    
+
+    public RRectF(in RectF rect, float x_rad, float y_rad)
+        : this(rect.X, rect.Y, rect.Width, rect.Height, x_rad, y_rad) {}
+
     // Sets all x and y radii to radius.
-    public RRectF(float x, float y, float width, float height, float radius) : this(x, y, width, height, radius, radius) {}
-    
+    public RRectF(float x, float y, float width, float height, float radius)
+        : this(x, y, width, height, radius, radius) {}
+
     // Sets all x radii to x_rad, and all y radii to y_rad.
     // If one of x_rad or y_rad are zero, sets ALL radii to zero.
     public RRectF(float x, float y, float width, float height, float x_rad, float y_rad)
     {
-        // SKRect() takes left, top, right, bottom (not left, top, width, height, like in C++ Skia), so:
-        // right = x + width
-        // bottom = y + height
-        skrrect_ = new SKRoundRect(new SKRect(x, y, x + width, y + height), x_rad, y_rad);
+        // SKRect takes left, top, right, bottom.
+        _rect = new SKRect(x, y, x + width, y + height);
 
-        if (IsEmpty())
-        {
-            // Make sure that empty rects are created fully empty, not with some non-zero dimensions.
-            skrrect_ = new SKRoundRect();
-        }
+        // If either radius component is zero, all radii are zeroed (matching Skia behaviour).
+        if (x_rad == 0 || y_rad == 0)
+            x_rad = y_rad = 0;
+
+        _radiiUpperLeft  = new SKPoint(x_rad, y_rad);
+        _radiiUpperRight = new SKPoint(x_rad, y_rad);
+        _radiiLowerRight = new SKPoint(x_rad, y_rad);
+        _radiiLowerLeft  = new SKPoint(x_rad, y_rad);
+        Normalize();
     }
 
     // Directly sets all four corners.
-    public RRectF(float x,
-         float y,
-         float width,
-         float height,
-         float upper_left_x,
-         float upper_left_y,
-         float upper_right_x,
-         float upper_right_y,
-         float lower_right_x,
-         float lower_right_y,
-         float lower_left_x,
-         float lower_left_y) : this()
+    public RRectF(float x, float y, float width, float height,
+                  float upper_left_x,  float upper_left_y,
+                  float upper_right_x, float upper_right_y,
+                  float lower_right_x, float lower_right_y,
+                  float lower_left_x,  float lower_left_y)
     {
-        Span<SKPoint> radii = stackalloc SKPoint[]
-        {
-            new(upper_left_x, upper_left_y),
-            new(upper_right_x, upper_right_y),
-            new(lower_right_x, lower_right_y),
-            new(lower_left_x, lower_left_y)
-        };
-
-        // SKRect() takes left, top, right, bottom (not left, top, width, height, like in C++ Skia), so:
-        // right = x + width
-        // bottom = y + height
-        skrrect_.SetRectRadii(new SKRect(x, y, x + width, y + height), radii);
-
-        if (IsEmpty())
-        {
-            // Make sure that empty rects are created fully empty, not with some non-zero dimensions.
-            skrrect_ = new SKRoundRect();
-        }
+        _rect            = new SKRect(x, y, x + width, y + height);
+        _radiiUpperLeft  = new SKPoint(upper_left_x,  upper_left_y);
+        _radiiUpperRight = new SKPoint(upper_right_x, upper_right_y);
+        _radiiLowerRight = new SKPoint(lower_right_x, lower_right_y);
+        _radiiLowerLeft  = new SKPoint(lower_left_x,  lower_left_y);
+        Normalize();
     }
 
     public RRectF(in RectF rect,
-                float upper_left_x,
-                float upper_left_y,
-                float upper_right_x,
-                float upper_right_y,
-                float lower_right_x,
-                float lower_right_y,
-                float lower_left_x,
-                float lower_left_y) : this(rect.X,
-                                           rect.Y,
-                                           rect.Width,
-                                           rect.Height,
-                                           upper_left_x,
-                                           upper_left_y,
-                                           upper_right_x,
-                                           upper_right_y,
-                                           lower_right_x,
-                                           lower_right_y,
-                                           lower_left_x,
-                                           lower_left_y) { }
-    RRectF(in RectF rect, in RoundedCornersF corners) : this(rect.X,
-                                                             rect.Y,
-                                                             rect.Width,
-                                                             rect.Height,
-                                                             corners.UpperLeft,
-                                                             corners.UpperLeft,
-                                                             corners.UpperRight,
-                                                             corners.UpperRight,
-                                                             corners.LowerRight,
-                                                             corners.LowerRight,
-                                                             corners.LowerLeft,
-                                                             corners.LowerLeft) { }
-    public readonly RoundRectType GetRoundRectType()
-    {
-        SKPoint rad;
+                  float upper_left_x,  float upper_left_y,
+                  float upper_right_x, float upper_right_y,
+                  float lower_right_x, float lower_right_y,
+                  float lower_left_x,  float lower_left_y)
+        : this(rect.X, rect.Y, rect.Width, rect.Height,
+               upper_left_x,  upper_left_y,
+               upper_right_x, upper_right_y,
+               lower_right_x, lower_right_y,
+               lower_left_x,  lower_left_y) { }
 
-        switch (skrrect_.Type)
+    RRectF(in RectF rect, in RoundedCornersF corners)
+        : this(rect.X, rect.Y, rect.Width, rect.Height,
+               corners.UpperLeft,  corners.UpperLeft,
+               corners.UpperRight, corners.UpperRight,
+               corners.LowerRight, corners.LowerRight,
+               corners.LowerLeft,  corners.LowerLeft) { }
+
+    // Clears all fields if the rect is empty, mirroring Skia's normalisation.
+    private void Normalize()
+    {
+        if (RectIsEmpty)
         {
-            case SKRoundRectType.Empty:
-                return RoundRectType.kEmpty;
-            case SKRoundRectType.Rect:
-                return RoundRectType.kRect;
-            case SKRoundRectType.Simple:
-                rad = skrrect_.GetRadii(SKRoundRectCorner.UpperLeft);
-                if (rad.X == rad.Y)
-                {
-                    return RoundRectType.kSingle;
-                }
-                return RoundRectType.kSimple;
-            case SKRoundRectType.Oval:
-                rad = skrrect_.GetRadii(SKRoundRectCorner.UpperLeft);
-                if (rad.X == rad.Y)
-                {
-                    return RoundRectType.kSingle;
-                }
-                return RoundRectType.kOval;
-            case SKRoundRectType.NinePatch:
-            case SKRoundRectType.Complex:
-            default:
-                return RoundRectType.kComplex;
+            this = default;
         }
     }
 
-    // The rectangular portion of the RRectF, without the corner radii.
-    public readonly RectF rect()
+    public readonly RoundRectType GetRoundRectType()
     {
-        return SkRectToRectF(skrrect_.Rect);
+        if (RectIsEmpty)
+            return RoundRectType.kEmpty;
+
+        bool allZero = _radiiUpperLeft  == SKPoint.Empty &&
+                       _radiiUpperRight == SKPoint.Empty &&
+                       _radiiLowerRight == SKPoint.Empty &&
+                       _radiiLowerLeft  == SKPoint.Empty;
+
+        if (allZero)
+            return RoundRectType.kRect;
+
+        bool allEqual = _radiiUpperLeft  == _radiiUpperRight &&
+                        _radiiUpperLeft  == _radiiLowerRight &&
+                        _radiiUpperLeft  == _radiiLowerLeft;
+
+        if (allEqual)
+        {
+            // Check for oval: radii match half the rect dimensions.
+            float halfW = _rect.Width  / 2f;
+            float halfH = _rect.Height / 2f;
+            if (_radiiUpperLeft.X == halfW && _radiiUpperLeft.Y == halfH)
+                return _radiiUpperLeft.X == _radiiUpperLeft.Y
+                    ? RoundRectType.kSingle
+                    : RoundRectType.kOval;
+
+            return _radiiUpperLeft.X == _radiiUpperLeft.Y
+                ? RoundRectType.kSingle
+                : RoundRectType.kSimple;
+        }
+
+        return RoundRectType.kComplex;
     }
 
-    // Returns the radii of the all corners. DCHECKs that all corners
+    // The rectangular portion of the RRectF, without the corner radii.
+    public readonly RectF rect() => SkRectToRectF(_rect);
+
+    // Returns the radii of all corners. DCHECKs that all corners
     // have the same radii (the type is <= kOval).
     public readonly Vector2DF GetSimpleRadii()
     {
 #if DEBUG
         Debug.Assert(GetRoundRectType() <= RoundRectType.kOval);
 #endif
-        SKPoint result = skrrect_.GetRadii(SKRoundRectCorner.UpperLeft);
-        return new Vector2DF(result.X, result.Y);
+        return new Vector2DF(_radiiUpperLeft.X, _radiiUpperLeft.Y);
     }
 
     // Returns the radius of all corners. DCHECKs that all corners have the same
@@ -181,113 +175,114 @@ public struct RRectF
     public readonly float GetSimpleRadius()
     {
 #if DEBUG
-        Debug.Assert(GetRoundRectType() <= RoundRectType.kOval);
+        Debug.Assert(GetRoundRectType() <= RoundRectType.kSingle);
+        Debug.Assert(_radiiUpperLeft.X == _radiiUpperLeft.Y);
 #endif
-        SKPoint result = skrrect_.GetRadii(SKRoundRectCorner.UpperLeft);
-#if DEBUG
-        Debug.Assert(result.X == result.Y);
-#endif
-        return result.X;
+        return _radiiUpperLeft.X;
     }
 
     // Make the RRectF empty.
-    public void Clear()
-    {
-        skrrect_.SetEmpty();
-    }
+    public void Clear() => this = default;
 
-    public readonly bool IsEmpty()
-    {
-        return GetRoundRectType() == RoundRectType.kEmpty;
-    }
+    private readonly bool RectIsEmpty => _rect.Width <= 0 || _rect.Height <= 0;
 
-    public readonly bool HasRoundedCorners()
-    {
-        return !IsEmpty() && GetRoundRectType() != RoundRectType.kRect;
-    }
+    public readonly bool IsEmpty() => RectIsEmpty;
 
-    // GetCornerRadii may be called for any type of RRect (kRect, kOval, etc.),
-    // and it will return "correct" values. If GetType() is kOval or less,
-    // all corner values will be identical to each other. SetCornerRadii can similarly
-    // be called on any type of RRect, but GetType() may change as a result of the call.
+    public readonly bool HasRoundedCorners() =>
+        !IsEmpty() && GetRoundRectType() != RoundRectType.kRect;
+
     public readonly Vector2DF GetCornerRadii(RoundRectCorner corner)
     {
-        SKPoint result = skrrect_.GetRadii((SKRoundRectCorner)corner);
-        
-        return new Vector2DF(result.X, result.Y);
-    }
-
-    private readonly Span<SKPoint> GetAllRadii()
-    {
-        return skrrect_.Radii.AsSpan();
+        SKPoint r = corner switch
+        {
+            RoundRectCorner.kUpperLeft  => _radiiUpperLeft,
+            RoundRectCorner.kUpperRight => _radiiUpperRight,
+            RoundRectCorner.kLowerRight => _radiiLowerRight,
+            RoundRectCorner.kLowerLeft  => _radiiLowerLeft,
+            _ => SKPoint.Empty
+        };
+        return new Vector2DF(r.X, r.Y);
     }
 
     void SetCornerRadii(RoundRectCorner corner, float x_rad, float y_rad)
     {
-        var radii = GetAllRadii();
-        
-        radii[(int)corner] = new SKPoint(x_rad, y_rad);
-
-        skrrect_.SetRectRadii(skrrect_.Rect, radii);
+        var pt = new SKPoint(x_rad, y_rad);
+        switch (corner)
+        {
+            case RoundRectCorner.kUpperLeft:  _radiiUpperLeft  = pt; break;
+            case RoundRectCorner.kUpperRight: _radiiUpperRight = pt; break;
+            case RoundRectCorner.kLowerRight: _radiiLowerRight = pt; break;
+            case RoundRectCorner.kLowerLeft:  _radiiLowerLeft  = pt; break;
+        }
     }
 
-    void SetCornerRadii(RoundRectCorner corner, in Vector2DF radii)
-    {
-        SetCornerRadii(corner, radii.X, radii.Y);
-    }
+    void SetCornerRadii(RoundRectCorner corner, in Vector2DF radii) => SetCornerRadii(corner, radii.X, radii.Y);
 
     // Returns true if |rect| is inside the bounds and corner radii of this
     // RRectF, and if both this RRectF and rect are not empty.
     public readonly bool Contains(in RectF rect)
     {
-        return skrrect_.Contains(RectFToSkRect(rect));
+        using var rrect = ToSKRoundRect();
+        return rrect.Contains(RectFToSkRect(rect));
     }
 
     // Move the rectangle by a horizontal and vertical distance.
     public void Offset(float horizontal, float vertical)
     {
-        skrrect_.Offset(horizontal, vertical);
+        _rect.Left   += horizontal;
+        _rect.Right  += horizontal;
+        _rect.Top    += vertical;
+        _rect.Bottom += vertical;
     }
 
-    public void Offset(in Vector2DF distance)
+    public void Offset(in Vector2DF distance) => Offset(distance.X, distance.Y);
+
+    // Creates an SKRoundRect for use with Skia APIs. The caller is responsible
+    // for disposing the returned object.
+    public readonly SKRoundRect ToSKRoundRect()
     {
-        Offset(distance.X, distance.Y);
-    }
+        var rrect = new SKRoundRect();
 
-    public override readonly int GetHashCode() => HashCode.Combine(skrrect_.Radii[0], skrrect_.Radii[1], skrrect_.Radii[2], skrrect_.Radii[3],
-                                                                   skrrect_.Rect.Top, skrrect_.Rect.Right, skrrect_.Rect.Bottom, skrrect_.Rect.Right);
-    public override readonly bool Equals(object? obj) => obj is RRectF other && Equals(other);
+        if (!RectIsEmpty)
+        {
+            Span<SKPoint> radii = stackalloc SKPoint[]
+            {
+                _radiiUpperLeft, _radiiUpperRight,
+                _radiiLowerRight, _radiiLowerLeft
+            };
+            rrect.SetRectRadii(_rect, radii);
+        }
+        return rrect;
+    }
 
     public readonly bool Equals(in RRectF other)
     {
-        // Skia normalizes on construction, so two empty rrects are always equal
-        // regardless of their original bounds or radii (e.g. RRectF(1,2,3,0,5,6)
-        // normalizes to the same Empty type as RRectF(0,0,0,0,0,0)).
-        if (skrrect_.Type != other.skrrect_.Type)
-            return false;
+        // Two empty rects are always equal regardless of their original geometry.
+        bool thisEmpty  = RectIsEmpty;
+        bool otherEmpty = other.RectIsEmpty;
 
-        if (skrrect_.Type == SKRoundRectType.Empty)
-            return true;
+        if (thisEmpty && otherEmpty) return true;
+        if (thisEmpty != otherEmpty) return false;
 
-        return skrrect_.Rect == other.skrrect_.Rect &&
-               skrrect_.GetRadii(SKRoundRectCorner.UpperLeft) == other.skrrect_.GetRadii(SKRoundRectCorner.UpperLeft) &&
-               skrrect_.GetRadii(SKRoundRectCorner.UpperRight) == other.skrrect_.GetRadii(SKRoundRectCorner.UpperRight) &&
-               skrrect_.GetRadii(SKRoundRectCorner.LowerRight) == other.skrrect_.GetRadii(SKRoundRectCorner.LowerRight) &&
-               skrrect_.GetRadii(SKRoundRectCorner.LowerLeft) == other.skrrect_.GetRadii(SKRoundRectCorner.LowerLeft);
+        return _rect            == other._rect            &&
+               _radiiUpperLeft  == other._radiiUpperLeft  &&
+               _radiiUpperRight == other._radiiUpperRight &&
+               _radiiLowerRight == other._radiiLowerRight &&
+               _radiiLowerLeft  == other._radiiLowerLeft;
     }
 
-    public static bool operator == (in RRectF left, in RRectF right) => left.Equals(right);
-    public static bool operator != (in RRectF left, in RRectF right) => !left.Equals(right);
+    public override readonly bool Equals(object? obj) => obj is RRectF other && Equals(other);
 
-    public void operator +=(in Vector2DF offset)
-    {
-        Offset(offset.X, offset.Y);
-    }
+    public override readonly int GetHashCode() =>
+        HashCode.Combine(_rect.Left, _rect.Top, _rect.Right, _rect.Bottom,
+                         _radiiUpperLeft, _radiiUpperRight, _radiiLowerRight, _radiiLowerLeft);
 
-    public void operator -=(in Vector2DF offset)
-    {
-        Offset(-offset.X, -offset.Y);
-    }
+    public static bool operator ==(in RRectF left, in RRectF right) => left.Equals(right);
+    public static bool operator !=(in RRectF left, in RRectF right) => !left.Equals(right);
+
+    public void operator +=(in Vector2DF offset) => Offset(offset.X, offset.Y);
+
+    public void operator -=(in Vector2DF offset) => Offset(-offset.X, -offset.Y);
 
     public static RRectF operator +(in RRectF a, in Vector2DF b)
     {
