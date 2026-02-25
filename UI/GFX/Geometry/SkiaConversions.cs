@@ -109,16 +109,27 @@ public static class SkiaConversions
 
     public static Transform SkM44ToTransform(in SKMatrix44 matrix)
     {
-        throw new NotImplementedException();
+        return Transform.RowMajor(
+            matrix[0, 0], matrix[0, 1], matrix[0, 2], matrix[0, 3],
+            matrix[1, 0], matrix[1, 1], matrix[1, 2], matrix[1, 3],
+            matrix[2, 0], matrix[2, 1], matrix[2, 2], matrix[2, 3],
+            matrix[3, 0], matrix[3, 1], matrix[3, 2], matrix[3, 3]);
     }
 
-    public static SKMatrix TransformToFlattenedSkMatrix(Transform transform)
+    public static SKMatrix TransformToFlattenedSkMatrix(Transform matrix)
     {
-        throw new NotImplementedException();
+        // Convert from 4x4 to 3x3 by dropping row 2 (counted from 0) and column 2.
+        return new SKMatrix((float)matrix.rc(0, 0), (float)matrix.rc(0, 1), (float)matrix.rc(0, 3),
+                           (float)matrix.rc(1, 0), (float)matrix.rc(1, 1), (float)matrix.rc(1, 3),
+                           (float)matrix.rc(3, 0), (float)matrix.rc(3, 1), (float)matrix.rc(3, 3));
     }
 
     public static Transform SkMatrixToTransform(in SKMatrix matrix)
     {
-        throw new NotImplementedException();
+        return Transform.RowMajor(
+        matrix.ScaleX, matrix.SkewX, 0, matrix.TransX,     // row 0
+        matrix.SkewY, matrix.ScaleY, 0, matrix.TransY,     // row 1
+        0, 0, 1, 0,                                        // row 2
+        matrix.Persp0, matrix.Persp1, 0, matrix.Persp2);   // row 3
     }
 }

@@ -40,6 +40,21 @@ public class Transform
         axis_2d_ = axis_2d;
     }
 
+    // Creates a transform from explicit 16 matrix elements in row-major order.
+    // Always creates a double precision 4x4 matrix.
+    // clang-format off
+    public static Transform RowMajor(
+      double r0c0, double r0c1, double r0c2, double r0c3,
+      double r1c0, double r1c1, double r1c2, double r1c3,
+      double r2c0, double r2c1, double r2c2, double r2c3,
+      double r3c0, double r3c1, double r3c2, double r3c3)
+      {
+        return new Transform(r0c0, r1c0, r2c0, r3c0, // col 0
+                     r0c1, r1c1, r2c1, r3c1,         // col 1
+                     r0c2, r1c2, r2c2, r3c2,         // col 2
+                     r0c3, r1c3, r2c3, r3c3);        // col 3
+    }
+
     // Used internally to construct Transform with parameters in col-major order.
     Transform(double r0c0, double r1c0, double r2c0, double r3c0,
               double r0c1, double r1c1, double r2c1, double r3c1,

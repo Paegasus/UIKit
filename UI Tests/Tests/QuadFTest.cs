@@ -217,4 +217,10 @@ public static class QuadFTest
             Assert.False(quad.IsRectilinear()); // << "case " << i;
         }
     }
+
+    [Fact]
+    private static void TestIsCounterClockwise()
+    {
+        
+    }
 }
