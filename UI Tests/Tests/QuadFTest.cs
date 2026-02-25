@@ -155,16 +155,17 @@ public static class QuadFTest
     private static void TestIsRectilinearForMappedQuad()
     {
         const int kNumRectilinear = 8;
-        Transform[] rectilinear_trans = new Transform[kNumRectilinear];
-
-        rectilinear_trans[0] = new();
-        rectilinear_trans[1] = new();
-        rectilinear_trans[2] = new();
-        rectilinear_trans[3] = new();
-        rectilinear_trans[4] = new();
-        rectilinear_trans[5] = new();
-        rectilinear_trans[6] = new();
-        rectilinear_trans[7] = new();
+        Transform[] rectilinear_trans =
+        [
+            new Transform(),
+            new Transform(),
+            new Transform(),
+            new Transform(),
+            new Transform(),
+            new Transform(),
+            new Transform(),
+            new Transform()
+        ];
 
         rectilinear_trans[1].Rotate(90.0f);
         rectilinear_trans[2].Rotate(180.0f);
@@ -185,19 +186,20 @@ public static class QuadFTest
         }
 
         const int kNumNonRectilinear = 10;
-        Transform[] non_rectilinear_trans = new Transform[kNumNonRectilinear];
-
-        non_rectilinear_trans[0] = new();
-        non_rectilinear_trans[1] = new();
-        non_rectilinear_trans[2] = new();
-        non_rectilinear_trans[3] = new();
-        non_rectilinear_trans[4] = new();
-        non_rectilinear_trans[5] = new();
-        non_rectilinear_trans[6] = new();
-        non_rectilinear_trans[7] = new();
-        non_rectilinear_trans[8] = new();
-        non_rectilinear_trans[9] = new();
-
+        Transform[] non_rectilinear_trans =
+        [
+            new Transform(),
+            new Transform(),
+            new Transform(),
+            new Transform(),
+            new Transform(),
+            new Transform(),
+            new Transform(),
+            new Transform(),
+            new Transform(),
+            new Transform()
+        ];
+        
         non_rectilinear_trans[0].Rotate(359.9999f);
         non_rectilinear_trans[1].Rotate(0.0000001f);
         non_rectilinear_trans[2].Rotate(89.9999f);
