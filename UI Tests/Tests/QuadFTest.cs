@@ -547,4 +547,276 @@ public static class QuadFTest
         // Cover.
         Assert.True(quad.IntersectsRect(new RectF(0, 0, 20, 20)));
     }
+
+    [Fact]
+    private static void TestRectIntersectionIsInclusive()
+    {
+        // A rectilinear quad at (10, 10) with dimensions 10x10.
+        QuadF quad = new(new RectF(10, 10, 10, 10));
+
+        // A rect fully contained in the quad should intersect.
+        Assert.True(quad.IntersectsRect(new RectF(11, 11, 8, 8)));
+        Assert.True(quad.IntersectsRectPartial(new RectF(11, 11, 8, 8)));
+
+        // A point fully contained in the quad should intersect.
+        Assert.True(quad.IntersectsRect(new RectF(11, 11, 0, 0)));
+        Assert.True(quad.IntersectsRectPartial(new RectF(11, 11, 0, 0)));
+
+        // A rect that touches the quad only at the point (10, 10) should intersect.
+        Assert.True(quad.IntersectsRect(new RectF(9, 9, 1, 1)));
+        Assert.True(quad.IntersectsRectPartial(new RectF(9, 9, 1, 1)));
+
+        // A rect that touches the quad only on the left edge should intersect.
+        Assert.True(quad.IntersectsRect(new RectF(9, 11, 1, 1)));
+        Assert.True(quad.IntersectsRectPartial(new RectF(9, 11, 1, 1)));
+
+        // A rect that touches the quad only on the top edge should intersect.
+        Assert.True(quad.IntersectsRect(new RectF(11, 9, 1, 1)));
+        Assert.True(quad.IntersectsRectPartial(new RectF(11, 9, 1, 1)));
+
+        // A rect that touches the quad only on the right edge should intersect.
+        Assert.True(quad.IntersectsRect(new RectF(20, 11, 1, 1)));
+        Assert.True(quad.IntersectsRectPartial(new RectF(20, 11, 1, 1)));
+
+        // A rect that touches the quad only on the bottom edge should intersect.
+        Assert.True(quad.IntersectsRect(new RectF(11, 20, 1, 1)));
+        Assert.True(quad.IntersectsRectPartial(new RectF(11, 20, 1, 1)));
+
+        // A rect that is fully outside the quad should not intersect.
+        Assert.False(quad.IntersectsRect(new RectF(8, 8, 1, 1)));
+        Assert.False(quad.IntersectsRectPartial(new RectF(8, 8, 1, 1)));
+
+        // A point that is fully outside the quad should not intersect.
+        Assert.False(quad.IntersectsRect(new RectF(9, 9, 0, 0)));
+        Assert.False(quad.IntersectsRectPartial(new RectF(9, 9, 0, 0)));
+
+        // A rect that is not fully to the left of any of the quad's edges.
+        QuadF quad2 = new(new PointF(100, 100), new PointF(80, 120), new PointF(50, 80), new PointF(60, 40));
+        Assert.False(quad2.IntersectsRect(new RectF(60, 130, 30, 10)));
+    }
+
+    [Fact]
+    private static void TestQuadIntersection()
+    {
+        // Clockwise (convex) quad.
+        // (Centroid = { 72.5, 85 }, Min = { 50, 40 }, Max = { 100, 120 })
+        QuadF cw_quad = new QuadF(new PointF(100, 100), new PointF(80, 120), new PointF(50, 80), new PointF(60, 40));
+
+        // All points contained.
+        Assert.True(cw_quad.IntersectsQuad(new QuadF(new RectF(72.5f, 85, 1, 1))));
+
+        // All points contained (degenerate).
+        Assert.True(cw_quad.IntersectsQuad(new QuadF(new RectF(72.5f, 85, 0, 0))));
+
+        // One point contained.
+        Assert.True(cw_quad.IntersectsQuad(new QuadF(new RectF(72.5f, 85, 100, 100))));
+
+        // Quad contained by other quad.
+        Assert.True(cw_quad.IntersectsQuad(new QuadF(new RectF(40, 30, 70, 100))));
+
+        // Touching a single point.
+        Assert.True(cw_quad.IntersectsQuad(new QuadF(new RectF(80, 120, 100, 100))));
+
+        // Touching p1 - p2 edge.
+        Assert.True(cw_quad.IntersectsQuad(new QuadF(new RectF(90, 110, 10, 10))));
+
+        // Touching p2 - p3 edge.
+        Assert.True(cw_quad.IntersectsQuad(new QuadF(new RectF(55, 100, 10, 10))));
+
+        // Touching p3 - p4 edge.
+        Assert.True(cw_quad.IntersectsQuad(new QuadF(new RectF(45, 50, 10, 10))));
+
+        // Touching p4 - p1 edge.
+        Assert.True(cw_quad.IntersectsQuad(new QuadF(new RectF(80, 60, 10, 10))));
+
+        // Edge crossing (but no points in quad.)
+        Assert.True(cw_quad.IntersectsQuad(new QuadF(new RectF(50, 30, 50, 15))));
+
+        // Co-linear edges.
+        Assert.True(cw_quad.IntersectsQuad(new QuadF(new PointF(20, 40), new PointF(110, 160),
+                                                 new PointF(70, 160), new PointF(10, 40))));
+
+        // Fully outside.
+        // L = { 80, 120 } + t * { -30, -40 }
+        Assert.False(cw_quad.IntersectsQuad(new QuadF(new PointF(10, 40), new PointF(100, 160), new PointF(70, 160), new PointF(0, 40))));
+        // L = { 100, 100 } + t * { -20, 20 }
+        Assert.False(cw_quad.IntersectsQuad(new QuadF(new PointF(120, 90), new PointF(80, 130),
+                                                  new PointF(90, 130), new PointF(130, 90))));
+        // L = { 50, 80 } + t * { 10, -40 }
+        Assert.False(cw_quad.IntersectsQuad(new QuadF(new PointF(35, 100), new PointF(55, 20), new PointF(45, 20), new PointF(25, 100))));
+        // L = { 60, 40 } + t * { 40, 60 }
+        Assert.False(cw_quad.IntersectsQuad(new QuadF(new PointF(50, 10), new PointF(130, 130),
+                                                  new PointF(150, 130), new PointF(80, 10))));
+        // BBox = { { 50, 40 }, { 100, 120 } }; w = 50, h = 80
+        Assert.False(cw_quad.IntersectsQuad(new QuadF(new RectF(110, 50, 10, 60))));
+        Assert.False(cw_quad.IntersectsQuad(new QuadF(new RectF(60, 130, 30, 10))));
+        Assert.False(cw_quad.IntersectsQuad(new QuadF(new RectF(30, 50, 10, 60))));
+        Assert.False(cw_quad.IntersectsQuad(new QuadF(new RectF(60, 20, 30, 10))));
+
+        // Same quad, but counter-clockwise.
+        // (Centroid = { 72.5, 85 }, Min = { 50, 40 }, Max = { 100, 120 })
+        QuadF ccw_quad = new(new PointF(100, 100), new PointF(60, 40), new PointF(50, 80), new PointF(80, 120));
+
+        // All points contained.
+        Assert.True(ccw_quad.IntersectsQuad(new QuadF(new RectF(72.5f, 85, 1, 1))));
+
+        // One point contained.
+        Assert.True(ccw_quad.IntersectsQuad(new QuadF(new RectF(72.5f, 85, 100, 100))));
+
+        // Quad contained by other quad.
+        Assert.True(ccw_quad.IntersectsQuad(new QuadF(new RectF(40, 30, 70, 100))));
+
+        // Touching a single point.
+        Assert.True(ccw_quad.IntersectsQuad(new QuadF(new RectF(80, 120, 100, 100))));
+
+        // Touching p1 - p2 edge.
+        Assert.True(ccw_quad.IntersectsQuad(new QuadF(new RectF(90, 110, 10, 10))));
+
+        // Touching p2 - p3 edge.
+        Assert.True(ccw_quad.IntersectsQuad(new QuadF(new RectF(55, 100, 10, 10))));
+
+        // Touching p3 - p4 edge.
+        Assert.True(ccw_quad.IntersectsQuad(new QuadF(new RectF(45, 50, 10, 10))));
+
+        // Touching p4 - p1 edge.
+        Assert.True(ccw_quad.IntersectsQuad(new QuadF(new RectF(80, 60, 10, 10))));
+
+        // Edge crossing (but no points in quad.)
+        Assert.True(ccw_quad.IntersectsQuad(new QuadF(new RectF(50, 30, 50, 15))));
+
+        // Co-linear edges.
+        Assert.True(ccw_quad.IntersectsQuad(new QuadF(new PointF(20, 40), new PointF(110, 160), new PointF(70, 160), new PointF(10, 40))));
+
+        // Fully outside.
+        // L = { 80, 120 } + t * { -30, -40 }
+        Assert.False(ccw_quad.IntersectsQuad(new QuadF(new PointF(10, 40), new PointF(100, 160), new PointF(70, 160), new PointF(0, 40))));
+        // L = { 100, 100 } + t * { -20, 20 }
+        Assert.False(ccw_quad.IntersectsQuad(new QuadF(
+            new PointF(120, 90), new PointF(80, 130), new PointF(90, 130), new PointF(130, 90))));
+        // L = { 50, 80 } + t * { 10, -40 }
+        Assert.False(ccw_quad.IntersectsQuad(new QuadF(new PointF(35, 100), new PointF(55, 20), new PointF(45, 20), new PointF(25, 100))));
+        // L = { 60, 40 } + t * { 40, 60 }
+        Assert.False(ccw_quad.IntersectsQuad(new QuadF(new PointF(50, 10), new PointF(130, 130), new PointF(150, 130), new PointF(80, 10))));
+        // BBox = { { 50, 40 }, { 100, 120 } }; w = 50, h = 80
+        Assert.False(ccw_quad.IntersectsQuad(new QuadF(new RectF(110, 50, 10, 60))));
+        Assert.False(ccw_quad.IntersectsQuad(new QuadF(new RectF(60, 130, 30, 10))));
+        Assert.False(ccw_quad.IntersectsQuad(new QuadF(new RectF(30, 50, 10, 60))));
+        Assert.False(ccw_quad.IntersectsQuad(new QuadF(new RectF(60, 20, 30, 10))));
+    }
+
+    [Fact]
+    private static void TestIntersectsEllipseClockWise()
+    {
+        QuadF quad = new(new PointF(10, 0), new PointF(20, 10), new PointF(10, 20), new PointF(0, 10));
+
+        // Top-left.
+        Assert.False(quad.IntersectsEllipse(new PointF(0, 0), new SizeF(7, 7)));
+        Assert.True(quad.IntersectsEllipse(new PointF(0, 0), new SizeF(6, 9)));
+        Assert.True(quad.IntersectsEllipse(new PointF(0, 0), new SizeF(7.1f, 7.1f)));
+        Assert.True(quad.IntersectsEllipse(new PointF(0, 0), new SizeF(9, 6)));
+        Assert.False(quad.IntersectsEllipse(new PointF(0, 0), new SizeF(2, 8)));
+        Assert.False(quad.IntersectsEllipse(new PointF(0, 0), new SizeF(8, 2)));
+
+        // Top.
+        Assert.False(quad.IntersectsEllipse(new PointF(10, -5), new SizeF(20, 2)));
+        Assert.False(quad.IntersectsEllipse(new PointF(10, -5), new SizeF(20, 4.9f)));
+        Assert.True(quad.IntersectsEllipse(new PointF(10, -5), new SizeF(20, 5.1f)));
+
+        // Top-right.
+        Assert.False(quad.IntersectsEllipse(new PointF(20, 0), new SizeF(7, 7)));
+        Assert.True(quad.IntersectsEllipse(new PointF(20, 0), new SizeF(6, 9)));
+        Assert.True(quad.IntersectsEllipse(new PointF(20, 0), new SizeF(7.1f, 7.1f)));
+        Assert.True(quad.IntersectsEllipse(new PointF(20, 0), new SizeF(9, 6)));
+        Assert.False(quad.IntersectsEllipse(new PointF(20, 0), new SizeF(2, 8)));
+        Assert.False(quad.IntersectsEllipse(new PointF(20, 0), new SizeF(8, 2)));
+
+        // Right.
+        Assert.False(quad.IntersectsEllipse(new PointF(25, 10), new SizeF(2, 20)));
+        Assert.False(quad.IntersectsEllipse(new PointF(25, 10), new SizeF(4.9f, 20)));
+        Assert.True(quad.IntersectsEllipse(new PointF(25, 10), new SizeF(5.1f, 20)));
+
+        // Bottom-right.
+        Assert.False(quad.IntersectsEllipse(new PointF(20, 20), new SizeF(7, 7)));
+        Assert.True(quad.IntersectsEllipse(new PointF(20, 20), new SizeF(6, 9)));
+        Assert.True(quad.IntersectsEllipse(new PointF(20, 20), new SizeF(7.1f, 7.1f)));
+        Assert.True(quad.IntersectsEllipse(new PointF(20, 20), new SizeF(9, 6)));
+        Assert.False(quad.IntersectsEllipse(new PointF(20, 20), new SizeF(2, 8)));
+        Assert.False(quad.IntersectsEllipse(new PointF(20, 20), new SizeF(8, 2)));
+
+        // Bottom.
+        Assert.False(quad.IntersectsEllipse(new PointF(10, 25), new SizeF(20, 2)));
+        Assert.False(quad.IntersectsEllipse(new PointF(10, 25), new SizeF(20, 4.9f)));
+        Assert.True(quad.IntersectsEllipse(new PointF(10, 25), new SizeF(20, 5.1f)));
+
+        // Bottom-left.
+        Assert.False(quad.IntersectsEllipse(new PointF(0, 20), new SizeF(7, 7)));
+        Assert.True(quad.IntersectsEllipse(new PointF(0, 20), new SizeF(6, 9)));
+        Assert.True(quad.IntersectsEllipse(new PointF(0, 20), new SizeF(7.1f, 7.1f)));
+        Assert.True(quad.IntersectsEllipse(new PointF(0, 20), new SizeF(9, 6)));
+        Assert.False(quad.IntersectsEllipse(new PointF(0, 20), new SizeF(2, 8)));
+        Assert.False(quad.IntersectsEllipse(new PointF(0, 20), new SizeF(8, 2)));
+
+        // Left.
+        Assert.False(quad.IntersectsEllipse(new PointF(-5, 10), new SizeF(2, 20)));
+        Assert.False(quad.IntersectsEllipse(new PointF(-5, 10), new SizeF(4.9f, 20)));
+        Assert.True(quad.IntersectsEllipse(new PointF(-5, 10), new SizeF(5.1f, 20)));
+    }
+
+    [Fact]
+    private static void TestIntersectsEllipseCounterClockwise()
+    {
+        QuadF quad = new(new PointF(10, 0), new PointF(0, 10), new PointF(10, 20), new PointF(20, 10));
+
+        // Top-left.
+        Assert.False(quad.IntersectsEllipse(new PointF(0, 0), new SizeF(7, 7)));
+        Assert.True(quad.IntersectsEllipse(new PointF(0, 0), new SizeF(6, 9)));
+        Assert.True(quad.IntersectsEllipse(new PointF(0, 0), new SizeF(7.1f, 7.1f)));
+        Assert.True(quad.IntersectsEllipse(new PointF(0, 0), new SizeF(9, 6)));
+        Assert.False(quad.IntersectsEllipse(new PointF(0, 0), new SizeF(2, 8)));
+        Assert.False(quad.IntersectsEllipse(new PointF(0, 0), new SizeF(8, 2)));
+
+        // Top.
+        Assert.False(quad.IntersectsEllipse(new PointF(10, -5), new SizeF(20, 2)));
+        Assert.False(quad.IntersectsEllipse(new PointF(10, -5), new SizeF(20, 4.9f)));
+        Assert.True(quad.IntersectsEllipse(new PointF(10, -5), new SizeF(20, 5.1f)));
+
+        // Top-right.
+        Assert.False(quad.IntersectsEllipse(new PointF(20, 0), new SizeF(7, 7)));
+        Assert.True(quad.IntersectsEllipse(new PointF(20, 0), new SizeF(6, 9)));
+        Assert.True(quad.IntersectsEllipse(new PointF(20, 0), new SizeF(7.1f, 7.1f)));
+        Assert.True(quad.IntersectsEllipse(new PointF(20, 0), new SizeF(9, 6)));
+        Assert.False(quad.IntersectsEllipse(new PointF(20, 0), new SizeF(2, 8)));
+        Assert.False(quad.IntersectsEllipse(new PointF(20, 0), new SizeF(8, 2)));
+
+        // Right.
+        Assert.False(quad.IntersectsEllipse(new PointF(25, 10), new SizeF(2, 20)));
+        Assert.False(quad.IntersectsEllipse(new PointF(25, 10), new SizeF(4.9f, 20)));
+        Assert.True(quad.IntersectsEllipse(new PointF(25, 10), new SizeF(5.1f, 20)));
+
+        // Bottom-right.
+        Assert.False(quad.IntersectsEllipse(new PointF(20, 20), new SizeF(7, 7)));
+        Assert.True(quad.IntersectsEllipse(new PointF(20, 20), new SizeF(6, 9)));
+        Assert.True(quad.IntersectsEllipse(new PointF(20, 20), new SizeF(7.1f, 7.1f)));
+        Assert.True(quad.IntersectsEllipse(new PointF(20, 20), new SizeF(9, 6)));
+        Assert.False(quad.IntersectsEllipse(new PointF(20, 20), new SizeF(2, 8)));
+        Assert.False(quad.IntersectsEllipse(new PointF(20, 20), new SizeF(8, 2)));
+
+        // Bottom.
+        Assert.False(quad.IntersectsEllipse(new PointF(10, 25), new SizeF(20, 2)));
+        Assert.False(quad.IntersectsEllipse(new PointF(10, 25), new SizeF(20, 4.9f)));
+        Assert.True(quad.IntersectsEllipse(new PointF(10, 25), new SizeF(20, 5.1f)));
+
+        // Bottom-left.
+        Assert.False(quad.IntersectsEllipse(new PointF(0, 20), new SizeF(7, 7)));
+        Assert.True(quad.IntersectsEllipse(new PointF(0, 20), new SizeF(6, 9)));
+        Assert.True(quad.IntersectsEllipse(new PointF(0, 20), new SizeF(7.1f, 7.1f)));
+        Assert.True(quad.IntersectsEllipse(new PointF(0, 20), new SizeF(9, 6)));
+        Assert.False(quad.IntersectsEllipse(new PointF(0, 20), new SizeF(2, 8)));
+        Assert.False(quad.IntersectsEllipse(new PointF(0, 20), new SizeF(8, 2)));
+
+        // Left.
+        Assert.False(quad.IntersectsEllipse(new PointF(-5, 10), new SizeF(2, 20)));
+        Assert.False(quad.IntersectsEllipse(new PointF(-5, 10), new SizeF(4.9f, 20)));
+        Assert.True(quad.IntersectsEllipse(new PointF(-5, 10), new SizeF(5.1f, 20)));
+    }
 }
