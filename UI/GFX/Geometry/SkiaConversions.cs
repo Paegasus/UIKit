@@ -129,7 +129,11 @@ public static class SkiaConversions
 
     public static Transform SkMatrixToTransform(in SKMatrix matrix)
     {
-        return Transform.RowMajor(
+        // SKMatrix uses named properties rather than indexed access,
+        // so the SkiaSharp row/column naming inversion doesn't apply here.
+        // The C++ uses Transform::RowMajor, but ColMajor is correct in C#
+        // due to how SkiaSharp exposes SKMatrix fields.
+        return Transform.ColMajor(
         matrix.ScaleX, matrix.SkewX, 0, matrix.TransX,     // row 0
         matrix.SkewY, matrix.ScaleY, 0, matrix.TransY,     // row 1
         0, 0, 1, 0,                                        // row 2
