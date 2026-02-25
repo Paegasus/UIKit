@@ -86,7 +86,8 @@ public static class SkiaConversionsTest
 
         Span<float> v1 = stackalloc float[16]; 
         m.ToRowMajor(v1);
-        
+
+        //Assert.True(v.SequenceEqual(v1));
         Assert.Equal(v, v1);
         Assert.Equal(t, SkM44ToTransform(m));
     }
