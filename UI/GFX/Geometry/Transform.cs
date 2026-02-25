@@ -55,6 +55,42 @@ public class Transform
                      r0c3, r1c3, r2c3, r3c3);        // col 3
     }
 
+    // Creates a transform from explicit 16 matrix elements in col-major order.
+    // Always creates a double precision 4x4 matrix.
+    // See also ColMajor(double[]) and ColMajorF(float[]).
+    public static Transform ColMajor(
+      double r0c0, double r1c0, double r2c0, double r3c0,
+      double r0c1, double r1c1, double r2c1, double r3c1,
+      double r0c2, double r1c2, double r2c2, double r3c2,
+      double r0c3, double r1c3, double r2c3, double r3c3)
+      {
+        return new Transform(r0c0, r1c0, r2c0, r3c0,   // col 0
+                             r0c1, r1c1, r2c1, r3c1,   // col 1
+                             r0c2, r1c2, r2c2, r3c2,   // col 2
+                             r0c3, r1c3, r2c3, r3c3);  // col 3
+    }
+
+    // Constructs Transform from a float col-major array.
+    // Creates an AxisTransform2d or a Matrix44 depending on the values.
+    // GetColMajorF() and ColMajorF() are used when passing a Transform through mojo.
+    public static Transform ColMajorF(Span<float> a)
+    {
+#if DEBUG
+    Debug.Assert(a.Length >= 16);
+#endif
+        if (a[1]  == 0 && a[2]  == 0 && a[3]  == 0 && a[4]  == 0 &&
+            a[6]  == 0 && a[7]  == 0 && a[8]  == 0 && a[9]  == 0 &&
+            a[10] == 1 && a[11] == 0 && a[14] == 0 && a[15] == 1)
+        {
+            return new Transform(a[0], a[5], a[12], a[13]);
+        }
+
+        return new Transform(a[0],  a[1],  a[2],  a[3],
+                             a[4],  a[5],  a[6],  a[7],
+                             a[8],  a[9],  a[10], a[11],
+                             a[12], a[13], a[14], a[15]);
+    }
+
     // Used internally to construct Transform with parameters in col-major order.
     Transform(double r0c0, double r1c0, double r2c0, double r3c0,
               double r0c1, double r1c1, double r2c1, double r3c1,
@@ -67,6 +103,11 @@ public class Transform
                       r0c1, r1c1, r2c1, r3c1,
                       r0c2, r1c2, r2c2, r3c2,
                       r0c3, r1c3, r2c3, r3c3);
+    }
+
+    public Transform(float scale_x, float scale_y, float trans_x, float trans_y)
+    {
+        axis_2d_ = AxisTransform2D.FromScaleAndTranslation(new Vector2DF(scale_x, scale_y), new Vector2DF(trans_x, trans_y));
     }
 
     public Transform(in Quaternion q) : this(

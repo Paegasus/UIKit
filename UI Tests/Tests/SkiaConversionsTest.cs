@@ -68,4 +68,30 @@ public static class SkiaConversionsTest
         result = SkIRectToRect(new SKRectI(int_max, int_max, int_min, int_min));
         Assert.Equal(new Rect(int_max, int_max, 0, 0), result);
     }
+
+    [Fact]
+    private static void TestTransformSkM44Conversions()
+    {
+        float[] v = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 };
+        Transform t = Transform.ColMajorF(v);
+
+        SKMatrix44 m = TransformToSkM44(t);
+        // SkiaSharp's ToRowMajor/ToColumnMajor names are inverted relative to
+        // standard convention — ToRowMajor() returns what we consider column-major order.
+        float[] v1 = m.ToRowMajor();
+        Assert.Equal(v, v1);
+        Assert.Equal(t, SkM44ToTransform(m));
+
+        /*
+        Span<float> v = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16];
+
+        Transform t = Transform.ColMajorF(v);
+
+        SKMatrix44 m = TransformToSkM44(t);
+        Span<float> v1 = stackalloc float[16]; 
+        m.ToColumnMajor(v1);
+        Assert.Equal(v, v1);
+        Assert.Equal(t, SkM44ToTransform(m));
+        */
+    }
 }
