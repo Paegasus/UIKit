@@ -50,8 +50,9 @@ public static class SkiaConversionsTest
         // This clamping only makes sense if SkIRect and Rect have the same size.
         // Otherwise, either other overflows can occur that we don't handle,
         // or no overflows can occur.
-        
-        //if (sizeof(int) != sizeof(int32_t))
+        //
+        // No need to do the check, int is always System.Int32 in C#
+        //if (sizeof(int) != sizeof(System.Int32))
         //    return;
 
         var int_max = int.MaxValue;
