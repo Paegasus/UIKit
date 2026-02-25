@@ -43,4 +43,28 @@ public static class SkiaConversionsTest
             Assert.Equal(i + 1, skrect.Bottom);
         }
     }
+
+    [Fact]
+    private static void TestSkIRectToRectClamping()
+    {
+        // This clamping only makes sense if SkIRect and Rect have the same size.
+        // Otherwise, either other overflows can occur that we don't handle,
+        // or no overflows can occur.
+        
+        //if (sizeof(int) != sizeof(int32_t))
+        //    return;
+
+        var int_max = int.MaxValue;
+        var int_min = int.MinValue;
+
+        // right-left and bottom-top would overflow.
+        // These should be mapped to max width/height, which is as close as Rect can represent.
+        Rect result = SkIRectToRect(new SKRectI(int_min, int_min, int_max, int_max));
+        Assert.Equal(new Size(int_max, int_max), result.Size);
+
+        // right-left and bottom-top would underflow.
+        // These should be mapped to zero, like all negative values.
+        result = SkIRectToRect(new SKRectI(int_max, int_max, int_min, int_min));
+        Assert.Equal(new Rect(int_max, int_max, 0, 0), result);
+    }
 }
