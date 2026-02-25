@@ -110,6 +110,11 @@ public class Transform
         return MapPointInternal(matrix_, point);
     }
 
+    public QuadF MapQuad(in QuadF quad)
+    {
+        return new QuadF(MapPoint(quad.p1), MapPoint(quad.p2), MapPoint(quad.p3), MapPoint(quad.p4));
+    }
+
     public static Matrix44 AxisTransform2DToMatrix44(in AxisTransform2D axis_2d)
     {
         return new Matrix44(axis_2d.Scale.X, 0, 0, 0,  // col 0
@@ -288,6 +293,19 @@ public class Transform
     public void Rotate(double degrees)
     {
         RotateAboutZAxis(degrees);
+    }
+
+    private static double TanDegrees(double degrees)
+    {
+        return Math.Tan(double.DegreesToRadians(degrees));
+    }
+
+    public void Skew(double degrees_x, double degrees_y)
+    {
+        if (degrees_x == 0 && degrees_y == 0)
+            return;
+        
+        EnsureFullMatrix().Skew(TanDegrees(degrees_x), TanDegrees(degrees_y));
     }
 
     // Composes a transform from the given |decomp|, following the routines
