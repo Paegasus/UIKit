@@ -221,6 +221,160 @@ public static class QuadFTest
     [Fact]
     private static void TestIsCounterClockwise()
     {
-        
+        PointF a1 = new(1, 1);
+        PointF b1 = new(2, 1);
+        PointF c1 = new(2, 2);
+        PointF d1 = new(1, 2);
+        Assert.False(new QuadF(a1, b1, c1, d1).IsCounterClockwise());
+        Assert.False(new QuadF(b1, c1, d1, a1).IsCounterClockwise());
+        Assert.True(new QuadF(a1, d1, c1, b1).IsCounterClockwise());
+        Assert.True(new QuadF(c1, b1, a1, d1).IsCounterClockwise());
+
+        // Slightly more complicated quads should work just as easily.
+        PointF a2 = new(1.3f, 1.4f);
+        PointF b2 = new(-0.7f, 4.9f);
+        PointF c2 = new(1.8f, 6.2f);
+        PointF d2 = new(2.1f, 1.6f);
+        Assert.True(new QuadF(a2, b2, c2, d2).IsCounterClockwise());
+        Assert.True(new QuadF(b2, c2, d2, a2).IsCounterClockwise());
+        Assert.False(new QuadF(a2, d2, c2, b2).IsCounterClockwise());
+        Assert.False(new QuadF(c2, b2, a2, d2).IsCounterClockwise());
+
+        // Quads with 3 collinear points should work correctly, too.
+        PointF a3 = new(0, 0);
+        PointF b3 = new(1, 0);
+        PointF c3 = new(2, 0);
+        PointF d3 = new(1, 1);
+        Assert.False(new QuadF(a3, b3, c3, d3).IsCounterClockwise());
+        Assert.False(new QuadF(b3, c3, d3, a3).IsCounterClockwise());
+        Assert.True(new QuadF(a3, d3, c3, b3).IsCounterClockwise());
+        // The next expectation in particular would fail for an implementation
+        // that incorrectly uses only a cross product of the first 3 vertices.
+        Assert.True(new QuadF(c3, b3, a3, d3).IsCounterClockwise());
+
+        // Non-convex quads should work correctly, too.
+        PointF a4 = new(0, 0);
+        PointF b4 = new(1, 1);
+        PointF c4 = new(2, 0);
+        PointF d4 = new(1, 3);
+        Assert.False(new QuadF(a4, b4, c4, d4).IsCounterClockwise());
+        Assert.False(new QuadF(b4, c4, d4, a4).IsCounterClockwise());
+        Assert.True(new QuadF(a4, d4, c4, b4).IsCounterClockwise());
+        Assert.True(new QuadF(c4, b4, a4, d4).IsCounterClockwise());
+
+        // A quad with huge coordinates should not fail this check due to
+        // single-precision overflow.
+        PointF a5 = new(1e30f, 1e30f);
+        PointF b5 = new(1e35f, 1e30f);
+        PointF c5 = new(1e35f, 1e35f);
+        PointF d5 = new(1e30f, 1e35f);
+        Assert.False(new QuadF(a5, b5, c5, d5).IsCounterClockwise());
+        Assert.False(new QuadF(b5, c5, d5, a5).IsCounterClockwise());
+        Assert.True(new QuadF(a5, d5, c5, b5).IsCounterClockwise());
+        Assert.True(new QuadF(c5, b5, a5, d5).IsCounterClockwise());
+    }
+
+    [Fact]
+    private static void TestBoundingBox()
+    {
+        RectF r = new(3.2f, 5.4f, 7.007f, 12.01f);
+        Assert.Equal(r, new QuadF(r).BoundingBox());
+
+        PointF a = new(1.3f, 1.4f);
+        PointF b = new(-0.7f, 4.9f);
+        PointF c = new(1.8f, 6.2f);
+        PointF d = new(2.1f, 1.6f);
+        float left = -0.7f;
+        float top = 1.4f;
+        float right = 2.1f;
+        float bottom = 6.2f;
+        Assert.Equal(new RectF(left, top, right - left, bottom - top), new QuadF(a, b, c, d).BoundingBox());
+    }
+
+    [Fact]
+    private static void TestContainsPoint()
+    {
+        PointF a = new(1.3f, 1.4f);
+        PointF b = new(-0.8f, 4.4f);
+        PointF c = new(1.8f, 6.1f);
+        PointF d = new(2.1f, 1.6f);
+
+        Vector2DF epsilon_x = new(2 * float.MachineEpsilon, 0);
+        Vector2DF epsilon_y = new(0, 2 * float.MachineEpsilon);
+
+        Vector2DF ac_center = c - a;
+        ac_center.Scale(0.5f);
+        Vector2DF bd_center = d - b;
+        bd_center.Scale(0.5f);
+
+        Assert.True(new QuadF(a, b, c, d).Contains(a + ac_center));
+        Assert.True(new QuadF(a, b, c, d).Contains(b + bd_center));
+        Assert.True(new QuadF(a, b, c, d).Contains(c - ac_center));
+        Assert.True(new QuadF(a, b, c, d).Contains(d - bd_center));
+        Assert.False(new QuadF(a, b, c, d).Contains(a - ac_center));
+        Assert.False(new QuadF(a, b, c, d).Contains(b - bd_center));
+        Assert.False(new QuadF(a, b, c, d).Contains(c + ac_center));
+        Assert.False(new QuadF(a, b, c, d).Contains(d + bd_center));
+
+        Assert.True(new QuadF(a, b, c, d).Contains(a));
+        Assert.False(new QuadF(a, b, c, d).Contains(a - epsilon_x));
+        Assert.False(new QuadF(a, b, c, d).Contains(a - epsilon_y));
+        Assert.False(new QuadF(a, b, c, d).Contains(a + epsilon_x));
+        Assert.True(new QuadF(a, b, c, d).Contains(a + epsilon_y));
+
+        Assert.True(new QuadF(a, b, c, d).Contains(b));
+        Assert.False(new QuadF(a, b, c, d).Contains(b - epsilon_x));
+        Assert.False(new QuadF(a, b, c, d).Contains(b - epsilon_y));
+        Assert.True(new QuadF(a, b, c, d).Contains(b + epsilon_x));
+        Assert.False(new QuadF(a, b, c, d).Contains(b + epsilon_y));
+
+        Assert.True(new QuadF(a, b, c, d).Contains(c));
+        Assert.False(new QuadF(a, b, c, d).Contains(c - epsilon_x));
+        Assert.True(new QuadF(a, b, c, d).Contains(c - epsilon_y));
+        Assert.False(new QuadF(a, b, c, d).Contains(c + epsilon_x));
+        Assert.False(new QuadF(a, b, c, d).Contains(c + epsilon_y));
+
+        Assert.True(new QuadF(a, b, c, d).Contains(d));
+        Assert.True(new QuadF(a, b, c, d).Contains(d - epsilon_x));
+        Assert.False(new QuadF(a, b, c, d).Contains(d - epsilon_y));
+        Assert.False(new QuadF(a, b, c, d).Contains(d + epsilon_x));
+        Assert.False(new QuadF(a, b, c, d).Contains(d + epsilon_y));
+
+        // Test a simple square.
+        PointF s1 = new(-1, -1);
+        PointF s2 = new(1, -1);
+        PointF s3 = new(1, 1);
+        PointF s4 = new(-1, 1);
+        // Top edge.
+        Assert.False(new QuadF(s1, s2, s3, s4).Contains(new PointF(-1.1f, -1.0f)));
+        Assert.True(new QuadF(s1, s2, s3, s4).Contains(new PointF(-1.0f, -1.0f)));
+        Assert.True(new QuadF(s1, s2, s3, s4).Contains(new PointF(0.0f, -1.0f)));
+        Assert.True(new QuadF(s1, s2, s3, s4).Contains(new PointF(1.0f, -1.0f)));
+        Assert.False(new QuadF(s1, s2, s3, s4).Contains(new PointF(1.1f, -1.0f)));
+        // Bottom edge.
+        Assert.False(new QuadF(s1, s2, s3, s4).Contains(new PointF(-1.1f, 1.0f)));
+        Assert.True(new QuadF(s1, s2, s3, s4).Contains(new PointF(-1.0f, 1.0f)));
+        Assert.True(new QuadF(s1, s2, s3, s4).Contains(new PointF(0.0f, 1.0f)));
+        Assert.True(new QuadF(s1, s2, s3, s4).Contains(new PointF(1.0f, 1.0f)));
+        Assert.False(new QuadF(s1, s2, s3, s4).Contains(new PointF(1.1f, 1.0f)));
+        // Left edge.
+        Assert.False(new QuadF(s1, s2, s3, s4).Contains(new PointF(-1.0f, -1.1f)));
+        Assert.True(new QuadF(s1, s2, s3, s4).Contains(new PointF(-1.0f, -1.0f)));
+        Assert.True(new QuadF(s1, s2, s3, s4).Contains(new PointF(-1.0f, 0.0f)));
+        Assert.True(new QuadF(s1, s2, s3, s4).Contains(new PointF(-1.0f, 1.0f)));
+        Assert.False(new QuadF(s1, s2, s3, s4).Contains(new PointF(-1.0f, 1.1f)));
+        // Right edge.
+        Assert.False(new QuadF(s1, s2, s3, s4).Contains(new PointF(1.0f, -1.1f)));
+        Assert.True(new QuadF(s1, s2, s3, s4).Contains(new PointF(1.0f, -1.0f)));
+        Assert.True(new QuadF(s1, s2, s3, s4).Contains(new PointF(1.0f, 0.0f)));
+        Assert.True(new QuadF(s1, s2, s3, s4).Contains(new PointF(1.0f, 1.0f)));
+        Assert.False(new QuadF(s1, s2, s3, s4).Contains(new PointF(1.0f, 1.1f)));
+        // Centered inside.
+        Assert.True(new QuadF(s1, s2, s3, s4).Contains(new PointF(0, 0)));
+        // Centered outside.
+        Assert.False(new QuadF(s1, s2, s3, s4).Contains(new PointF(-1.1f, 0)));
+        Assert.False(new QuadF(s1, s2, s3, s4).Contains(new PointF(1.1f, 0)));
+        Assert.False(new QuadF(s1, s2, s3, s4).Contains(new PointF(0, -1.1f)));
+        Assert.False(new QuadF(s1, s2, s3, s4).Contains(new PointF(0, 1.1f)));
     }
 }
