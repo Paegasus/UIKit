@@ -73,7 +73,7 @@ public class Transform
     // Constructs Transform from a float col-major array.
     // Creates an AxisTransform2d or a Matrix44 depending on the values.
     // GetColMajorF() and ColMajorF() are used when passing a Transform through mojo.
-    public static Transform ColMajorF(Span<float> a)
+    public static Transform ColMajorF(ReadOnlySpan<float> a)
     {
 #if DEBUG
     Debug.Assert(a.Length >= 16);
