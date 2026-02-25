@@ -83,7 +83,6 @@ public struct PointF : IComparable<PointF>
 
     public override readonly string ToString() => $"{X},{Y}";
 
-    // For use in collections (SortedSet, Dictionary keys, etc.)
     public override readonly int GetHashCode() => HashCode.Combine(Y, X);
 
     public readonly int CompareTo(PointF other)

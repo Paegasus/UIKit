@@ -22,6 +22,16 @@ public struct RRectF
         kComplex,  // Non-zero width and height, and arbitrary (non-equal) radii.
     }
 
+    // Enumeration of the corners of a rectangle in clockwise order. Values match
+    // SkRRect::Corner.
+    public enum RoundRectCorner
+    {
+        kUpperLeft = SKRoundRectCorner.UpperLeft,
+        kUpperRight = SKRoundRectCorner.UpperRight,
+        kLowerRight = SKRoundRectCorner.LowerRight,
+        kLowerLeft = SKRoundRectCorner.LowerLeft
+    }
+
     private SKRoundRect skrrect_;
 
     public RRectF(in SKRoundRect rect) => skrrect_ = rect;
@@ -134,6 +144,37 @@ public struct RRectF
         return SkRectToRectF(skrrect_.Rect);
     }
 
+    // Returns the radii of the all corners. DCHECKs that all corners
+    // have the same radii (the type is <= kOval).
+    public readonly Vector2DF GetSimpleRadii()
+    {
+#if DEBUG
+        Debug.Assert(GetRoundRectType() <= RoundRectType.kOval);
+#endif
+        SKPoint result = skrrect_.GetRadii(SKRoundRectCorner.UpperLeft);
+        return new Vector2DF(result.X, result.Y);
+    }
+
+    // Returns the radius of all corners. DCHECKs that all corners have the same
+    // radii, and that x_rad == y_rad (the type is <= kSingle).
+    public readonly float GetSimpleRadius()
+    {
+#if DEBUG
+        Debug.Assert(GetRoundRectType() <= RoundRectType.kOval);
+#endif
+        SKPoint result = skrrect_.GetRadii(SKRoundRectCorner.UpperLeft);
+#if DEBUG
+        Debug.Assert(result.X == result.Y);
+#endif
+        return result.X;
+    }
+
+    // Make the RRectF empty.
+    public void Clear()
+    {
+        skrrect_.SetEmpty();
+    }
+
     public readonly bool IsEmpty()
     {
         return GetRoundRectType() == RoundRectType.kEmpty;
@@ -142,5 +183,86 @@ public struct RRectF
     public readonly bool HasRoundedCorners()
     {
         return !IsEmpty() && GetRoundRectType() != RoundRectType.kRect;
-    }    
+    }
+
+    // GetCornerRadii may be called for any type of RRect (kRect, kOval, etc.),
+    // and it will return "correct" values. If GetType() is kOval or less,
+    // all corner values will be identical to each other. SetCornerRadii can similarly
+    // be called on any type of RRect, but GetType() may change as a result of the call.
+    public readonly Vector2DF GetCornerRadii(RoundRectCorner corner)
+    {
+        SKPoint result = skrrect_.GetRadii((SKRoundRectCorner)corner);
+        
+        return new Vector2DF(result.X, result.Y);
+    }
+
+    private readonly Span<SKPoint> GetAllRadii()
+    {
+        return skrrect_.Radii.AsSpan();
+    }
+
+    void SetCornerRadii(RoundRectCorner corner, float x_rad, float y_rad)
+    {
+        var radii = GetAllRadii();
+        
+        radii[(int)corner] = new SKPoint(x_rad, y_rad);
+
+        skrrect_.SetRectRadii(skrrect_.Rect, radii);
+    }
+
+    void SetCornerRadii(RoundRectCorner corner, in Vector2DF radii)
+    {
+        SetCornerRadii(corner, radii.X, radii.Y);
+    }
+
+    // Returns true if |rect| is inside the bounds and corner radii of this
+    // RRectF, and if both this RRectF and rect are not empty.
+    public readonly bool Contains(in RectF rect)
+    {
+        return skrrect_.Contains(RectFToSkRect(rect));
+    }
+
+    // Move the rectangle by a horizontal and vertical distance.
+    public void Offset(float horizontal, float vertical)
+    {
+        skrrect_.Offset(horizontal, vertical);
+    }
+
+    public void Offset(in Vector2DF distance)
+    {
+        Offset(distance.X, distance.Y);
+    }
+
+    public override readonly int GetHashCode() => HashCode.Combine(skrrect_.Radii[0], skrrect_.Radii[1], skrrect_.Radii[2], skrrect_.Radii[3],
+                                                                   skrrect_.Rect.Top, skrrect_.Rect.Right, skrrect_.Rect.Bottom, skrrect_.Rect.Right);
+    public override readonly bool Equals(object? obj) => obj is RRectF other && Equals(other);
+    
+    public readonly bool Equals(in RRectF other) => skrrect_ == other.skrrect_;
+
+    public static bool operator == (in RRectF left, in RRectF right) => left.Equals(right);
+    public static bool operator != (in RRectF left, in RRectF right) => !left.Equals(right);
+
+    public void operator +=(in Vector2DF offset)
+    {
+        Offset(offset.X, offset.Y);
+    }
+
+    public void operator -=(in Vector2DF offset)
+    {
+        Offset(-offset.X, -offset.Y);
+    }
+
+    public static RRectF operator +(in RRectF a, in Vector2DF b)
+    {
+        RRectF result = a;
+        result += b;
+        return result;
+    }
+
+    public static RRectF operator -(in RRectF a, in Vector2DF b)
+    {
+        RRectF result = a;
+        result -= b;
+        return result;
+    }
 }
