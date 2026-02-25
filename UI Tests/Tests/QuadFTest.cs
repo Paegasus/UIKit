@@ -819,4 +819,55 @@ public static class QuadFTest
         Assert.False(quad.IntersectsEllipse(new PointF(-5, 10), new SizeF(4.9f, 20)));
         Assert.True(quad.IntersectsEllipse(new PointF(-5, 10), new SizeF(5.1f, 20)));
     }
+
+    [Fact]
+    private static void TestCircleIntersectionIsInclusive()
+    {
+        // A rectilinear quad at (10, 10) with dimensions 10x10.
+        QuadF quad = new(new RectF(10, 10, 10, 10));
+
+        // A circle fully contained in the top-left of the quad should intersect.
+        Assert.True(quad.IntersectsCircle(new PointF(12, 12), 1));
+
+        // A point fully contained in the top-left of the quad should intersect.
+        Assert.True(quad.IntersectsCircle(new PointF(12, 12), 0));
+
+        // A circle that touches the left edge should intersect.
+        Assert.True(quad.IntersectsCircle(new PointF(9, 11), 1));
+
+        // A circle that touches the top edge should intersect.
+        Assert.True(quad.IntersectsCircle(new PointF(11, 9), 1));
+
+        // A circle that touches the right edge should intersect.
+        Assert.True(quad.IntersectsCircle(new PointF(21, 11), 1));
+
+        // A circle that touches the bottom edge should intersect.
+        Assert.True(quad.IntersectsCircle(new PointF(11, 21), 1));
+
+        // A point that touches the left edge should intersect.
+        Assert.True(quad.IntersectsCircle(new PointF(10, 11), 0));
+
+        // A point that touches the top edge should intersect.
+        Assert.True(quad.IntersectsCircle(new PointF(11, 10), 0));
+
+        // A point that touches the right edge should intersect.
+        Assert.True(quad.IntersectsCircle(new PointF(20, 11), 0));
+
+        // A point that touches the bottom edge should intersect.
+        Assert.True(quad.IntersectsCircle(new PointF(11, 20), 0));
+
+        // A circle that is fully outside the quad should not intersect.
+        Assert.False(quad.IntersectsCircle(new PointF(9, 9), 1));
+
+        // A point that is fully outside the quad should not intersect.
+        Assert.False(quad.IntersectsCircle(new PointF(9, 9), 0));
+    }
+
+    [Fact]
+    private static void TestCenterPoint()
+    {
+        Assert.Equal(new PointF(), new QuadF().CenterPoint());
+        Assert.Equal(new PointF(25.75f, 40.75f), new QuadF(new RectF(10.5f, 20.5f, 30.5f, 40.5f)).CenterPoint());
+        Assert.Equal(new PointF(10, 10), new QuadF(new PointF(10, 0), new PointF(20, 10), new PointF(10, 20), new PointF(0, 10)).CenterPoint());
+    }
 }
