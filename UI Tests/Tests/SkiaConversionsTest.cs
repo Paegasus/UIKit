@@ -25,4 +25,22 @@ public static class SkiaConversionsTest
         skrect = RectFToSkRect(fsrc);
         Assert.Equal(fsrc.ToString(), SkRectToRectF(skrect).ToString());
     }
+
+    [Fact]
+    private static void TestRectToSkRectAccuracy()
+    {
+        // For a Rect with large negative x/y and large with/height, but small right/bottom,
+        // we expect the converted SkRect has accurate right/bottom,
+        // to make sure the right/bottom edge, which is likely to be visible, to be rendered correctly.
+        Rect r = new();
+        for (int i = 0; i < 50; i++)
+        {
+            r.SetByBounds(-30000000, -28000000, i, i + 1);
+            Assert.Equal(i, r.Right);
+            Assert.Equal(i + 1, r.Bottom);
+            SKRect skrect = RectToSkRect(r);
+            Assert.Equal(i, skrect.Right);
+            Assert.Equal(i + 1, skrect.Bottom);
+        }
+    }
 }
