@@ -50,4 +50,34 @@ public static class QuadFTest
         q1 = q3;
         Assert.Equal(q1, q3);
     }
+
+    [Fact]
+    private static void TestAddingVectors()
+    {
+        PointF a = new(1, 1);
+        PointF b = new(2, 1);
+        PointF c = new(2, 2);
+        PointF d = new(1, 2);
+        Vector2DF v = new(3.5f, -2.5f);
+
+        QuadF q1 = new(a, b, c, d);
+        QuadF added = q1 + v;
+        q1 += v;
+        var expected1 = new QuadF(new PointF(4.5f, -1.5f), new PointF(5.5f, -1.5f), new PointF(5.5f, -0.5f), new PointF(4.5f, -0.5f));
+        Assert.Equal(expected1, added);
+        Assert.Equal(expected1, q1);
+
+        QuadF q2 = new(a, b, c, d);
+        QuadF subtracted = q2 - v;
+        q2 -= v;
+        var expected2 = new QuadF(new PointF(-2.5f, 3.5f), new PointF(-1.5f, 3.5f), new PointF(-1.5f, 4.5f), new PointF(-2.5f, 4.5f));
+        Assert.Equal(expected2, subtracted);
+        Assert.Equal(expected2, q2);
+
+        QuadF q3 = new(a, b, c, d);
+        q3 += v;
+        q3 -= v;
+        Assert.Equal(new QuadF(a, b, c, d), q3);
+        Assert.Equal(q3, (q3 + v - v));
+    }
 }
