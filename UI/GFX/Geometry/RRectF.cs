@@ -34,6 +34,8 @@ public struct RRectF
 
     private SKRoundRect skrrect_;
 
+    public RRectF() => skrrect_ = new();
+
     public RRectF(in SKRoundRect rect) => skrrect_ = rect;
 
     public RRectF(in RectF rect) : this(rect, 0.0f) {}
@@ -48,7 +50,10 @@ public struct RRectF
     // If one of x_rad or y_rad are zero, sets ALL radii to zero.
     public RRectF(float x, float y, float width, float height, float x_rad, float y_rad)
     {
-        skrrect_ = new SKRoundRect(new SKRect(x, y, width, height), x_rad, y_rad);
+        // This is wrong in SkiaSharp
+        //skrrect_ = new SKRoundRect(new SKRect(x, y, width, height), x_rad, y_rad);
+
+        skrrect_ = new SKRoundRect(new SKRect(x, y, x + width, y + height), x_rad, y_rad);
 
         if (IsEmpty())
         {
@@ -236,8 +241,24 @@ public struct RRectF
     public override readonly int GetHashCode() => HashCode.Combine(skrrect_.Radii[0], skrrect_.Radii[1], skrrect_.Radii[2], skrrect_.Radii[3],
                                                                    skrrect_.Rect.Top, skrrect_.Rect.Right, skrrect_.Rect.Bottom, skrrect_.Rect.Right);
     public override readonly bool Equals(object? obj) => obj is RRectF other && Equals(other);
-    
-    public readonly bool Equals(in RRectF other) => skrrect_ == other.skrrect_;
+
+    public readonly bool Equals(in RRectF other)
+    {
+        // Skia normalizes on construction, so two empty rrects are always equal
+        // regardless of their original bounds or radii (e.g. RRectF(1,2,3,0,5,6)
+        // normalizes to the same Empty type as RRectF(0,0,0,0,0,0)).
+        if (skrrect_.Type != other.skrrect_.Type)
+            return false;
+
+        if (skrrect_.Type == SKRoundRectType.Empty)
+            return true;
+
+        return skrrect_.Rect == other.skrrect_.Rect &&
+               skrrect_.GetRadii(SKRoundRectCorner.UpperLeft) == other.skrrect_.GetRadii(SKRoundRectCorner.UpperLeft) &&
+               skrrect_.GetRadii(SKRoundRectCorner.UpperRight) == other.skrrect_.GetRadii(SKRoundRectCorner.UpperRight) &&
+               skrrect_.GetRadii(SKRoundRectCorner.LowerRight) == other.skrrect_.GetRadii(SKRoundRectCorner.LowerRight) &&
+               skrrect_.GetRadii(SKRoundRectCorner.LowerLeft) == other.skrrect_.GetRadii(SKRoundRectCorner.LowerLeft);
+    }
 
     public static bool operator == (in RRectF left, in RRectF right) => left.Equals(right);
     public static bool operator != (in RRectF left, in RRectF right) => !left.Equals(right);
