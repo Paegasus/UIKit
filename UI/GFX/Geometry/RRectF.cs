@@ -50,9 +50,6 @@ public struct RRectF
     // If one of x_rad or y_rad are zero, sets ALL radii to zero.
     public RRectF(float x, float y, float width, float height, float x_rad, float y_rad)
     {
-        // This is wrong in SkiaSharp
-        //skrrect_ = new SKRoundRect(new SKRect(x, y, width, height), x_rad, y_rad);
-
         // SKRect() takes left, top, right, bottom (not left, top, width, height, like in C++ Skia), so:
         // right = x + width
         // bottom = y + height
@@ -60,8 +57,7 @@ public struct RRectF
 
         if (IsEmpty())
         {
-            // Make sure that empty rects are created fully empty, not with some
-            // non-zero dimensions.
+            // Make sure that empty rects are created fully empty, not with some non-zero dimensions.
             skrrect_ = new SKRoundRect();
         }
     }
@@ -78,9 +74,26 @@ public struct RRectF
          float lower_right_x,
          float lower_right_y,
          float lower_left_x,
-         float lower_left_y)
+         float lower_left_y) : this()
     {
-        
+        Span<SKPoint> radii = stackalloc SKPoint[]
+        {
+            new(upper_left_x, upper_left_y),
+            new(upper_right_x, upper_right_y),
+            new(lower_right_x, lower_right_y),
+            new(lower_left_x, lower_left_y)
+        };
+
+        // SKRect() takes left, top, right, bottom (not left, top, width, height, like in C++ Skia), so:
+        // right = x + width
+        // bottom = y + height
+        skrrect_.SetRectRadii(new SKRect(x, y, x + width, y + height), radii);
+
+        if (IsEmpty())
+        {
+            // Make sure that empty rects are created fully empty, not with some non-zero dimensions.
+            skrrect_ = new SKRoundRect();
+        }
     }
 
     public RRectF(in RectF rect,
