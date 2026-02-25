@@ -53,6 +53,9 @@ public struct RRectF
         // This is wrong in SkiaSharp
         //skrrect_ = new SKRoundRect(new SKRect(x, y, width, height), x_rad, y_rad);
 
+        // SKRect() takes left, top, right, bottom (not left, top, width, height, like in C++ Skia), so:
+        // right = x + width
+        // bottom = y + height
         skrrect_ = new SKRoundRect(new SKRect(x, y, x + width, y + height), x_rad, y_rad);
 
         if (IsEmpty())
