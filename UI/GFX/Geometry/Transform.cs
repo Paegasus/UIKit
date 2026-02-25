@@ -73,6 +73,41 @@ public class Transform
           // Col 3.
           0, 0, 0, 1) {}
 
+    // Gets a value at |row|, |col| from the matrix.
+    public double rc(int row, int col)
+    {
+#if DEBUG
+        Debug.Assert((uint)row <= 3u);
+        Debug.Assert((uint)col <= 3u);
+#endif
+        if (!full_matrix_)
+        {
+            return (row, col) switch
+            {
+                (0, 0) => axis_2d_.Scale.X,
+                (1, 1) => axis_2d_.Scale.Y,
+                (2, 2) => 1,
+                (3, 3) => 1,
+                (0, 3) => axis_2d_.Translation.X,
+                (1, 3) => axis_2d_.Translation.Y,
+                _ => 0
+            };
+        }
+
+        return matrix_.rc(row, col);
+    }
+
+    // Sets a value in the matrix at |row|, |col|. It forces full double precision
+    // 4x4 matrix.
+    public void set_rc(int row, int col, double v)
+    {
+#if DEBUG
+        Debug.Assert((uint)row <= 3u);
+        Debug.Assert((uint)col <= 3u);
+#endif
+        EnsureFullMatrix().set_rc(row, col, v);
+    }
+
     // Returns true if the matrix is either identity or pure translation.
     public bool IsIdentityOrTranslation => !full_matrix_ ? axis_2d_.Scale == new Vector2DF(1, 1) : matrix_.IsIdentityOrTranslation;
 
@@ -132,16 +167,6 @@ public class Transform
         }
         
         return ref matrix_;
-    }
-
-    // Sets a value in the matrix at |row|, |col|. It forces full double precision 4x4 matrix.
-    public void set_rc(int row, int col, double v)
-    {
-#if DEBUG
-        Debug.Assert((uint)row <= 3u);
-        Debug.Assert((uint)col <= 3u);
-#endif
-        EnsureFullMatrix().set_rc(row, col, v);
     }
 
     public void Translate(float x, float y)
