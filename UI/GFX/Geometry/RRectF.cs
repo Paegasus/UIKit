@@ -34,11 +34,11 @@ public struct RRectF
     }
 
     // Plain value-type fields — no heap allocation, true struct copy semantics.
-    private SKRect  _rect;
-    private SKPoint _radiiUpperLeft;
-    private SKPoint _radiiUpperRight;
-    private SKPoint _radiiLowerRight;
-    private SKPoint _radiiLowerLeft;
+    public SKRect _rect;
+    public SKPoint _radiiUpperLeft;
+    public SKPoint _radiiUpperRight;
+    public SKPoint _radiiLowerRight;
+    public SKPoint _radiiLowerLeft;
 
     public RRectF() { }
 
@@ -127,7 +127,7 @@ public struct RRectF
     // Clears all fields if the rect is empty, mirroring Skia's normalisation.
     private void Normalize()
     {
-        if (RectIsEmpty)
+        if (RectIsEmpty || !float.IsFinite(_rect.Left) || !float.IsFinite(_rect.Top) || !float.IsFinite(_rect.Right) || !float.IsFinite(_rect.Bottom))
         {
             this = default;
             return;
@@ -265,13 +265,104 @@ public struct RRectF
 
     public void SetCornerRadii(RoundRectCorner corner, in Vector2DF radii) => SetCornerRadii(corner, radii.X, radii.Y);
 
+    // Direct port of Skia's SkRRect::checkCornerContainment().
+    // Assumes the point is already known to be inside the bounding rect.
+    private readonly bool CheckCornerContainment(float x, float y)
+    {
+        SKPoint canonicalPt;
+        SKPoint radii;
+
+        if (x < _rect.Left + _radiiUpperLeft.X && y < _rect.Top + _radiiUpperLeft.Y)
+        {
+            canonicalPt = new SKPoint(x - (_rect.Left + _radiiUpperLeft.X),
+                                      y - (_rect.Top + _radiiUpperLeft.Y));
+            radii = _radiiUpperLeft;
+        }
+        else if (x < _rect.Left + _radiiLowerLeft.X && y > _rect.Bottom - _radiiLowerLeft.Y)
+        {
+            canonicalPt = new SKPoint(x - (_rect.Left + _radiiLowerLeft.X),
+                                      y - (_rect.Bottom - _radiiLowerLeft.Y));
+            radii = _radiiLowerLeft;
+        }
+        else if (x > _rect.Right - _radiiUpperRight.X && y < _rect.Top + _radiiUpperRight.Y)
+        {
+            canonicalPt = new SKPoint(x - (_rect.Right - _radiiUpperRight.X),
+                                      y - (_rect.Top + _radiiUpperRight.Y));
+            radii = _radiiUpperRight;
+        }
+        else if (x > _rect.Right - _radiiLowerRight.X && y > _rect.Bottom - _radiiLowerRight.Y)
+        {
+            canonicalPt = new SKPoint(x - (_rect.Right - _radiiLowerRight.X),
+                                      y - (_rect.Bottom - _radiiLowerRight.Y));
+            radii = _radiiLowerRight;
+        }
+        else
+        {
+            // Not in any corner region — point is on a straight edge, always inside.
+            return true;
+        }
+
+        // b²x² + a²y² <= (ab)²  — avoids division, matches Skia exactly.
+        float dist = canonicalPt.X * canonicalPt.X * radii.Y * radii.Y +
+                     canonicalPt.Y * canonicalPt.Y * radii.X * radii.X;
+        
+        return dist <= radii.X * radii.X * radii.Y * radii.Y;
+    }
+
     // Returns true if |rect| is inside the bounds and corner radii of this
     // RRectF, and if both this RRectF and rect are not empty.
     public readonly bool Contains(in RectF rect)
     {
-        using var rrect = ToSKRoundRect();
-        return rrect.Contains(RectFToSkRect(rect));
+        if (IsEmpty() || rect.IsEmpty())
+            return false;
+
+        SKRect r = new(rect.X, rect.Y, rect.Right, rect.Bottom);
+
+        if (!_rect.Contains(r))
+            return false;
+
+        // A plain rect only needed the bounds check above.
+        if (GetRoundRectType() == RoundRectType.kRect)
+            return true;
+
+        return CheckCornerContainment(r.Left, r.Top) &&
+               CheckCornerContainment(r.Right, r.Top) &&
+               CheckCornerContainment(r.Right, r.Bottom) &&
+               CheckCornerContainment(r.Left, r.Bottom);
     }
+
+    // Returns the bounding box that contains the specified rounded corner.
+    public readonly RectF CornerBoundingRect(RoundRectCorner corner)
+    {
+        throw new NotImplementedException();
+    }
+
+    public void Scale(float x_scale, float y_scale)
+    {
+        if (IsEmpty())
+            return;
+
+        if (x_scale == 0 || y_scale == 0)
+        {
+            this = default;
+            return;
+        }
+
+        _rect = new SKRect(_rect.Left * x_scale,
+                           _rect.Top * y_scale,
+                           _rect.Right * x_scale,
+                           _rect.Bottom * y_scale);
+
+        _radiiUpperLeft = new SKPoint(_radiiUpperLeft.X * x_scale, _radiiUpperLeft.Y * y_scale);
+        _radiiUpperRight = new SKPoint(_radiiUpperRight.X * x_scale, _radiiUpperRight.Y * y_scale);
+        _radiiLowerRight = new SKPoint(_radiiLowerRight.X * x_scale, _radiiLowerRight.Y * y_scale);
+        _radiiLowerLeft = new SKPoint(_radiiLowerLeft.X * x_scale, _radiiLowerLeft.Y * y_scale);
+
+        Normalize();
+    }
+
+    // Scales the rectangle by |scale|.
+    public void Scale(float scale) => Scale(scale, scale);
 
     // Move the rectangle by a horizontal and vertical distance.
     public void Offset(float horizontal, float vertical)

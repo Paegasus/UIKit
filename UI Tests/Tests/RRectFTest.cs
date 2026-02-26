@@ -220,9 +220,10 @@ public static class RRectFTest
     {
         RRectF a = new(40, 50, 60, 70, 5, 6);
         RectF b = new(50, 60, 5, 6);
+        
         Assert.True(a.Contains(b));
         b = new RectF(40, 50, 5, 6);  // Right on the border
-        Assert.False(a.Contains(b));
+        Assert.False(a.Contains(b)); // <- FAILS
         b = new RectF(95, 114, 5, 6);  // Right on the border
         Assert.False(a.Contains(b));
         b = new RectF(40, 50, 60, 70);
@@ -242,5 +243,41 @@ public static class RRectFTest
         Assert.True(a.HasRoundedCorners());
         a = new RRectF(new RectF(10, 10), new RoundedCornersF(1, 0, 0, 0));
         Assert.True(a.HasRoundedCorners());
+    }
+
+    [Fact]
+    private static void TestScale()
+    {
+        (float x1, float y1, float w1, float h1, float x_rad1, float y_rad1, float x_scale, float y_scale, float x2, float y2, float w2, float h2, float x_rad2, float y_rad2)[] tests =
+        [
+            (3.0f, 4.0f, 5.0f, 6.0f, 0.0f, 0.0f, 1.5f, 1.5f, 4.5f, 6.0f, 7.5f, 9.0f, 0.0f, 0.0f),
+			(3.0f, 4.0f, 5.0f, 6.0f, 1.0f, 1.0f, 1.5f, 1.5f, 4.5f, 6.0f, 7.5f, 9.0f, 1.5f, 1.5f),
+			(3.0f, 4.0f, 5.0f, 6.0f, 0.0f, 0.0f, 1.5f, 3.0f, 4.5f, 12.0f, 7.5f, 18.0f, 0.0f, 0.0f),
+			(3.0f, 4.0f, 5.0f, 6.0f, 1.0f, 1.0f, 1.5f, 3.0f, 4.5f, 12.0f, 7.5f, 18.0f, 1.5f, 3.0f),
+			(3.0f, 4.0f, 0.0f, 6.0f, 1.0f, 1.0f, 1.5f, 1.5f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f),
+			(3.0f, 4.0f, 5.0f, 6.0f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f),
+			(3.0f, 4.0f, 5.0f, 6.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f),
+			(3.0f, 4.0f, 5.0f, 6.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f),
+			(3.0f, 4.0f, 5.0f, 6.0f, 1.0f, 1.0f, float.MaxValue, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f),
+			(3.0f, 4.0f, 5.0f, 6.0f, 1.0f, 1.0f, 1.0f, float.MaxValue, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f),
+			(3.0f, 4.0f, 5.0f, 6.0f, 1.0f, 1.0f, float.MaxValue, float.MaxValue, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f),
+			(3.0f, 4.0f, 5.0f, 6.0f, 1.0f, 1.0f, float.NaN, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f),
+			(3.0f, 4.0f, 5.0f, 6.0f, 1.0f, 1.0f, 1.0f, float.NaN, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f),
+			(3.0f, 4.0f, 5.0f, 6.0f, 1.0f, 1.0f, float.NaN, float.NaN, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f)
+        ];
+
+        foreach (var (x1, y1, w1, h1, x_rad1, y_rad1, x_scale, y_scale, x2, y2, w2, h2, x_rad2, y_rad2) in tests)
+        {
+            RRectF r1 = new(x1, y1, w1, h1, x_rad1, y_rad1);
+            RRectF r2 = new(x2, y2, w2, h2, x_rad2, y_rad2);
+
+            r1.Scale(x_scale, y_scale);
+            Assert.True(r1.GetRoundRectType() <= RRectF.RoundRectType.kSimple);
+            Assert.Equal(r1.Rect().X, r2.Rect().X);
+            Assert.Equal(r1.Rect().Y, r2.Rect().Y);
+            Assert.Equal(r1.Rect().Width, r2.Rect().Width);
+            Assert.Equal(r1.Rect().Height, r2.Rect().Height);
+            Assert.Equal(r1.GetSimpleRadii(), r2.GetSimpleRadii());
+        }
     }
 }
