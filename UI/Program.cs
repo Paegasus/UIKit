@@ -10,6 +10,13 @@ public static class Program
 {
     public static void Main(string[] args)
     {
+        RRectF rect = new RRectFBuilder()
+                            .SetOrigin(0, 0)
+                            .SetSize(100, 35)
+                            .Build();
+
+        Console.WriteLine(rect);
+
         /*
         Quaternion q1 = new Quaternion(new Vector3DF(0, 0, 0), 1);
         Quaternion q2 = new Quaternion(new Vector3DF(1, 0, 0), 1);

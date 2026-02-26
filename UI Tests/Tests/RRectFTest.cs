@@ -303,6 +303,19 @@ public static class RRectFTest
     [Fact]
     private static void TestBuildFromRectF()
     {
-        
+        RectF a = new();
+        RRectF b = new(a);
+        RRectF c = new RRectFBuilder().SetRect(a).Build();
+        Assert.Equal(b, c);
+
+        a = new RectF(60, 70);
+        b = new RRectF(a);
+        c = new RRectFBuilder().SetRect(a).Build();
+        Assert.Equal(b, c);
+
+        a = new RectF(40, 50, 60, 70);
+        b = new RRectF(a);
+        c = new RRectFBuilder().SetRect(a).Build();
+        Assert.Equal(b, c);
     }
 }
