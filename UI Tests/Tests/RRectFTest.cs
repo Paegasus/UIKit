@@ -51,7 +51,7 @@ public static class RRectFTest
 
         correct = new RRectF(17, 16, 60, 70, 5);
         b = a - offset;
-        Assert.Equal(b, correct); // Fails
+        Assert.Equal(b, correct);
         b = a;
         b.Offset(-offset);
         Assert.Equal(b, correct);
@@ -89,5 +89,49 @@ public static class RRectFTest
         // If they stay equal to half the radius, it stays oval.
         a = new RRectF(40, 50, 60, 70, 120, 140);
         Assert.Equal(RRectF.RoundRectType.kOval, a.GetRoundRectType());
+    }
+
+    private static void CheckRadii(RRectF val,
+                                   float ulx,
+                                   float uly,
+                                   float urx,
+                                   float ury,
+                                   float lrx,
+                                   float lry,
+                                   float llx,
+                                   float lly)
+    {
+        Assert.Equal(val.GetCornerRadii(RRectF.RoundRectCorner.kUpperLeft), new Vector2DF(ulx, uly));
+        Assert.Equal(val.GetCornerRadii(RRectF.RoundRectCorner.kUpperRight), new Vector2DF(urx, ury));
+        Assert.Equal(val.GetCornerRadii(RRectF.RoundRectCorner.kLowerRight), new Vector2DF(lrx, lry));
+        Assert.Equal(val.GetCornerRadii(RRectF.RoundRectCorner.kLowerLeft), new Vector2DF(llx, lly));
+    }
+
+    [Fact]
+    private static void TestRRectRadii()
+    {
+        RRectF a = new(40, 50, 60, 70, 0);
+        CheckRadii(a, 0, 0, 0, 0, 0, 0, 0, 0);
+
+        a.SetCornerRadii(RRectF.RoundRectCorner.kUpperLeft, 1, 2);
+        CheckRadii(a, 1, 2, 0, 0, 0, 0, 0, 0);
+
+        a.SetCornerRadii(RRectF.RoundRectCorner.kUpperRight, 3, 4);
+        CheckRadii(a, 1, 2, 3, 4, 0, 0, 0, 0);
+
+        a.SetCornerRadii(RRectF.RoundRectCorner.kLowerRight, 5, 6);
+        CheckRadii(a, 1, 2, 3, 4, 5, 6, 0, 0);
+
+        a.SetCornerRadii(RRectF.RoundRectCorner.kLowerLeft, 7, 8);
+        CheckRadii(a, 1, 2, 3, 4, 5, 6, 7, 8);
+
+        RRectF b = new(40, 50, 60, 70, 1, 2, 3, 4, 5, 6, 7, 8);
+        Assert.Equal(a, b);
+    }
+
+    [Fact]
+    private static void TestRRectRadii()
+    {
+        
     }
 }
