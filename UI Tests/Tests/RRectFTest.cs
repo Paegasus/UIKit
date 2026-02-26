@@ -56,4 +56,38 @@ public static class RRectFTest
         b.Offset(-offset);
         Assert.Equal(b, correct);
     }
+
+    [Fact]
+    private static void TestRRectTypes()
+    {
+        RRectF a = new(40, 50, 0, 70, 0);
+        Assert.Equal(RRectF.RoundRectType.kEmpty, a.GetRoundRectType());
+        Assert.True(a.IsEmpty());
+        a = new RRectF(40, 50, 60, 70, 0);
+        Assert.Equal(RRectF.RoundRectType.kRect, a.GetRoundRectType());
+        a = new RRectF(40, 50, 60, 70, 5);
+        Assert.Equal(RRectF.RoundRectType.kSingle, a.GetRoundRectType());
+        a = new RRectF(40, 50, 60, 70, 5, 5);
+        Assert.Equal(RRectF.RoundRectType.kSingle, a.GetRoundRectType());
+        a = new RRectF(40, 50, 60, 60, 30, 30);
+        Assert.Equal(RRectF.RoundRectType.kSingle, a.GetRoundRectType());
+        a = new RRectF(40, 50, 60, 70, 6, 3);
+        Assert.Equal(RRectF.RoundRectType.kSimple, a.GetRoundRectType());
+        a = new RRectF(40, 50, 60, 70, 30, 3);
+        Assert.Equal(RRectF.RoundRectType.kSimple, a.GetRoundRectType());
+        a = new RRectF(40, 50, 60, 70, 30, 35);
+        Assert.Equal(RRectF.RoundRectType.kOval, a.GetRoundRectType());
+
+        a.SetCornerRadii(RRectF.RoundRectCorner.kLowerRight, new Vector2DF(7, 8));
+        Assert.Equal(RRectF.RoundRectType.kComplex, a.GetRoundRectType());
+        
+        // When one radius is larger than half its dimension,
+        // both radii are scaled down proportionately.
+        a = new RRectF(40, 50, 60, 70, 30, 70);
+        Assert.Equal(RRectF.RoundRectType.kSimple, a.GetRoundRectType());
+        Assert.Equal(a, new RRectF(40, 50, 60, 70, 15, 35));
+        // If they stay equal to half the radius, it stays oval.
+        a = new RRectF(40, 50, 60, 70, 120, 140);
+        Assert.Equal(RRectF.RoundRectType.kOval, a.GetRoundRectType());
+    }
 }
