@@ -117,6 +117,7 @@ public struct RRectF
     // The rectangular portion of the RRectF, without the corner radii.
     public readonly RectF Rect() => new(_rect.Left, _rect.Top, _rect.Width, _rect.Height);
 
+    /*
     private static SKPoint ClampRadii(SKPoint r, float halfW, float halfH)
     {
         if (r.X <= 0 || r.Y <= 0) return SKPoint.Empty;
@@ -166,6 +167,45 @@ public struct RRectF
             _radiiUpperRight = ClampRadii(_radiiUpperRight, halfW, halfH);
             _radiiLowerRight = ClampRadii(_radiiLowerRight, halfW, halfH);
             _radiiLowerLeft = ClampRadii(_radiiLowerLeft, halfW, halfH);
+        }
+    }
+    */
+
+    // Returns the minimum of curMin and (limit / (r1 + r2)) when r1+r2 exceeds limit.
+    private static float MinScale(float r1, float r2, float limit, float curMin)
+    {
+        float sum = r1 + r2;
+        if (sum > limit)
+            return MathF.Min(curMin, limit / sum);
+        return curMin;
+    }
+
+    private void Normalize()
+    {
+        if (RectIsEmpty || !float.IsFinite(_rect.Left) || !float.IsFinite(_rect.Top) ||
+                           !float.IsFinite(_rect.Right) || !float.IsFinite(_rect.Bottom))
+        {
+            this = default;
+            return;
+        }
+
+        float width = _rect.Width;
+        float height = _rect.Height;
+
+        // Compute a single global scale factor the same way Skia's scaleRadii() does —
+        // find the minimum ratio across all adjacent corner pairs in each dimension.
+        float scale = 1f;
+        scale = MinScale(_radiiUpperLeft.X, _radiiUpperRight.X, width, scale);
+        scale = MinScale(_radiiLowerLeft.X, _radiiLowerRight.X, width, scale);
+        scale = MinScale(_radiiUpperLeft.Y, _radiiLowerLeft.Y, height, scale);
+        scale = MinScale(_radiiUpperRight.Y, _radiiLowerRight.Y, height, scale);
+
+        if (scale < 1f)
+        {
+            _radiiUpperLeft = new SKPoint(_radiiUpperLeft.X * scale, _radiiUpperLeft.Y * scale);
+            _radiiUpperRight = new SKPoint(_radiiUpperRight.X * scale, _radiiUpperRight.Y * scale);
+            _radiiLowerRight = new SKPoint(_radiiLowerRight.X * scale, _radiiLowerRight.Y * scale);
+            _radiiLowerLeft = new SKPoint(_radiiLowerLeft.X * scale, _radiiLowerLeft.Y * scale);
         }
     }
 

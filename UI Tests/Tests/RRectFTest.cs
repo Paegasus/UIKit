@@ -396,4 +396,22 @@ public static class RRectFTest
         RRectF c = new RRectFBuilder().SetRect(a).SetCorners(corners).Build();
         Assert.Equal(b, c);
     }
+
+    // In the following tests(*CornersHigherThanSize), we test whether the corner
+    // radii gets truncated in case of being greater than the width/height.
+
+    [Fact]
+    private static void TestBuildFromCornersHigherThanSize()
+    {
+        RRectF a = new(0, 0, 20, 10, 12, 2, 8, 4, 14, 6, 6, 8);
+        RRectF b = new RRectFBuilder()
+                 .SetOrigin(0, 0)
+                 .SetSize(20, 10)
+                 .SetUpperLeft(48, 8)
+                 .SetUpperRight(32, 16)
+                 .SetLowerRight(56, 24)
+                 .SetLowerLeft(24, 32)
+                 .Build();
+        Assert.Equal(a, b);
+    }
 }
