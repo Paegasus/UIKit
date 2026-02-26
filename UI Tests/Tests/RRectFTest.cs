@@ -343,4 +343,57 @@ public static class RRectFTest
         b = new RRectFBuilder().SetOrigin(p).SetSize(s).SetRadius(15, 25).Build();
         Assert.Equal(a, b);
     }
+
+    [Fact]
+    private static void TestBuildFromRectFWithRadius()
+    {
+        RectF a = new(40, 50, 60, 70);
+        RRectF b = new(a, 15);
+        RRectF c = new RRectFBuilder().SetRect(a).SetRadius(15).Build();
+        Assert.Equal(b, c);
+
+        b = new RRectF(a, 15, 25);
+        c = new RRectFBuilder().SetRect(a).SetRadius(15, 25).Build();
+        Assert.Equal(b, c);
+    }
+
+    [Fact]
+    private static void TestBuildFromCorners()
+    {
+        RRectF a = new(40, 50, 60, 70, 1, 2, 3, 4, 5, 6, 7, 8);
+        RRectF b = new RRectFBuilder()
+                 .SetOrigin(40, 50)
+                 .SetSize(60, 70)
+                 .SetUpperLeft(1, 2)
+                 .SetUpperRight(3, 4)
+                 .SetLowerRight(5, 6)
+                 .SetLowerLeft(7, 8)
+                 .Build();
+        Assert.Equal(a, b);
+    }
+
+    [Fact]
+    private static void TestBuildFromRectFWithCorners()
+    {
+        RectF a = new(40, 50, 60, 70);
+        RRectF b = new(a, 1, 2, 3, 4, 5, 6, 7, 8);
+        RRectF c = new RRectFBuilder()
+                       .SetRect(a)
+                       .SetUpperLeft(1, 2)
+                       .SetUpperRight(3, 4)
+                       .SetLowerRight(5, 6)
+                       .SetLowerLeft(7, 8)
+                       .Build();
+        Assert.Equal(b, c);
+    }
+
+    [Fact]
+    private static void TestBuildFromRoundedCornersF()
+    {
+        RectF a = new(40, 50, 60, 70);
+        RoundedCornersF corners = new(1.5f, 2.5f, 3.5f, 4.5f);
+        RRectF b = new(a, corners);
+        RRectF c = new RRectFBuilder().SetRect(a).SetCorners(corners).Build();
+        Assert.Equal(b, c);
+    }
 }
