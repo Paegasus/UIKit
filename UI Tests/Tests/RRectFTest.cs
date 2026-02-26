@@ -2,6 +2,7 @@ using Xunit;
 
 using UI.GFX.Geometry;
 using System.Diagnostics;
+using SkiaSharp;
 
 namespace UI.Tests;
 
@@ -130,8 +131,66 @@ public static class RRectFTest
     }
 
     [Fact]
-    private static void TestRRectRadii()
+    private static void TestFromRectF()
     {
-        
+        // Check that explicit conversion from float rect works.
+        RectF a = new(40, 50, 60, 70);
+        RRectF b = new(40, 50, 60, 70, 0);
+        RRectF c = new RRectF(a);
+        Assert.Equal(b, c);
+    }
+
+    [Fact]
+    private static void TestFromSkRRect()
+    {
+        // Check that explicit conversion from SkRRect works.
+        SKRoundRect a = new(SKRect.Create(40, 50, 60, 70), 15, 25);
+        RRectF b = new(40, 50, 60, 70, 15, 25);
+        RRectF c = new(a);
+        Assert.Equal(b, c);
+
+        // Try with single radius constructor.
+        a = new(SKRect.Create(40, 50, 60, 70), 15, 15);
+        b = new RRectF(40, 50, 60, 70, 15);
+        c = new RRectF(a);
+        Assert.Equal(b, c);
+    }
+
+    [Fact]
+    private static void TestFromRoundedCornersF()
+    {
+        RectF kRect = new(50.0f, 40.0f);
+        RoundedCornersF kCorners = new(1.5f, 2.5f, 3.5f, 4.5f);
+        RRectF rrect_f = new(kRect, kCorners);
+
+        var upper_left = rrect_f.GetCornerRadii(RRectF.RoundRectCorner.kUpperLeft);
+        Assert.Equal(kCorners.UpperLeft, upper_left.X);
+        Assert.Equal(kCorners.UpperLeft, upper_left.Y);
+        var upper_right = rrect_f.GetCornerRadii(RRectF.RoundRectCorner.kUpperRight);
+        Assert.Equal(kCorners.UpperRight, upper_right.X);
+        Assert.Equal(kCorners.UpperRight, upper_right.Y);
+        var lower_right = rrect_f.GetCornerRadii(RRectF.RoundRectCorner.kLowerRight);
+        Assert.Equal(kCorners.LowerRight, lower_right.X);
+        Assert.Equal(kCorners.LowerRight, lower_right.Y);
+        var lower_left = rrect_f.GetCornerRadii(RRectF.RoundRectCorner.kLowerLeft);
+        Assert.Equal(kCorners.LowerLeft, lower_left.X);
+        Assert.Equal(kCorners.LowerLeft, lower_left.Y);
+    }
+
+    [Fact]
+    private static void TestToString()
+    {
+        RRectF a = new(40, 50, 60, 70, 0);
+
+        Assert.Equal("40.000,50.000 60.000x70.000, rectangular", a.ToString());
+
+        a = new RRectF(40, 50, 60, 70, 15);
+        Assert.Equal("40.000,50.000 60.000x70.000, radius 15.000", a.ToString());
+
+        a = new RRectF(40, 50, 60, 70, 15, 25);
+        Assert.Equal("40.000,50.000 60.000x70.000, x_rad 15.000, y_rad 25.000", a.ToString());
+
+        a.SetCornerRadii(RRectF.RoundRectCorner.kLowerRight, new Vector2DF(7, 8));
+        Assert.Equal("40.000,50.000 60.000x70.000, [15.000 25.000] [15.000 25.000] [7.000 8.000] [15.000 25.000]", a.ToString());
     }
 }

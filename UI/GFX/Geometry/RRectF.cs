@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Text;
 using SkiaSharp;
 
 using static UI.GFX.Geometry.SkiaConversions;
@@ -106,12 +107,15 @@ public struct RRectF
                lower_right_x, lower_right_y,
                lower_left_x,  lower_left_y) { }
 
-    RRectF(in RectF rect, in RoundedCornersF corners)
+    public RRectF(in RectF rect, in RoundedCornersF corners)
         : this(rect.X, rect.Y, rect.Width, rect.Height,
                corners.UpperLeft,  corners.UpperLeft,
                corners.UpperRight, corners.UpperRight,
                corners.LowerRight, corners.LowerRight,
                corners.LowerLeft,  corners.LowerLeft) { }
+    
+    // The rectangular portion of the RRectF, without the corner radii.
+    public readonly RectF Rect() => new(_rect.Left, _rect.Top, _rect.Width, _rect.Height);
 
     private static SKPoint ClampRadii(SKPoint r, float halfW, float halfH)
     {
@@ -296,6 +300,65 @@ public struct RRectF
             rrect.SetRectRadii(_rect, radii);
         }
         return rrect;
+    }
+
+    public override readonly string ToString()
+    {
+        var ss = new StringBuilder();
+
+        var rect = Rect();
+
+        ss.AppendFormat("{0:0.000}", rect.Origin.X);
+        ss.Append(',');
+        ss.AppendFormat("{0:0.000}", rect.Origin.Y);
+        ss.Append(' ');
+        ss.AppendFormat("{0:0.000}", rect.Size.Width);
+        ss.Append('x');
+        ss.AppendFormat("{0:0.000}", rect.Size.Height);
+
+        var type = GetRoundRectType();
+
+        if (type <= RoundRectType.kRect)
+        {
+            ss.Append(", rectangular");
+        }
+        else if (type <= RoundRectType.kSingle)
+        {
+            ss.Append(", radius ");
+            ss.AppendFormat("{0:0.000}", GetSimpleRadius());
+        }
+        else if (type <= RoundRectType.kSimple)
+        {
+            var radii = GetSimpleRadii();
+
+            ss.Append(", x_rad ");
+            ss.AppendFormat("{0:0.000}", radii.X);
+            ss.Append(", y_rad ");
+            ss.AppendFormat("{0:0.000}", radii.Y);
+        }
+        else
+        {
+            ss.Append(',');
+
+            RoundRectCorner[] corners = [RoundRectCorner.kUpperLeft,
+                                         RoundRectCorner.kUpperRight,
+                                         RoundRectCorner.kLowerRight,
+                                         RoundRectCorner.kLowerLeft];
+            
+            foreach (var c in corners)
+            {
+                var corner = GetCornerRadii(c);
+
+                
+                ss.Append(" [");
+                ss.AppendFormat("{0:0.000}", corner.X);
+                ss.Append(' ');
+                ss.AppendFormat("{0:0.000}", corner.Y);
+                ss.Append(']');
+            }
+        }
+
+        return ss.ToString();
     }
 
     public readonly bool Equals(in RRectF other)
