@@ -295,4 +295,14 @@ public static class RRectFTest
         b.Outset(3);
         Assert.Equal(b, new RRectF(37, 47, 66, 76, 8));
     }
+
+    // The following tests (started with "Build*") are for RRectFBuilder. All
+    // different tests are to make sure that existing RRectF definitions can be
+    // implemented with RRectFBuilder.
+
+    [Fact]
+    private static void TestBuildFromRectF()
+    {
+        
+    }
 }
