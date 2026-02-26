@@ -414,4 +414,35 @@ public static class RRectFTest
                  .Build();
         Assert.Equal(a, b);
     }
+
+    [Fact]
+    private static void TestBuildFromRectFWithCornersHigherThanSize()
+    {
+        RectF a = new(0, 0, 20, 10);
+        RRectF b = new(a, 12, 2, 8, 4, 14, 6, 6, 8);
+        RRectF c = new RRectFBuilder()
+                       .SetRect(a)
+                       .SetUpperLeft(48, 8)
+                       .SetUpperRight(32, 16)
+                       .SetLowerRight(56, 24)
+                       .SetLowerLeft(24, 32)
+                       .Build();
+        Assert.Equal(b, c);
+    }
+
+    // In this test, we set the radius first but then change the value of the corners.
+    [Fact]
+    private static void TestBuildFromRadiusAndCorners()
+    {
+        RRectF a = new(40, 50, 60, 70, 1, 2, 3, 4, 15, 25, 15, 25);
+        RRectF b = new RRectFBuilder()
+                       .SetOrigin(40, 50)
+                       .SetSize(60, 70)
+                       .SetRadius(15, 25)
+                       .SetUpperLeft(1, 2)
+                       .SetUpperRight(3, 4)
+                       .Build();
+        Assert.Equal(a, b);
+    }
 }
+
