@@ -248,7 +248,10 @@ public static class RRectFTest
     [Fact]
     private static void TestScale()
     {
-        (float x1, float y1, float w1, float h1, float x_rad1, float y_rad1, float x_scale, float y_scale, float x2, float y2, float w2, float h2, float x_rad2, float y_rad2)[] tests =
+        // source
+        (float x1, float y1, float w1, float h1, float x_rad1, float y_rad1, float x_scale, float y_scale,
+        // target
+        float x2, float y2, float w2, float h2, float x_rad2, float y_rad2)[] tests =
         [
             (3.0f, 4.0f, 5.0f, 6.0f, 0.0f, 0.0f, 1.5f, 1.5f, 4.5f, 6.0f, 7.5f, 9.0f, 0.0f, 0.0f),
 			(3.0f, 4.0f, 5.0f, 6.0f, 1.0f, 1.0f, 1.5f, 1.5f, 4.5f, 6.0f, 7.5f, 9.0f, 1.5f, 1.5f),
