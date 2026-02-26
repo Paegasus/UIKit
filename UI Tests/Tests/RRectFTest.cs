@@ -193,4 +193,54 @@ public static class RRectFTest
         a.SetCornerRadii(RRectF.RoundRectCorner.kLowerRight, new Vector2DF(7, 8));
         Assert.Equal("40.000,50.000 60.000x70.000, [15.000 25.000] [15.000 25.000] [7.000 8.000] [15.000 25.000]", a.ToString());
     }
+
+    [Fact]
+    private static void TestSizes()
+    {
+        RRectF a = new(40, 50, 60, 70, 5, 6);
+        Assert.Equal(40, a.rect().X);
+        Assert.Equal(50, a.rect().Y);
+        Assert.Equal(60, a.rect().Width);
+        Assert.Equal(70, a.rect().Height);
+        Assert.Equal(5, a.GetSimpleRadii().X);
+        Assert.Equal(6, a.GetSimpleRadii().Y);
+        a = new RRectF(40, 50, 60, 70, 5, 5);
+        Assert.Equal(5, a.GetSimpleRadius());
+        a.Clear();
+        Assert.True(a.IsEmpty());
+        // Make sure ovals can still get simple radii
+        a = new RRectF(40, 50, 60, 70, 30, 35);
+        Assert.Equal(RRectF.RoundRectType.kOval, a.GetRoundRectType());
+        Assert.Equal(30, a.GetSimpleRadii().X);
+        Assert.Equal(35, a.GetSimpleRadii().Y);
+    }
+
+    [Fact]
+    private static void TestContains()
+    {
+        RRectF a = new(40, 50, 60, 70, 5, 6);
+        RectF b = new(50, 60, 5, 6);
+        Assert.True(a.Contains(b));
+        b = new RectF(40, 50, 5, 6);  // Right on the border
+        Assert.False(a.Contains(b));
+        b = new RectF(95, 114, 5, 6);  // Right on the border
+        Assert.False(a.Contains(b));
+        b = new RectF(40, 50, 60, 70);
+        Assert.False(a.Contains(b));
+    }
+
+    [Fact]
+    private static void TestHasRoundedCorners()
+    {
+        RRectF a = new();
+        Assert.False(a.HasRoundedCorners());
+        a = new RRectF(new RectF(10, 10));
+        Assert.False(a.HasRoundedCorners());
+        a = new RRectF(new RectF(), new RoundedCornersF(1.0f));
+        Assert.False(a.HasRoundedCorners());
+        a = new RRectF(new RectF(10, 10), new RoundedCornersF(1.0f));
+        Assert.True(a.HasRoundedCorners());
+        a = new RRectF(new RectF(10, 10), new RoundedCornersF(1, 0, 0, 0));
+        Assert.True(a.HasRoundedCorners());
+    }
 }
