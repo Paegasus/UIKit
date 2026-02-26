@@ -318,4 +318,29 @@ public static class RRectFTest
         c = new RRectFBuilder().SetRect(a).Build();
         Assert.Equal(b, c);
     }
+
+    [Fact]
+    private static void TestBuildFromRadius()
+    {
+        RRectF a = new(40, 50, 60, 70, 15);
+        RRectF b = new RRectFBuilder()
+                       .SetOrigin(40, 50)
+                       .SetSize(60, 70)
+                       .SetRadius(15)
+                       .Build();
+        Assert.Equal(a, b);
+
+        a = new RRectF(40, 50, 60, 70, 15, 25);
+        b = new RRectFBuilder()
+                .SetOrigin(40, 50)
+                .SetSize(60, 70)
+                .SetRadius(15, 25)
+                .Build();
+        Assert.Equal(a, b);
+
+        PointF p = new(40, 50);
+        SizeF s = new(60, 70);
+        b = new RRectFBuilder().SetOrigin(p).SetSize(s).SetRadius(15, 25).Build();
+        Assert.Equal(a, b);
+    }
 }
