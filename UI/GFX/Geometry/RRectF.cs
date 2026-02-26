@@ -375,10 +375,10 @@ public struct RRectF
 
     public void Offset(in Vector2DF distance) => Offset(distance.X, distance.Y);
 
-    // Insets bounds by dx and dy, and adjusts radii by dx and dy. dx and dy may
-    // be positive, negative, or zero. If either corner radius is zero, the corner
-    // has no curvature and is unchanged. Otherwise, if adjusted radius becomes
-    // negative, the radius is pinned to zero.
+    // Insets bounds by dx and dy, and adjusts radii by dx and dy.
+    // dx and dy may be positive, negative, or zero.
+    // If either corner radius is zero, the corner has no curvature and is unchanged.
+    // Otherwise, if adjusted radius becomes negative, the radius is pinned to zero.
     public void Inset(float val) => Inset(val, val);
 
     public void Inset(float dx, float dy)
@@ -431,21 +431,16 @@ public struct RRectF
         Normalize();
     }
 
-    // Outsets bounds by dx and dy, and adjusts radii by dx and dy. dx and dy may
-    // be positive, negative, or zero. If either corner radius is zero, the corner
-    // has no curvature and is unchanged. Otherwise, if adjusted radius becomes
-    // negative, the radius is pinned to zero.
-    /*
-    void Outset(float val)
-    {
-        skrrect_.outset(val, val);
-    }
+    // Outsets bounds by dx and dy, and adjusts radii by dx and dy.
+    // dx and dy may be positive, negative, or zero.
+    // If either corner radius is zero, the corner has no curvature and is unchanged.
+    // Otherwise, if adjusted radius becomes negative, the radius is pinned to zero.
+    public void Outset(float val) => Outset(val, val);
 
-    void Outset(float dx, float dy)
+    public void Outset(float dx, float dy)
     {
-        skrrect_.outset(dx, dy);
+        Inset(-dx, -dy);
     }
-    */
 
     // Creates an SKRoundRect for use with Skia APIs. The caller is responsible
     // for disposing the returned object.

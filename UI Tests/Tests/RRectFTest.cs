@@ -291,10 +291,8 @@ public static class RRectFTest
         RRectF b = a;
         b.Inset(3);
         Assert.Equal(b, new RRectF(43, 53, 54, 64, 2));
-        /*
         b = a;
         b.Outset(3);
         Assert.Equal(b, new RRectF(37, 47, 66, 76, 8));
-        */
     }
 }
