@@ -283,4 +283,18 @@ public static class RRectFTest
             Assert.Equal(r1.GetSimpleRadii(), r2.GetSimpleRadii());
         }
     }
+
+    [Fact]
+    private static void TestInsetOutset()
+    {
+        RRectF a = new(40, 50, 60, 70, 5);
+        RRectF b = a;
+        b.Inset(3);
+        Assert.Equal(b, new RRectF(43, 53, 54, 64, 2));
+        /*
+        b = a;
+        b.Outset(3);
+        Assert.Equal(b, new RRectF(37, 47, 66, 76, 8));
+        */
+    }
 }

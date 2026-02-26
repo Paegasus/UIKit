@@ -375,6 +375,78 @@ public struct RRectF
 
     public void Offset(in Vector2DF distance) => Offset(distance.X, distance.Y);
 
+    // Insets bounds by dx and dy, and adjusts radii by dx and dy. dx and dy may
+    // be positive, negative, or zero. If either corner radius is zero, the corner
+    // has no curvature and is unchanged. Otherwise, if adjusted radius becomes
+    // negative, the radius is pinned to zero.
+    public void Inset(float val) => Inset(val, val);
+
+    public void Inset(float dx, float dy)
+    {
+        SKRect r = new(_rect.Left + dx,
+                       _rect.Top + dy,
+                       _rect.Right - dx,
+                       _rect.Bottom - dy);
+
+        bool degenerate = false;
+
+        if (r.Right <= r.Left)
+        {
+            degenerate = true;
+            float mid = (r.Left + r.Right) * 0.5f;
+            r.Left = r.Right = mid;
+        }
+        if (r.Bottom <= r.Top)
+        {
+            degenerate = true;
+            float mid = (r.Top + r.Bottom) * 0.5f;
+            r.Top = r.Bottom = mid;
+        }
+
+        if (degenerate)
+        {
+            this = default;
+            return;
+        }
+
+        if (!float.IsFinite(r.Left) || !float.IsFinite(r.Top) ||
+            !float.IsFinite(r.Right) || !float.IsFinite(r.Bottom))
+        {
+            this = default;
+            return;
+        }
+
+        // Only adjust a radius component if it was non-zero, then clamp to zero.
+        // This matches Skia: zero radius means square corner, leave it unchanged.
+        _rect = r;
+        if (_radiiUpperLeft.X != 0) _radiiUpperLeft.X = MathF.Max(0, _radiiUpperLeft.X - dx);
+        if (_radiiUpperLeft.Y != 0) _radiiUpperLeft.Y = MathF.Max(0, _radiiUpperLeft.Y - dy);
+        if (_radiiUpperRight.X != 0) _radiiUpperRight.X = MathF.Max(0, _radiiUpperRight.X - dx);
+        if (_radiiUpperRight.Y != 0) _radiiUpperRight.Y = MathF.Max(0, _radiiUpperRight.Y - dy);
+        if (_radiiLowerRight.X != 0) _radiiLowerRight.X = MathF.Max(0, _radiiLowerRight.X - dx);
+        if (_radiiLowerRight.Y != 0) _radiiLowerRight.Y = MathF.Max(0, _radiiLowerRight.Y - dy);
+        if (_radiiLowerLeft.X != 0) _radiiLowerLeft.X = MathF.Max(0, _radiiLowerLeft.X - dx);
+        if (_radiiLowerLeft.Y != 0) _radiiLowerLeft.Y = MathF.Max(0, _radiiLowerLeft.Y - dy);
+
+        Normalize();
+    }
+
+    // Outsets bounds by dx and dy, and adjusts radii by dx and dy. dx and dy may
+    // be positive, negative, or zero. If either corner radius is zero, the corner
+    // has no curvature and is unchanged. Otherwise, if adjusted radius becomes
+    // negative, the radius is pinned to zero.
+    /*
+    void Outset(float val)
+    {
+        skrrect_.outset(val, val);
+    }
+
+    void Outset(float dx, float dy)
+    {
+        skrrect_.outset(dx, dy);
+    }
+    */
+
     // Creates an SKRoundRect for use with Skia APIs. The caller is responsible
     // for disposing the returned object.
     public readonly SKRoundRect ToSKRoundRect()
