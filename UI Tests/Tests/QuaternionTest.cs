@@ -59,14 +59,39 @@ public static class QuaternionTest
         CompareQuaternions(q, new Quaternion());
     }
 
+    [Fact]
     private static void TestAddition()
     {
-        
+        double[] values = [0, 1, 100];
+
+        for (int i = 0; i < values.Length; ++i)
+        {
+            double t = values[i];
+            Quaternion a = new(t, 2 * t, 3 * t, 4 * t);
+            Quaternion b = new(5 * t, 4 * t, 3 * t, 2 * t);
+            Quaternion sum = a + b;
+            CompareQuaternions(new Quaternion(t, t, t, t) * 6, sum);
+        }
     }
 
+    [Fact]
     private static void TestMultiplication()
     {
-        
+        (Quaternion a, Quaternion b, Quaternion expected)[] cases =
+        [
+            (new Quaternion(1, 0, 0, 0), new Quaternion(1, 0, 0, 0), new Quaternion(0, 0, 0, -1)),
+            (new Quaternion(0, 1, 0, 0), new Quaternion(0, 1, 0, 0), new Quaternion(0, 0, 0, -1)),
+            (new Quaternion(0, 0, 1, 0), new Quaternion(0, 0, 1, 0), new Quaternion(0, 0, 0, -1)),
+            (new Quaternion(0, 0, 0, 1), new Quaternion(0, 0, 0, 1), new Quaternion(0, 0, 0, 1)),
+            (new Quaternion(1, 2, 3, 4), new Quaternion(5, 6, 7, 8), new Quaternion(24, 48, 48, -6)),
+            (new Quaternion(5, 6, 7, 8), new Quaternion(1, 2, 3, 4), new Quaternion(32, 32, 56, -6))
+        ];
+
+        foreach(var (a, b, expected) in cases)
+        {
+            Quaternion product = a * b;
+            CompareQuaternions(expected, product);
+        }
     }
 
     private static void TestScaling()
