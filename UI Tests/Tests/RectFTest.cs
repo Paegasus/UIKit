@@ -208,7 +208,64 @@ public static class RectFTest
         float kMinFloat = float.MinNormal;
         RectF r1 = new(kMinFloat, 0, kMaxFloat, kMaxFloat);
         RectF r2 = new(0, kMinFloat, kMaxFloat, kMaxFloat);
-        // This should not trigger DCHECK failure.
+        // This should not trigger assert failure.
         r1.Union(r2);
+    }
+
+    [Fact]
+    private static void TestCenterPoint()
+    {
+        PointF center;
+
+        // When origin is (0, 0).
+        center = new RectF(0, 0, 20, 20).CenterPoint();
+        Assert.True(center == new PointF(10, 10));
+
+        // When origin is even.
+        center = new RectF(10, 10, 20, 20).CenterPoint();
+        Assert.True(center == new PointF(20, 20));
+
+        // When origin is odd.
+        center = new RectF(11, 11, 20, 20).CenterPoint();
+        Assert.True(center == new PointF(21, 21));
+
+        // When 0 width or height.
+        center = new RectF(10, 10, 0, 20).CenterPoint();
+        Assert.True(center == new PointF(10, 20));
+        center = new RectF(10, 10, 20, 0).CenterPoint();
+        Assert.True(center == new PointF(20, 10));
+
+        // When an odd size.
+        center = new RectF(10, 10, 21, 21).CenterPoint();
+        Assert.True(center == new PointF(20.5f, 20.5f));
+
+        // When an odd size and position.
+        center = new RectF(11, 11, 21, 21).CenterPoint();
+        Assert.True(center == new PointF(21.5f, 21.5f));
+    }
+
+    [Fact]
+    private static void TestScaleRect()
+    {
+        RectF input = new(3, 3, 3, 3);
+        SizeF size_f = new(2.0f, 3.0f);
+        Size size = new(3, 2);
+        AssertRectFEqual(new RectF(4.5f, 4.5f, 4.5f, 4.5f), RectF.ScaleRect(input, 1.5f));
+        AssertRectFEqual(new RectF(6.0f, 9.0f, 6.0f, 9.0f), RectF.ScaleRect(input, size_f));
+        AssertRectFEqual(new RectF(9.0f, 6.0f, 9.0f, 6.0f), RectF.ScaleRect(input, size));
+        AssertRectFEqual(new RectF(0, 0, 0, 0), RectF.ScaleRect(input, 0));
+
+        float kMaxFloat = float.MaxValue;
+        int kMaxInt = int.MaxValue;
+        AssertRectFEqual(new RectF(kMaxFloat, kMaxFloat, kMaxFloat, kMaxFloat), RectF.ScaleRect(input, kMaxFloat));
+        AssertRectFEqual(new RectF(input.X * (float)kMaxInt, input.Y * (float)kMaxInt, input.Width * (float)kMaxInt, input.Height * (float)kMaxInt),
+                        RectF.ScaleRect(input, new Size(kMaxInt, kMaxInt)));
+
+        RectF nan_rect = RectF.ScaleRect(input, float.NaN);
+        Assert.True(float.IsNaN(nan_rect.X));
+        Assert.True(float.IsNaN(nan_rect.Y));
+        // NaN is clamped to 0 in SizeF constructor.
+        Assert.Equal(0, nan_rect.Width);
+        Assert.Equal(0, nan_rect.Height);
     }
 }

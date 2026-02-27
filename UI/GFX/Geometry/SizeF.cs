@@ -6,7 +6,6 @@ namespace UI.GFX.Geometry;
 public struct SizeF
 {
     private float m_Width, m_Height;
-
     public float Width { readonly get => m_Width; set => m_Width = Clamp(value); }
     public float Height { readonly get => m_Height; set => m_Height = Clamp(value); }
 
@@ -35,14 +34,14 @@ public struct SizeF
 
     public SizeF(float width, float height)
     {
-        Width = Clamp(width);
-        Height = Clamp(height);
+        Width = width;
+        Height = height;
     }
 
     public SizeF(in Size size)
     {
-        Width = Clamp(size.Width);
-        Height = Clamp(size.Height);
+        Width = size.Width;
+        Height = size.Height;
     }
 
     public readonly float GetArea() => Width * Height;
