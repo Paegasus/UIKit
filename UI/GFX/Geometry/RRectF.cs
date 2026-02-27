@@ -117,60 +117,6 @@ public struct RRectF
     // The rectangular portion of the RRectF, without the corner radii.
     public readonly RectF Rect() => new(_rect.Left, _rect.Top, _rect.Width, _rect.Height);
 
-    /*
-    private static SKPoint ClampRadii(SKPoint r, float halfW, float halfH)
-    {
-        if (r.X <= 0 || r.Y <= 0) return SKPoint.Empty;
-        float scale = Math.Min(halfW / r.X, Math.Min(halfH / r.Y, 1f));
-        return new SKPoint(r.X * scale, r.Y * scale);
-    }
-
-    // Clears all fields if the rect is empty, mirroring Skia's normalisation.
-    private void Normalize()
-    {
-        if (RectIsEmpty || !float.IsFinite(_rect.Left) || !float.IsFinite(_rect.Top) || !float.IsFinite(_rect.Right) || !float.IsFinite(_rect.Bottom))
-        {
-            this = default;
-            return;
-        }
-
-        // Clamp radii so they fit within the rect, matching Skia's behaviour.
-        // When a radius exceeds half its dimension, both x and y are scaled down
-        // proportionally by the most constraining dimension.
-        float halfW = _rect.Width / 2f;
-        float halfH = _rect.Height / 2f;
-
-        // For uniform radii (simple case), scale both by the same factor.
-        if (_radiiUpperLeft == _radiiUpperRight &&
-            _radiiUpperLeft == _radiiLowerRight &&
-            _radiiUpperLeft == _radiiLowerLeft)
-        {
-            float rx = _radiiUpperLeft.X;
-            float ry = _radiiUpperLeft.Y;
-            if (rx > 0 && ry > 0)
-            {
-                float scale = Math.Min(halfW / rx, halfH / ry);
-                if (scale < 1f)
-                {
-                    var clamped = new SKPoint(rx * scale, ry * scale);
-                    _radiiUpperLeft = clamped;
-                    _radiiUpperRight = clamped;
-                    _radiiLowerRight = clamped;
-                    _radiiLowerLeft = clamped;
-                }
-            }
-        }
-        else
-        {
-            // For complex radii, clamp each corner independently.
-            _radiiUpperLeft = ClampRadii(_radiiUpperLeft, halfW, halfH);
-            _radiiUpperRight = ClampRadii(_radiiUpperRight, halfW, halfH);
-            _radiiLowerRight = ClampRadii(_radiiLowerRight, halfW, halfH);
-            _radiiLowerLeft = ClampRadii(_radiiLowerLeft, halfW, halfH);
-        }
-    }
-    */
-
     // Returns the minimum of curMin and (limit / (r1 + r2)) when r1+r2 exceeds limit.
     private static float MinScale(float r1, float r2, float limit, float curMin)
     {
