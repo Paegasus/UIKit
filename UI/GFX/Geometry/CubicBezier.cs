@@ -169,7 +169,7 @@ public struct CubicBezier
             sol2 = SampleCurveY(t2);
 
         range_min_ = Math.Min(range_min_, Math.Min(sol1, sol2));
-        range_max_ = Math.Max(range_max_, Math.Min(sol1, sol2));
+        range_max_ = Math.Max(range_max_, Math.Max(sol1, sol2));
     }
 
     private void InitSpline()
@@ -330,14 +330,8 @@ public struct CubicBezier
     public readonly double GetY2() => (by_ + cy_) / 3.0 + GetY1();
 
     // Gets the bezier's minimum y value in the interval [0, 1].
-    public readonly double range_min()
-    {
-        return range_min_;
-    }
+    public readonly double range_min => range_min_;
 
     // Gets the bezier's maximum y value in the interval [0, 1].
-    public readonly double range_max()
-    {
-        return range_max_;
-    }
+    public readonly double range_max => range_max_;
 }
