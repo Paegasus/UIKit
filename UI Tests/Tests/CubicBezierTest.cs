@@ -128,13 +128,6 @@ public static class CubicBezierTest
     private static void TestRange()
     {
         double epsilon = 0.00015;
-        // Derivative has two roots in [0,1].
-        CubicBezier function = new(0.25, 2.5, 0.75, 0.5);
-        Assert.Equal(0, function.range_min);
-        Assert.Equal(1.28818, function.range_max, epsilon); // Failed, Expected: 1.28818, Actual: 1
-
-        /*
-        double epsilon = 0.00015;
 
         // Derivative is a constant.
         CubicBezier function = new(0.25, (1.0 / 3.0), 0.75, (2.0 / 3.0));
@@ -188,6 +181,5 @@ public static class CubicBezierTest
           function = new(0.25, 0.367, 0.75, 0.7);
           Assert.Equal(0.0f, function.range_min);
           Assert.Equal(1.0f, function.range_max);
-          */
     }
 }
