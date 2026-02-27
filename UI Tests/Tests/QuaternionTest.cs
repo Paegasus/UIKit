@@ -184,38 +184,82 @@ public static class QuaternionTest
         AssertQuaternion(expected, interpolated);
     }
 
+    [Fact]
     private static void TestSlerpRotateXRotateY()
     {
-        
+        var start = new Quaternion(new Vector3DF(1, 0, 0), Math.PI / 2);
+        var stop = new Quaternion(new Vector3DF(0, 1, 0), Math.PI / 2);
+        var interpolated = start.Slerp(stop, 0.5f);
+
+        double expected_angle = Math.Acos(1.0 / 3.0);
+        double xy = Math.Sin(0.5 * expected_angle) / Math.Sqrt(2);
+        Quaternion expected = new(xy, xy, 0, Math.Cos(0.5 * expected_angle));
+        AssertQuaternion(expected, interpolated);
     }
 
+    [Fact]
     private static void TestSlerp360()
     {
-        
+        var start = new Quaternion(0, 0, 0, -1);  // 360 degree rotation.
+        var stop = new Quaternion(new Vector3DF(0, 0, 1), Math.PI / 2);
+        var interpolated = start.Slerp(stop, 0.5f);
+        double expected_half_angle = Math.PI / 8;
+        Quaternion expected = new(0, 0, Math.Sin(expected_half_angle),
+                            Math.Cos(expected_half_angle));
+        AssertQuaternion(expected, interpolated);
     }
 
+    [Fact]
     private static void TestSlerpEquivalentQuaternions()
     {
-        
+        Quaternion start = new(new Vector3DF(1, 0, 0), Math.PI / 3);
+        Quaternion stop = start.flip();
+        Quaternion interpolated = start.Slerp(stop, 0.5f);
+        AssertQuaternion(start, interpolated);
     }
 
+    [Fact]
     private static void TestSlerpQuaternionWithInverse()
     {
-        
+        Quaternion start = new(new Vector3DF(1, 0, 0), Math.PI / 3);
+        Quaternion stop = start.inverse();
+        Quaternion interpolated = start.Slerp(stop, 0.5f);
+        Quaternion expected = new(0, 0, 0, 1);
+        AssertQuaternion(expected, interpolated);
     }
 
+    [Fact]
     private static void TestSlerpObtuseAngle()
     {
-        
+        Quaternion start = new(new Vector3DF(1, 1, 0), Math.PI / 2);
+        Quaternion stop = new(new Vector3DF(0, 1, -1), 3 * Math.PI / 2);
+        Quaternion interpolated = start.Slerp(stop, 0.5f);
+        double expected_half_angle = -Math.Atan(0.5);
+        double xz = Math.Sin(expected_half_angle) / Math.Sqrt(2);
+        Quaternion expected = new(xz, 0, xz, -Math.Cos(expected_half_angle));
+        AssertQuaternion(expected, interpolated);
     }
 
+    [Fact]
     private static void TestEquals()
     {
-        
+        Assert.True(new Quaternion() == new Quaternion());
+        Assert.True(new Quaternion() == new Quaternion(0, 0, 0, 1));
+        Assert.True(new Quaternion(1, 5.2, -8.5, 222.2) == new Quaternion(1, 5.2, -8.5, 222.2));
+        Assert.False(new Quaternion() == new Quaternion(1, 0, 0, 0));
+        Assert.False(new Quaternion() == new Quaternion(0, 1, 0, 0));
+        Assert.False(new Quaternion() == new Quaternion(0, 0, 1, 0));
+        Assert.False(new Quaternion() == new Quaternion(1, 0, 0, 1));
     }
 
+    [Fact]
     private static void TestNotEquals()
     {
-        
+        Assert.False(new Quaternion() != new Quaternion());
+        Assert.False(new Quaternion(1, 5.2, -8.5, 222.2) != new Quaternion(1, 5.2, -8.5, 222.2));
+        Assert.True(new Quaternion() != new Quaternion(1, 0, 0, 0));
+        Assert.True(new Quaternion() != new Quaternion(0, 1, 0, 0));
+        Assert.True(new Quaternion() != new Quaternion(0, 0, 1, 0));
+        Assert.True(new Quaternion() != new Quaternion(1, 0, 0, 1));
     }
 }
