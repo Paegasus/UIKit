@@ -3,6 +3,7 @@ using Xunit;
 using UI.GFX.Geometry;
 
 using static UI.Tests.GeometryUtil;
+using UI.Extensions;
 
 namespace UI.Tests;
 
@@ -153,5 +154,61 @@ public static class RectFTest
         AssertRectFEqual(
             new RectF(2.2f, 3.3f, 4.4f, 5.5f),
             RectF.UnionRects(new RectF(2.2f, 3.3f, 4.4f, 5.5f), new RectF(8.8f, 9.9f, 2.2f, 0)));
+    }
+
+    [Fact]
+    private static void TestUnionEvenIfEmpty()
+    {
+        AssertRectFEqual(new RectF(), RectF.UnionRectsEvenIfEmpty(new RectF(), new RectF()));
+        AssertRectFEqual(new RectF(0, 0, 3.3f, 4.4f),
+                        RectF.UnionRectsEvenIfEmpty(new RectF(), new RectF(3.3f, 4.4f, 0, 0)));
+        AssertRectFEqual(new RectF(0, 0, 8.8f, 11.0f),
+                        RectF.UnionRectsEvenIfEmpty(new RectF(0, 0, 3.3f, 4.4f),
+                                              new RectF(3.3f, 4.4f, 5.5f, 6.6f)));
+        AssertRectFEqual(new RectF(0, 0, 8.8f, 11.0f),
+                        RectF.UnionRectsEvenIfEmpty(new RectF(3.3f, 4.4f, 5.5f, 6.6f),
+                                              new RectF(0, 0, 3.3f, 4.4f)));
+        AssertRectFEqual(new RectF(2.2f, 3.3f, 6.6f, 8.8f),
+                        RectF.UnionRectsEvenIfEmpty(new RectF(8.8f, 9.9f, 0, 2.2f),
+                                              new RectF(2.2f, 3.3f, 4.4f, 5.5f)));
+        AssertRectFEqual(new RectF(2.2f, 3.3f, 8.8f, 6.6f),
+                        RectF.UnionRectsEvenIfEmpty(new RectF(2.2f, 3.3f, 4.4f, 5.5f),
+                                              new RectF(8.8f, 9.9f, 2.2f, 0)));
+    }
+
+    [Fact]
+    private static void TestUnionEnsuresContainWithFloatingError()
+    {
+        for (float f = 0.1f; f < 5; f += 0.1f)
+        {
+            RectF r1 = new(1, 2, 3, 4);
+            r1.Scale(f, f + 0.05f);
+            RectF r2 = r1 + new Vector2DF(10.0f + f, f - 10.0f);
+            RectF r3 = RectF.UnionRects(r1, r2);
+            Assert.True(r3.Contains(r1));
+            Assert.True(r3.Contains(r2));
+        }
+    }
+
+    [Fact]
+    private static void TestUnionIfEmptyResultTinySize()
+    {
+        RectF r1 = new(1e-15f, 0, 0, 0);
+        RectF r2 = new(0, 1e-15f, 0, 0);
+        RectF r3 = RectF.UnionRectsEvenIfEmpty(r1, r2);
+        Assert.False(r3.IsEmpty());
+        Assert.True(r3.Contains(r1));
+        Assert.True(r3.Contains(r2));
+    }
+
+    [Fact]
+    private static void TestUnionMaxRects()
+    {
+        float kMaxFloat = float.MaxValue;
+        float kMinFloat = float.MinNormal;
+        RectF r1 = new(kMinFloat, 0, kMaxFloat, kMaxFloat);
+        RectF r2 = new(0, kMinFloat, kMaxFloat, kMaxFloat);
+        // This should not trigger DCHECK failure.
+        r1.Union(r2);
     }
 }
