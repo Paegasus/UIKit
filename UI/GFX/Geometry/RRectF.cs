@@ -500,6 +500,41 @@ public struct RRectF
         return rrect;
     }
 
+    private static bool AboveTolerance(float val1, float val2, float tolerance) => MathF.Abs(val1 - val2) > tolerance;
+
+    public readonly bool ApproximatelyEqual(in RRectF other, float tolerance)
+    {
+        if (AboveTolerance(_rect.Left, other._rect.Left, tolerance) ||
+            AboveTolerance(_rect.Top, other._rect.Top, tolerance) ||
+            AboveTolerance(_rect.Width, other._rect.Width, tolerance) ||
+            AboveTolerance(_rect.Height, other._rect.Height, tolerance))
+            return false;
+
+        return !AboveTolerance(_radiiUpperLeft.X, other._radiiUpperLeft.X, tolerance) &&
+               !AboveTolerance(_radiiUpperLeft.Y, other._radiiUpperLeft.Y, tolerance) &&
+               !AboveTolerance(_radiiUpperRight.X, other._radiiUpperRight.X, tolerance) &&
+               !AboveTolerance(_radiiUpperRight.Y, other._radiiUpperRight.Y, tolerance) &&
+               !AboveTolerance(_radiiLowerRight.X, other._radiiLowerRight.X, tolerance) &&
+               !AboveTolerance(_radiiLowerRight.Y, other._radiiLowerRight.Y, tolerance) &&
+               !AboveTolerance(_radiiLowerLeft.X, other._radiiLowerLeft.X, tolerance) &&
+               !AboveTolerance(_radiiLowerLeft.Y, other._radiiLowerLeft.Y, tolerance);
+    }
+
+    public readonly RoundedCornersF GetRoundedCorners()
+    {
+        var upper_left = GetCornerRadii(RoundRectCorner.kUpperLeft);
+        var upper_right = GetCornerRadii(RoundRectCorner.kUpperRight);
+        var lower_right = GetCornerRadii(RoundRectCorner.kLowerRight);
+        var lower_left = GetCornerRadii(RoundRectCorner.kLowerLeft);
+
+        return new (upper_left.X, upper_right.X, lower_right.X, lower_left.X);
+    }
+
+    public static RRectF ToEnclosingRRectF(in RRectF rrect_f)
+    {
+        return new RRectF(new RectF(RectConversions.ToEnclosingRect(rrect_f.rect())), rrect_f.GetRoundedCorners());
+    }
+
     public override readonly string ToString()
     {
         var ss = new StringBuilder();
