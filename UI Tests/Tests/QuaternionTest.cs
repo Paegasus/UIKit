@@ -94,29 +94,94 @@ public static class QuaternionTest
         }
     }
 
+    [Fact]
     private static void TestScaling()
     {
-        
+        double[] values = [0, 10, 100];
+
+        for (int i = 0; i < values.Length; ++i)
+        {
+            double s = values[i];
+            Quaternion q = new(1, 2, 3, 4);
+            Quaternion expected = new(s, 2 * s, 3 * s, 4 * s);
+            CompareQuaternions(expected, q * s);
+            CompareQuaternions(expected, s * q);
+            if (s > 0)
+                CompareQuaternions(expected, q / (1 / s));
+        }
     }
 
+    [Fact]
     private static void TestNormalization()
     {
-        
+        Quaternion q = new(1, -1, 1, -1);
+        Assert.Equal(4, q.Length(), kEpsilon);
+
+        q = q.Normalized();
+
+        Assert.Equal(1, q.Length(), kEpsilon);
+        Assert.Equal(0.5, q.X, kEpsilon);
+        Assert.Equal(-0.5, q.Y, kEpsilon);
+        Assert.Equal(0.5, q.Z, kEpsilon);
+        Assert.Equal(-0.5, q.W, kEpsilon);
     }
 
+    [Fact]
     private static void TestLerp()
     {
-        
+        for (int i = 1; i < 100; ++i)
+        {
+            Quaternion a = new(0, 0, 0, 0);
+            Quaternion b = new(1, 2, 3, 4);
+            float t = (float)i / 100.0f;
+            Quaternion interpolated = a.Lerp(b, t);
+            double s = 1.0 / Math.Sqrt(30.0);
+            CompareQuaternions(new Quaternion(1, 2, 3, 4) * s, interpolated);
+        }
+
+        {
+            Quaternion a = new(4, 3, 2, 1);
+            Quaternion b = new(1, 2, 3, 4);
+            CompareQuaternions(a.Normalized(), a.Lerp(b, 0));
+            CompareQuaternions(b.Normalized(), a.Lerp(b, 1));
+            CompareQuaternions(new Quaternion(1, 1, 1, 1).Normalized(), a.Lerp(b, 0.5));
+        }
     }
 
+    [Fact]
     private static void TestSlerp()
     {
-        
+        Vector3DF axis = new(1, 1, 1);
+        double start_radians = -0.5;
+        double stop_radians = 0.5;
+        Quaternion start = new(axis, start_radians);
+        Quaternion stop = new(axis, stop_radians);
+
+        for (int i = 0; i < 100; ++i)
+        {
+            float t = (float)i / 100.0f;
+            double radians = (1.0 - t) * start_radians + t * stop_radians;
+            Quaternion expected = new(axis, radians);
+            Quaternion interpolated = start.Slerp(stop, t);
+            AssertQuaternion(expected, interpolated);
+        }
     }
 
+    [Fact]
     private static void TestSlerpOppositeAngles()
     {
-        
+        Vector3DF axis = new(1, 1, 1);
+        double start_radians = -Math.PI / 2;
+        double stop_radians = Math.PI / 2;
+        Quaternion start = new(axis, start_radians);
+        Quaternion stop = new(axis, stop_radians);
+
+        // When quaternions are pointed in the fully opposite direction,
+        // this is ambiguous, so we rotate as per https://www.w3.org/TR/css-transforms-1/
+        Quaternion expected = new(axis, 0);
+
+        Quaternion interpolated = start.Slerp(stop, 0.5f);
+        AssertQuaternion(expected, interpolated);
     }
 
     private static void TestSlerpRotateXRotateY()
