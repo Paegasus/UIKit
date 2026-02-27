@@ -17,10 +17,11 @@ public struct Quaternion
 
     public Quaternion(double x, double y, double z, double w) => (X, Y, Z, W) = (x, y, z, w);
 
-    public Quaternion(in Vector3DF axis, double angle)
+    public Quaternion(in Vector3DF axis, double angle) : this()
     {
         // Rotation angle is the product of |angle| and the magnitude of |axis|.
         double length = axis.Length();
+
         if (Math.Abs(length) < kEpsilon)
             return;
 
@@ -36,7 +37,7 @@ public struct Quaternion
     }
 
     // Constructs a quaternion representing a rotation between |from| and |to|.
-    public Quaternion(in Vector3DF from, in Vector3DF to)
+    public Quaternion(in Vector3DF from, in Vector3DF to) : this()
     {
         double dot = Vector3DF.DotProduct(from, to);
         double norm = Math.Sqrt(from.LengthSquared() * to.LengthSquared());
