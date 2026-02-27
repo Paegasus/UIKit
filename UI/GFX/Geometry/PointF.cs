@@ -91,10 +91,10 @@ public struct PointF : IComparable<PointF>
         return yComparison != 0 ? yComparison : X.CompareTo(other.X);
     }
 
-    public override readonly bool Equals(object? obj) => obj is PointF other && Equals(other);
-    
     public readonly bool Equals(in PointF other) => X == other.X && Y == other.Y;
 
+    public override readonly bool Equals(object? obj) => obj is PointF other && Equals(other);
+    
     // A point is less than another point if its y-value is closer to the origin.
     // If the y-values are the same, then point with the x-value closer to the origin is considered less than the other.
     // This comparison is required to use PointF in sets, or sorted vectors.
