@@ -382,6 +382,8 @@ public struct RectF
     public static RectF operator -(in RectF lhs, in Vector2DF rhs) =>
         new RectF(lhs.X - rhs.X, lhs.Y - rhs.Y, lhs.Width, lhs.Height);
 
+    public static  RectF operator+(in Vector2DF lhs, in RectF rhs) => rhs + lhs;
+
     public static RectF IntersectRects(in RectF a, in RectF b)
     {
         RectF result = a;

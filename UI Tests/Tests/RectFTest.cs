@@ -268,4 +268,80 @@ public static class RectFTest
         Assert.Equal(0, nan_rect.Width);
         Assert.Equal(0, nan_rect.Height);
     }
+
+    [Fact]
+    private static void TestIsExpressibleAsRect()
+    {
+        Assert.True(new RectF().IsExpressibleAsRect());
+
+        float kMinIntF = (float)int.MinValue;
+        float kMaxIntF = (float)int.MaxValue;
+        float kInfinity = float.PositiveInfinity;
+
+        Assert.True(
+            new RectF(kMinIntF + 200, kMinIntF + 200, kMaxIntF - 200, kMaxIntF - 200)
+                .IsExpressibleAsRect());
+        Assert.False(
+            new RectF(kMinIntF - 200, kMinIntF + 200, kMaxIntF + 200, kMaxIntF + 200)
+                .IsExpressibleAsRect());
+        Assert.False(
+            new RectF(kMinIntF + 200, kMinIntF - 200, kMaxIntF + 200, kMaxIntF + 200)
+                .IsExpressibleAsRect());
+        Assert.False(
+            new RectF(kMinIntF + 200, kMinIntF + 200, kMaxIntF + 200, kMaxIntF - 200)
+                .IsExpressibleAsRect());
+        Assert.False(
+            new RectF(kMinIntF + 200, kMinIntF + 200, kMaxIntF - 200, kMaxIntF + 200)
+                .IsExpressibleAsRect());
+
+        Assert.True(
+            new RectF(0, 0, kMaxIntF - 200, kMaxIntF - 200).IsExpressibleAsRect());
+        Assert.False(
+            new RectF(200, 0, kMaxIntF + 200, kMaxIntF - 200).IsExpressibleAsRect());
+        Assert.False(
+            new RectF(0, 200, kMaxIntF - 200, kMaxIntF + 200).IsExpressibleAsRect());
+        Assert.False(
+            new RectF(0, 0, kMaxIntF + 200, kMaxIntF - 200).IsExpressibleAsRect());
+        Assert.False(
+            new RectF(0, 0, kMaxIntF - 200, kMaxIntF + 200).IsExpressibleAsRect());
+
+        Assert.False(new RectF(kInfinity, 0, 1, 1).IsExpressibleAsRect());
+        Assert.False(new RectF(0, kInfinity, 1, 1).IsExpressibleAsRect());
+        Assert.False(new RectF(0, 0, kInfinity, 1).IsExpressibleAsRect());
+        Assert.False(new RectF(0, 0, 1, kInfinity).IsExpressibleAsRect());
+    }
+
+    [Fact]
+    private static void TestOffset()
+    {
+        RectF f = new(1.1f, 2.2f, 3.3f, 4.4f);
+        Assert.Equal(new RectF(2.2f, 1.1f, 3.3f, 4.4f), (f + new Vector2DF(1.1f, -1.1f)));
+        Assert.Equal(new RectF(2.2f, 1.1f, 3.3f, 4.4f), (new Vector2DF(1.1f, -1.1f) + f));
+        f += new Vector2DF(1.1f, -1.1f);
+        Assert.Equal(new RectF(2.2f, 1.1f, 3.3f, 4.4f), f);
+        Assert.Equal(new RectF(1.1f, 2.2f, 3.3f, 4.4f), (f - new Vector2DF(1.1f, -1.1f)));
+        f -= new Vector2DF(1.1f, -1.1f);
+        Assert.Equal(new RectF(1.1f, 2.2f, 3.3f, 4.4f), f);
+    }
+
+    [Fact]
+    private static void TestCorners()
+    {
+        RectF f = new(1.1f, 2.1f, 3.1f, 4.1f);
+        Assert.Equal(new PointF(1.1f, 2.1f), f.Origin);
+        Assert.Equal(new PointF(4.2f, 2.1f), f.TopRight);
+        Assert.Equal(new PointF(1.1f, 6.2f), f.BottomLeft);
+        Assert.Equal(new PointF(4.2f, 6.2f), f.BottomRight);
+    }
+
+    [Fact]
+    private static void TestCenters()
+    {
+        RectF f = new(10.1f, 20.2f, 30.3f, 40.4f);
+        Assert.Equal(new PointF(10.1f, 40.4f), f.LeftCenter);
+        Assert.Equal(new PointF(25.25f, 20.2f), f.TopCenter);
+        Assert.Equal(new PointF(40.4f, 40.4f), f.RightCenter);
+        Assert.Equal(25.25f, f.BottomCenter.X);
+        Assert.Equal(60.6f, f.BottomCenter.Y, 0.001f);
+    }
 }
