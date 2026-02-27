@@ -182,4 +182,153 @@ public static class CubicBezierTest
           Assert.Equal(0.0f, function.range_min);
           Assert.Equal(1.0f, function.range_max);
     }
+
+    [Fact]
+    private static void TestSlope()
+    {
+        CubicBezier function = new(0.25, 0.0, 0.75, 1.0);
+
+        double epsilon = 0.00015;
+
+        Assert.Equal(0, function.Slope(-0.1), epsilon);
+        Assert.Equal(0, function.Slope(0), epsilon);
+        Assert.Equal(0.42170, function.Slope(0.05), epsilon);
+        Assert.Equal(0.69778, function.Slope(0.1), epsilon);
+        Assert.Equal(0.89121, function.Slope(0.15), epsilon);
+        Assert.Equal(1.03184, function.Slope(0.2), epsilon);
+        Assert.Equal(1.13576, function.Slope(0.25), epsilon);
+        Assert.Equal(1.21239, function.Slope(0.3), epsilon);
+        Assert.Equal(1.26751, function.Slope(0.35), epsilon);
+        Assert.Equal(1.30474, function.Slope(0.4), epsilon);
+        Assert.Equal(1.32628, function.Slope(0.45), epsilon);
+        Assert.Equal(1.33333, function.Slope(0.5), epsilon);
+        Assert.Equal(1.32628, function.Slope(0.55), epsilon);
+        Assert.Equal(1.30474, function.Slope(0.6), epsilon);
+        Assert.Equal(1.26751, function.Slope(0.65), epsilon);
+        Assert.Equal(1.21239, function.Slope(0.7), epsilon);
+        Assert.Equal(1.13576, function.Slope(0.75), epsilon);
+        Assert.Equal(1.03184, function.Slope(0.8), epsilon);
+        Assert.Equal(0.89121, function.Slope(0.85), epsilon);
+        Assert.Equal(0.69778, function.Slope(0.9), epsilon);
+        Assert.Equal(0.42170, function.Slope(0.95), epsilon);
+        Assert.Equal(0, function.Slope(1), epsilon);
+        Assert.Equal(0, function.Slope(1.1), epsilon);
+    }
+
+    [Fact]
+    private static void TestInputOutOfRange()
+    {
+        CubicBezier simple = new(0.5, 1.0, 0.5, 1.0);
+        Assert.Equal(-2.0, simple.Solve(-1.0));
+        Assert.Equal(1.0, simple.Solve(2.0));
+
+        CubicBezier at_edge_of_range = new(0.5, 1.0, 0.5, 1.0);
+        Assert.Equal(0.0, at_edge_of_range.Solve(0.0));
+        Assert.Equal(1.0, at_edge_of_range.Solve(1.0));
+
+        CubicBezier large_epsilon = new(0.5, 1.0, 0.5, 1.0);
+        Assert.Equal(-2.0, large_epsilon.SolveWithEpsilon(-1.0, 1.0));
+        Assert.Equal(1.0, large_epsilon.SolveWithEpsilon(2.0, 1.0));
+
+        CubicBezier coincident_endpoints = new(0.0, 0.0, 1.0, 1.0);
+        Assert.Equal(-1.0, coincident_endpoints.Solve(-1.0));
+        Assert.Equal(2.0, coincident_endpoints.Solve(2.0));
+
+        CubicBezier vertical_gradient = new(0.0, 1.0, 1.0, 0.0);
+        Assert.Equal(0.0, vertical_gradient.Solve(-1.0));
+        Assert.Equal(1.0, vertical_gradient.Solve(2.0));
+
+        CubicBezier vertical_trailing_gradient = new(0.5, 0.0, 1.0, 0.5);
+        Assert.Equal(0.0, vertical_trailing_gradient.Solve(-1.0));
+        Assert.Equal(1.0, vertical_trailing_gradient.Solve(2.0));
+
+        CubicBezier distinct_endpoints = new(0.1, 0.2, 0.8, 0.8);
+        Assert.Equal(-2.0, distinct_endpoints.Solve(-1.0));
+        Assert.Equal(2.0, distinct_endpoints.Solve(2.0));
+
+        CubicBezier coincident_leading_endpoint = new(0.0, 0.0, 0.5, 1.0);
+        Assert.Equal(-2.0, coincident_leading_endpoint.Solve(-1.0));
+        Assert.Equal(1.0, coincident_leading_endpoint.Solve(2.0));
+
+        CubicBezier coincident_trailing_endpoint = new(1.0, 0.5, 1.0, 1.0);
+        Assert.Equal(-0.5, coincident_trailing_endpoint.Solve(-1.0));
+        Assert.Equal(1.0, coincident_trailing_endpoint.Solve(2.0));
+
+        // Two special cases with three coincident points. Both are equivalent to linear.
+        CubicBezier all_zeros = new(0.0, 0.0, 0.0, 0.0);
+        Assert.Equal(-1.0, all_zeros.Solve(-1.0));
+        Assert.Equal(2.0, all_zeros.Solve(2.0));
+
+        CubicBezier all_ones = new(1.0, 1.0, 1.0, 1.0);
+        Assert.Equal(-1.0, all_ones.Solve(-1.0));
+        Assert.Equal(2.0, all_ones.Solve(2.0));
+    }
+
+    [Fact]
+    private static void TestGetPoints()
+    {
+        double epsilon = 0.00015;
+
+        CubicBezier cubic1 = new(0.1, 0.2, 0.8, 0.9);
+        Assert.Equal(0.1, cubic1.GetX1(), epsilon);
+        Assert.Equal(0.2, cubic1.GetY1(), epsilon);
+        Assert.Equal(0.8, cubic1.GetX2(), epsilon);
+        Assert.Equal(0.9, cubic1.GetY2(), epsilon);
+
+        CubicBezier cubic_zero = new(0, 0, 0, 0);
+        Assert.Equal(0, cubic_zero.GetX1(), epsilon);
+        Assert.Equal(0, cubic_zero.GetY1(), epsilon);
+        Assert.Equal(0, cubic_zero.GetX2(), epsilon);
+        Assert.Equal(0, cubic_zero.GetY2(), epsilon);
+
+        CubicBezier cubic_one = new(1, 1, 1, 1);
+        Assert.Equal(1, cubic_one.GetX1(), epsilon);
+        Assert.Equal(1, cubic_one.GetY1(), epsilon);
+        Assert.Equal(1, cubic_one.GetX2(), epsilon);
+        Assert.Equal(1, cubic_one.GetY2(), epsilon);
+
+        CubicBezier cubic_oor = new(-0.5, -1.5, 1.5, -1.6);
+        Assert.Equal(-0.5, cubic_oor.GetX1(), epsilon);
+        Assert.Equal(-1.5, cubic_oor.GetY1(), epsilon);
+        Assert.Equal(1.5, cubic_oor.GetX2(), epsilon);
+        Assert.Equal(-1.6, cubic_oor.GetY2(), epsilon);
+    }
+
+    private static void ValidateSolver(in CubicBezier cubic_bezier)
+    {
+        const double epsilon = 1e-7;
+        const double precision = 1e-5;
+        
+        for (double t = 0; t <= 1; t += 0.05)
+        {
+            double x = cubic_bezier.SampleCurveX(t);
+            double root = cubic_bezier.SolveCurveX(x, epsilon);
+            Assert.Equal(t, root, precision);
+        }
+    }
+
+    [Fact]
+    private static void TestCommonEasingFunctions()
+    {
+        ValidateSolver(new CubicBezier(0.25, 0.1, 0.25, 1));  // ease
+        ValidateSolver(new CubicBezier(0.42, 0, 1, 1));       // ease-in
+        ValidateSolver(new CubicBezier(0, 0, 0.58, 1));       // ease-out
+        ValidateSolver(new CubicBezier(0.42, 0, 0.58, 1));    // ease-in-out
+    }
+
+    [Fact]
+    private static void TestLinearEquivalentBeziers()
+    {
+        ValidateSolver(new CubicBezier(0.0, 0.0, 0.0, 0.0));
+        ValidateSolver(new CubicBezier(1.0, 1.0, 1.0, 1.0));
+    }
+
+    [Fact]
+    private static void TestControlPointsOutsideUnitSquare()
+    {
+        ValidateSolver(new CubicBezier(0.3, 1.5, 0.8, 1.5));
+        ValidateSolver(new CubicBezier(0.4, -0.8, 0.7, 1.7));
+        ValidateSolver(new CubicBezier(0.7, -2.0, 1.0, -1.5));
+        ValidateSolver(new CubicBezier(0, 4, 1, -3));
+    }
 }
