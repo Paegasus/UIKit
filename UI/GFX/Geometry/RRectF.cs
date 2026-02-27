@@ -257,7 +257,7 @@ public struct RRectF
         return new Vector2DF(_radiiUpperLeft.X, _radiiUpperLeft.Y);
     }
 
-    // Returns the radius of all corners. DCHECKs that all corners have the same
+    // Returns the radius of all corners. Asserts that all corners have the same
     // radii, and that x_rad == y_rad (the type is <= kSingle).
     public readonly float GetSimpleRadius()
     {
@@ -278,6 +278,10 @@ public struct RRectF
     public readonly bool HasRoundedCorners() =>
         !IsEmpty() && GetRoundRectType() != RoundRectType.kRect;
 
+    // GetCornerRadii may be called for any type of RRect (kRect, kOval, etc.),
+    // and it will return "correct" values. If GetType() is kOval or less, all
+    // corner values will be identical to each other. SetCornerRadii can similarly
+    // be called on any type of RRect, but GetType() may change as a result of the call.
     public readonly Vector2DF GetCornerRadii(RoundRectCorner corner)
     {
         SKPoint r = corner switch
@@ -289,6 +293,17 @@ public struct RRectF
             _ => SKPoint.Empty
         };
         return new Vector2DF(r.X, r.Y);
+    }
+
+    public readonly void GetAllRadii(Span<Vector2DF> radii)
+    {
+#if DEBUG
+        Debug.Assert(radii.Length >= 4);
+#endif
+        radii[(int)RoundRectCorner.kUpperLeft] = new Vector2DF(_radiiUpperLeft.X, _radiiUpperLeft.Y);
+        radii[(int)RoundRectCorner.kUpperRight] = new Vector2DF(_radiiUpperRight.X, _radiiUpperRight.Y);
+        radii[(int)RoundRectCorner.kLowerRight] = new Vector2DF(_radiiLowerRight.X, _radiiLowerRight.Y);
+        radii[(int)RoundRectCorner.kLowerLeft] = new Vector2DF(_radiiLowerLeft.X, _radiiLowerLeft.Y);
     }
 
     public void SetCornerRadii(RoundRectCorner corner, float x_rad, float y_rad)
@@ -374,14 +389,35 @@ public struct RRectF
     // Returns the bounding box that contains the specified rounded corner.
     public readonly RectF CornerBoundingRect(RoundRectCorner corner)
     {
-        throw new NotImplementedException();
+        var radii = GetCornerRadii(corner);
+        RectF bounding_box = new(radii.X, radii.Y);
+
+        switch (corner)
+        {
+            case RoundRectCorner.kUpperLeft:
+                bounding_box.Offset(_rect.Left, _rect.Top);
+                break;
+            case RoundRectCorner.kUpperRight:
+                bounding_box.Offset(_rect.Right - radii.X, _rect.Top);
+                break;
+            case RoundRectCorner.kLowerRight:
+                bounding_box.Offset(_rect.Right - radii.X, _rect.Bottom - radii.Y);
+                break;
+            case RoundRectCorner.kLowerLeft:
+                bounding_box.Offset(_rect.Left, _rect.Bottom - radii.Y);
+                break;
+        }
+
+        return bounding_box;
     }
 
     public void Scale(float x_scale, float y_scale)
     {
+        // Can't scale empty rects
         if (IsEmpty())
             return;
 
+        // Can't scale to an empty rect
         if (x_scale == 0 || y_scale == 0)
         {
             this = default;
@@ -533,6 +569,11 @@ public struct RRectF
     public static RRectF ToEnclosingRRectF(in RRectF rrect_f)
     {
         return new RRectF(new RectF(RectConversions.ToEnclosingRect(rrect_f.rect())), rrect_f.GetRoundedCorners());
+    }
+
+    public static  RRectF ToEnclosingRRectFIgnoringError(in RRectF rrect_f, float error)
+    {
+        return new RRectF(new RectF(RectConversions.ToEnclosingRectIgnoringError(rrect_f.rect(), error)), rrect_f.GetRoundedCorners());
     }
 
     public override readonly string ToString()
