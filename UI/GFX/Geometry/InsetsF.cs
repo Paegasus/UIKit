@@ -23,6 +23,8 @@ public struct InsetsF
 
     public InsetsF(float top, float left, float bottom, float right) => (m_Top, m_Left, m_Bottom, m_Right) = (top, left, bottom, right);
 
+    public InsetsF(in Insets insets) => (m_Top, m_Left, m_Bottom, m_Right) = (insets.Top, insets.Left, insets.Bottom, insets.Right);
+
     // Returns the total width taken up by the insets/outsets, which is the
     // sum of the left and right insets/outsets.
     public readonly float Width => m_Left + m_Right;
