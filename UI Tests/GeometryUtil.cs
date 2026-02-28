@@ -27,15 +27,4 @@ public static class GeometryUtil
         Assert.True(FloatAlmostEqual(lhs.Width, rhs.Width), $"Width: {lhs.Width} != {rhs.Width}");
         Assert.True(FloatAlmostEqual(lhs.Height, rhs.Height), $"Height: {lhs.Height} != {rhs.Height}");
     }
-
-    /*
-    public static void AssertRectFEqual(in RectF lhs, in RectF rhs)
-    {
-        float epsilon = 1e-5f;
-        Assert.Equal(lhs.X,      rhs.X,      epsilon);
-        Assert.Equal(lhs.Y,      rhs.Y,      epsilon);
-        Assert.Equal(lhs.Width,  rhs.Width,  epsilon);
-        Assert.Equal(lhs.Height, rhs.Height, epsilon);
-    }
-    */
 }

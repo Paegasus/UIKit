@@ -344,4 +344,80 @@ public static class RectFTest
         Assert.Equal(25.25f, f.BottomCenter.X);
         Assert.Equal(60.6f, f.BottomCenter.Y, 0.001f);
     }
+
+    [Fact]
+    private static void TestTranspose()
+    {
+        RectF f = new(10.1f, 20.2f, 30.3f, 40.4f);
+        f.Transpose();
+        Assert.Equal(new RectF(20.2f, 10.1f, 40.4f, 30.3f), f);
+    }
+
+    [Fact]
+    private static void TestManhattanDistanceToPoint()
+    {
+        float tolerance = 1E-06f;
+
+        RectF f = new(1.1f, 2.1f, 3.1f, 4.1f);
+        Assert.Equal(0.0f, f.ManhattanDistanceToPoint(new PointF(1.1f, 2.1f)), tolerance);
+        Assert.Equal(0.0f, f.ManhattanDistanceToPoint(new PointF(4.2f, 6.0f)), tolerance);
+        Assert.Equal(0.0f, f.ManhattanDistanceToPoint(new PointF(2.0f, 4.0f)), tolerance);
+        Assert.Equal(3.2f, f.ManhattanDistanceToPoint(new PointF(0.0f, 0.0f)), tolerance);
+        Assert.Equal(2.1f, f.ManhattanDistanceToPoint(new PointF(2.0f, 0.0f)), tolerance);
+        Assert.Equal(2.9f, f.ManhattanDistanceToPoint(new PointF(5.0f, 0.0f)), tolerance);
+        Assert.Equal(.8f, f.ManhattanDistanceToPoint(new PointF(5.0f, 4.0f)), tolerance);
+        Assert.Equal(2.6f, f.ManhattanDistanceToPoint(new PointF(5.0f, 8.0f)), tolerance);
+        Assert.Equal(1.8f, f.ManhattanDistanceToPoint(new PointF(3.0f, 8.0f)), tolerance);
+        Assert.Equal(1.9f, f.ManhattanDistanceToPoint(new PointF(0.0f, 7.0f)), tolerance);
+        Assert.Equal(1.1f, f.ManhattanDistanceToPoint(new PointF(0.0f, 3.0f)), tolerance);
+    }
+
+    [Fact]
+    private static void TestManhattanInternalDistance()
+    {
+        float tolerance = 1E-06f;
+
+        RectF f = new(0.0f, 0.0f, 400.0f, 400.0f);
+        float kEpsilon = float.MachineEpsilon;
+
+        Assert.Equal(0.0f, f.ManhattanInternalDistance(new RectF(-1.0f, 0.0f, 2.0f, 1.0f)), tolerance);
+        Assert.Equal(kEpsilon, f.ManhattanInternalDistance(new RectF(400.0f, 0.0f, 1.0f, 400.0f)), tolerance);
+        Assert.Equal(2.0f * kEpsilon, f.ManhattanInternalDistance(new RectF(-100.0f, -100.0f, 100.0f, 100.0f)), tolerance);
+        Assert.Equal(1.0f + kEpsilon, f.ManhattanInternalDistance(new RectF(-101.0f, 100.0f, 100.0f, 100.0f)), tolerance);
+        Assert.Equal(2.0f + 2.0f * kEpsilon, f.ManhattanInternalDistance(new RectF(-101.0f, -101.0f, 100.0f, 100.0f)), tolerance);
+        Assert.Equal(433.0f + 2.0f * kEpsilon, f.ManhattanInternalDistance(new RectF(630.0f, 603.0f, 100.0f, 100.0f)), tolerance);
+
+        Assert.Equal(0.0f, f.ManhattanInternalDistance(new RectF(-1.0f, 0.0f, 1.1f, 1.0f)), tolerance);
+        Assert.Equal(0.1f + kEpsilon, f.ManhattanInternalDistance(new RectF(-1.5f, 0.0f, 1.4f, 1.0f)), tolerance);
+        Assert.Equal(kEpsilon, f.ManhattanInternalDistance(new RectF(-1.5f, 0.0f, 1.5f, 1.0f)), tolerance);
+    }
+
+    [Fact]
+    private static void TestInset()
+    {
+        RectF r = new(10, 20, 30, 40);
+        r.Inset(0);
+        AssertRectFEqual(new RectF(10, 20, 30, 40), r);
+        r.Inset(1.5f);
+        AssertRectFEqual(new RectF(11.5f, 21.5f, 27, 37), r);
+        r.Inset(-1.5f);
+        AssertRectFEqual(new RectF(10, 20, 30, 40), r);
+
+        r.Inset(InsetsF.VH(2.25f, 1.5f));
+        AssertRectFEqual(new RectF(11.5f, 22.25f, 27, 35.5f), r);
+        r.Inset(InsetsF.VH(-2.25f, -1.5f));
+        AssertRectFEqual(new RectF(10, 20, 30, 40), r);
+
+        // The parameters are left, top, right, bottom.
+        r.Inset(InsetsF.TLBR(2.25f, 1.5f, 4, 3.75f));
+        AssertRectFEqual(new RectF(11.5f, 22.25f, 24.75f, 33.75f), r);
+        r.Inset(InsetsF.TLBR(-2.25f, -1.5f, -4, -3.75f));
+        AssertRectFEqual(new RectF(10, 20, 30, 40), r);
+
+        // InsetsF parameters are top, right, bottom, left.
+        r.Inset(InsetsF.TLBR(1.5f, 2.25f, 3.75f, 4f));
+        AssertRectFEqual(new RectF(12.25f, 21.5f, 23.75f, 34.75f), r);
+        r.Inset(InsetsF.TLBR(-1.5f, -2.25f, -3.75f, -4f));
+        AssertRectFEqual(new RectF(10f, 20f, 30f, 40f), r);
+    }
 }
