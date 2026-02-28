@@ -49,7 +49,7 @@ public struct MaskFilterInfo
         if (rounded_corner_bounds_.IsEmpty)
             return false;
 
-        return gradient_mask_ != null && !gradient_mask_.IsEmpty;
+        return gradient_mask_ != null && !gradient_mask_.Value.IsEmpty;
     }
 
     // True if this contains no effective mask information.
@@ -139,8 +139,8 @@ public struct MaskFilterInfo
 
         rounded_corner_bounds_.Normalize();
 
-        if (gradient_mask_ != null && !gradient_mask_.IsEmpty)
-            gradient_mask_.ApplyTransform(transform);
+        if (gradient_mask_ != null && !gradient_mask_.Value.IsEmpty)
+            gradient_mask_.Value.ApplyTransform(transform);
     }
     
     public void ApplyTransform(in AxisTransform2D transform)
@@ -157,8 +157,8 @@ public struct MaskFilterInfo
             return;
         }
 
-        if (gradient_mask_ != null && !gradient_mask_.IsEmpty)
-            gradient_mask_.ApplyTransform(transform);
+        if (gradient_mask_ != null && !gradient_mask_.Value.IsEmpty)
+            gradient_mask_.Value.ApplyTransform(transform);
     }
 
     public override string ToString()
@@ -182,9 +182,11 @@ public struct MaskFilterInfo
 
     public override readonly int GetHashCode() => HashCode.Combine(rounded_corner_bounds_, gradient_mask_, clip_id_);
 
-    public readonly bool Equals(in MaskFilterInfo other) => rounded_corner_bounds_ == other.rounded_corner_bounds_ &&
-                                                            gradient_mask_ == other.gradient_mask_ &&
-                                                            clip_id_ == other.clip_id_;
+    public readonly bool Equals(in MaskFilterInfo other) =>
+                                                            rounded_corner_bounds_ == other.rounded_corner_bounds_ &&
+                                                            clip_id_               == other.clip_id_               &&
+                                                            gradient_mask_.HasValue == other.gradient_mask_.HasValue &&
+                                                            (!gradient_mask_.HasValue || gradient_mask_.Value.Equals(other.gradient_mask_.Value));
         
     public override readonly bool Equals(object? obj) => obj is MaskFilterInfo other && Equals(other);
 

@@ -131,6 +131,11 @@ public class Transform
           // Col 3.
           0, 0, 0, 1) {}
 
+    // Creates a transform as a 2d translation.
+    public static Transform MakeTranslation(float tx, float ty) => new Transform(1, 1, tx, ty);
+
+    public static Transform MakeTranslation(in Vector2DF v) => MakeTranslation(v.X, v.Y);
+
     // Gets a value at |row|, |col| from the matrix.
     public double rc(int row, int col)
     {

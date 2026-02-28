@@ -20,12 +20,12 @@ public static class LinearGradientTest
         Assert.False(gradient.IsEmpty);
         Assert.Equal(45, gradient.Angle);
         Assert.Equal(3, gradient.StepCount);
-        Assert.Equal(0.1f, gradient.Steps[0].Fraction);
-        Assert.Equal(0, gradient.Steps[0].Alpha);
-        Assert.Equal(0.5f, gradient.Steps[1].Fraction);
-        Assert.Equal(50, gradient.Steps[1].Alpha);
-        Assert.Equal(0.8f, gradient.Steps[2].Fraction);
-        Assert.Equal(1, gradient.Steps[2].Alpha);
+        Assert.Equal(0.1f, gradient[0].Fraction);
+        Assert.Equal(0, gradient[0].Alpha);
+        Assert.Equal(0.5f, gradient[1].Fraction);
+        Assert.Equal(50, gradient[1].Alpha);
+        Assert.Equal(0.8f, gradient[2].Fraction);
+        Assert.Equal(1, gradient[2].Alpha);
 
         
         LinearGradient gradient2 = new(90);
@@ -61,12 +61,12 @@ public static class LinearGradientTest
 
         float tolerance = 1E-7f;
 
-        Assert.Equal(0.2f, gradient.Steps[0].Fraction, tolerance);
-        Assert.Equal(1, gradient.Steps[0].Alpha);
-        Assert.Equal(0.5f, gradient.Steps[1].Fraction, tolerance);
-        Assert.Equal(50, gradient.Steps[1].Alpha);
-        Assert.Equal(0.9f, gradient.Steps[2].Fraction, tolerance);
-        Assert.Equal(0, gradient.Steps[2].Alpha);
+        Assert.Equal(0.2f, gradient[0].Fraction, tolerance);
+        Assert.Equal(1, gradient[0].Alpha);
+        Assert.Equal(0.5f, gradient[1].Fraction, tolerance);
+        Assert.Equal(50, gradient[1].Alpha);
+        Assert.Equal(0.9f, gradient[2].Fraction, tolerance);
+        Assert.Equal(0, gradient[2].Alpha);
     }
 
     [Fact]

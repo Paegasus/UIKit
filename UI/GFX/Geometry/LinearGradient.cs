@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using System.Text;
 
 namespace UI.GFX.Geometry;
@@ -12,29 +13,48 @@ namespace UI.GFX.Geometry;
 // gradient.AddStep(30, 255);
 // gradient.AddStep(70, 255);
 // gradient.AddStep(80, 0);
-public class LinearGradient
+public struct LinearGradient
 {
-    public struct Step
+    public struct LinearGradientStep
     {
         // Fraction that defines a position in the gradient, from 0 to 1.
         public float Fraction;
         // Alpha, from 0 to 255.
         public byte Alpha;
 
-        public readonly bool Equals(in Step other) => Fraction == other.Fraction && Alpha == other.Alpha;
-        public override readonly bool Equals(object? obj) => obj is Step other && Equals(other);
+        public readonly bool Equals(in LinearGradientStep other) => Fraction == other.Fraction && Alpha == other.Alpha;
+        public override readonly bool Equals(object? obj) => obj is LinearGradientStep other && Equals(other);
 
-        public static bool operator ==(Step left, Step right) => left.Equals(right);
-        public static bool operator !=(Step left, Step right) => !left.Equals(right);
+        public static bool operator ==(LinearGradientStep left, LinearGradientStep right) => left.Equals(right);
+        public static bool operator !=(LinearGradientStep left, LinearGradientStep right) => !left.Equals(right);
 
         public override readonly int GetHashCode() => HashCode.Combine(Fraction, Alpha);
+    }
+
+    [InlineArray(8)]
+    public struct LinearGradientSteps
+    {
+        private LinearGradientStep _element0;
     }
 
     public const int MaxStepSize = 8;
 
     private short _angle;
     private int _stepCount;
-    private readonly Step[] _steps = new Step[MaxStepSize];
+
+    private LinearGradientSteps _steps = new();
+
+    // Since we can't return a span to stack-contained struct memory we use an indexer instead
+    public readonly LinearGradientStep this[int index]
+    {
+        get
+        {
+#if DEBUG
+            Debug.Assert((uint)index < (uint)_stepCount);
+#endif
+            return _steps[index];
+        }
+    }
 
     private static readonly LinearGradient _empty = new();
     public static LinearGradient GetEmpty() => _empty;
@@ -50,10 +70,10 @@ public class LinearGradient
     {
         _angle = copy._angle;
         _stepCount = copy._stepCount;
-        copy._steps.CopyTo(_steps, 0);
+        _steps = copy._steps;
     }
 
-    public bool IsEmpty => _stepCount == 0;
+    public readonly bool IsEmpty => _stepCount == 0;
 
     // Add a new step. Fraction must be in [0, 1] and monotonically increasing.
     public void AddStep(float fraction, byte alpha)
@@ -72,21 +92,55 @@ public class LinearGradient
         _stepCount++;
     }
 
-    // Gets a read-only view of the active steps.
-    public ReadOnlySpan<Step> Steps => _steps.AsSpan(0, _stepCount);
-
-    public int StepCount => _stepCount;
+    public readonly int StepCount => _stepCount;
 
     // Gets/Sets the angle in degrees.
-    public short Angle { get => _angle; set => _angle = value; }
+    public short Angle { readonly get => _angle; set => _angle = value; }
 
     // Reverses the order of steps and flips their fractions around 1.
+    // Note: Since LinearGradient is a struct, make sure you don't accidentally call ReverseSteps() on a copy.
+    /*
     public void ReverseSteps()
     {
-        // Reverse the active steps in-place within the array.
-        _steps.AsSpan(0, _stepCount).Reverse();
-        for (int i = 0; i < _stepCount; i++)
-            _steps[i].Fraction = 1f - _steps[i].Fraction;
+        Span<LinearGradientStep> span = _steps[.._stepCount];
+
+        span.Reverse();
+
+        for (int i = 0; i < span.Length; i++)
+            span[i].Fraction = 1f - span[i].Fraction;
+    }
+    */
+    public void ReverseSteps()
+    {
+        Span<LinearGradientStep> span = _steps;
+
+        int i = 0;
+        int j = _stepCount - 1;
+
+        while (i < j)
+        {
+            ref var left = ref span[i];
+            ref var right = ref span[j];
+
+            float newLeftFraction = 1f - right.Fraction;
+            float newRightFraction = 1f - left.Fraction;
+
+            byte leftAlpha = left.Alpha;
+            byte rightAlpha = right.Alpha;
+
+            left.Fraction = newLeftFraction;
+            left.Alpha = rightAlpha;
+
+            right.Fraction = newRightFraction;
+            right.Alpha = leftAlpha;
+
+            i++;
+            j--;
+        }
+
+        // Handle middle element (odd count)
+        if (i == j)
+            span[i].Fraction = 1f - span[i].Fraction;
     }
 
     // Transforms the gradient angle by a full Transform.
@@ -134,7 +188,7 @@ public class LinearGradient
         return sb.ToString();
     }
 
-    public bool Equals(LinearGradient other)
+    public readonly bool Equals(in LinearGradient other)
     {
         if (_angle != other._angle || _stepCount != other._stepCount)
             return false;
@@ -143,17 +197,17 @@ public class LinearGradient
         return true;
     }
 
-    public override bool Equals(object? obj) => obj is LinearGradient other && Equals(other);
+    public override readonly bool Equals(object? obj) => obj is LinearGradient other && Equals(other);
 
-    public static bool operator ==(LinearGradient? left, LinearGradient? right)
+    public static bool operator ==(in LinearGradient? left, in LinearGradient? right)
     {
         if (left is null) return right is null;
         return left.Equals(right!);
     }
 
-    public static bool operator !=(LinearGradient? left, LinearGradient? right) => !(left == right);
+    public static bool operator !=(in LinearGradient? left, in LinearGradient? right) => !(left == right);
 
-    public override int GetHashCode()
+    public override readonly int GetHashCode()
     {
         var hc = new HashCode();
         hc.Add(_angle);
