@@ -757,4 +757,153 @@ public static class RectTest
             Assert.True(Rect.UnionRects(left_minint, right_maxint).Contains(expected_rect));
         }
     }
+
+    [Fact]
+    private static void TestInset()
+    {
+        Rect r = new(10, 20, 30, 40);
+        r.Inset(0);
+        Assert.Equal(new Rect(10, 20, 30, 40), r);
+        r.Inset(1);
+        Assert.Equal(new Rect(11, 21, 28, 38), r);
+        r.Inset(-1);
+        Assert.Equal(new Rect(10, 20, 30, 40), r);
+
+        r.Inset(Insets.VH(2, 1));
+        Assert.Equal(new Rect(11, 22, 28, 36), r);
+        r.Inset(Insets.VH(-2, -1));
+        Assert.Equal(new Rect(10, 20, 30, 40), r);
+
+        // The parameters are left, top, right, bottom.
+        r.Inset(Insets.TLBR(2, 1, 4, 3));
+        Assert.Equal(new Rect(11, 22, 26, 34), r);
+        r.Inset(Insets.TLBR(-2, -1, -4, -3));
+        Assert.Equal(new Rect(10, 20, 30, 40), r);
+
+        r.Inset(Insets.TLBR(1, 2, 3, 4));
+        Assert.Equal(new Rect(12, 21, 24, 36), r);
+        r.Inset(Insets.TLBR(-1, -2, -3, -4));
+        Assert.Equal(new Rect(10, 20, 30, 40), r);
+    }
+
+    [Fact]
+    private static void TestOutset()
+    {
+        Rect r = new(10, 20, 30, 40);
+        r.Outset(0);
+        Assert.Equal(new Rect(10, 20, 30, 40), r);
+        r.Outset(1);
+        Assert.Equal(new Rect(9, 19, 32, 42), r);
+        r.Outset(-1);
+        Assert.Equal(new Rect(10, 20, 30, 40), r);
+
+        r.Outset(Outsets.VH(2, 1));
+        Assert.Equal(new Rect(9, 18, 32, 44), r);
+        r.Outset(Outsets.VH(-2, -1));
+        Assert.Equal(new Rect(10, 20, 30, 40), r);
+
+        r.Outset(Outsets.TLBR(2, 1, 4, 3));
+        Assert.Equal(new Rect(9, 18, 34, 46), r);
+        r.Outset(Outsets.TLBR(-2, -1, -4, -3));
+        Assert.Equal(new Rect(10, 20, 30, 40), r);
+    }
+
+    [Fact]
+    private static void TestInsetOutsetClamped()
+    {
+        Rect r = new(10, 20, 30, 40);
+        r.Inset(18);
+        Assert.Equal(new Rect(28, 38, 0, 4), r);
+        r.Inset(-18);
+        Assert.Equal(new Rect(10, 20, 36, 40), r);
+
+        r.Inset(Insets.VH(30, 15));
+        Assert.Equal(new Rect(25, 50, 6, 0), r);
+        r.Inset(Insets.VH(-30, -15));
+        Assert.Equal(new Rect(10, 20, 36, 60), r);
+
+        r.Inset(Insets.TLBR(30, 20, 50, 40));
+        Assert.Equal(new Rect(30, 50, 0, 0), r);
+        r.Inset(Insets.TLBR(-30, -20, -50, -40));
+        Assert.Equal(new Rect(10, 20, 60, 80), r);
+
+        r.Outset(kMaxInt);
+        Assert.Equal(new Rect(10 - kMaxInt, 20 - kMaxInt, kMaxInt, kMaxInt), r);
+
+        var outsets = new Outsets();
+        outsets.SetTopBottom(kMaxInt, kMaxInt);
+        r.Outset(outsets);
+        Assert.Equal(new Rect(10 - kMaxInt, kMinInt, kMaxInt, kMaxInt), r);
+
+        outsets = new Outsets();
+        outsets.SetRight(kMaxInt);
+        outsets.SetTop(kMaxInt);
+        r.Outset(outsets);
+        Assert.Equal(new Rect(10 - kMaxInt, kMinInt, kMaxInt, kMaxInt), r);
+
+        outsets = new Outsets();
+        outsets.SetLeftRight(kMaxInt, kMaxInt);
+        r.Outset(outsets);
+        Assert.Equal(new Rect(kMinInt, kMinInt, kMaxInt, kMaxInt), r);
+    }
+
+    [Fact]
+    private static void TestSetByBounds()
+    {
+        Rect r = new();
+        r.SetByBounds(1, 2, 30, 40);
+        Assert.Equal(new Rect(1, 2, 29, 38), r);
+        r.SetByBounds(30, 40, 1, 2);
+        Assert.Equal(new Rect(30, 40, 0, 0), r);
+
+        r.SetByBounds(0, 0, kMaxInt, kMaxInt);
+        Assert.Equal(new Rect(0, 0, kMaxInt, kMaxInt), r);
+        r.SetByBounds(-1, -1, kMaxInt, kMaxInt);
+        Assert.Equal(new Rect(-1, -1, kMaxInt, kMaxInt), r);
+        r.SetByBounds(1, 1, kMaxInt, kMaxInt);
+        Assert.Equal(new Rect(1, 1, kMaxInt - 1, kMaxInt - 1), r);
+        r.SetByBounds(kMinInt, kMinInt, 0, 0);
+        Assert.Equal(new Rect(kMinInt + 1, kMinInt + 1, kMaxInt, kMaxInt), r);
+        r.SetByBounds(kMinInt, kMinInt, 1, 1);
+        Assert.Equal(new Rect(kMinInt + 2, kMinInt + 2, kMaxInt, kMaxInt), r);
+        r.SetByBounds(kMinInt, kMinInt, -1, -1);
+        Assert.Equal(new Rect(kMinInt, kMinInt, kMaxInt, kMaxInt), r);
+        r.SetByBounds(kMinInt, kMinInt, kMaxInt, kMaxInt);
+        Assert.Equal(new Rect(kMinInt / 2 - 1, kMinInt / 2 - 1, kMaxInt, kMaxInt), r);
+    }
+
+    [Fact]
+    private static void TestMaximumCoveredRect()
+    {
+        // X aligned and intersect: unite.
+        Assert.Equal(new Rect(10, 20, 30, 60),
+                  Rect.MaximumCoveredRect(new Rect(10, 20, 30, 40), new Rect(10, 30, 30, 50)));
+        // X aligned and adjacent: unite.
+        Assert.Equal(new Rect(10, 20, 30, 90),
+                  Rect.MaximumCoveredRect(new Rect(10, 20, 30, 40), new Rect(10, 60, 30, 50)));
+        // X aligned and separate: choose the bigger one.
+        Assert.Equal(new Rect(10, 61, 30, 50),
+                  Rect.MaximumCoveredRect(new Rect(10, 20, 30, 40), new Rect(10, 61, 30, 50)));
+        // Y aligned and intersect: unite.
+        Assert.Equal(new Rect(10, 20, 60, 40),
+                  Rect.MaximumCoveredRect(new Rect(10, 20, 30, 40), new Rect(30, 20, 40, 40)));
+        // Y aligned and adjacent: unite.
+        Assert.Equal(new Rect(10, 20, 70, 40),
+                  Rect.MaximumCoveredRect(new Rect(10, 20, 30, 40), new Rect(40, 20, 40, 40)));
+        // Y aligned and separate: choose the bigger one.
+        Assert.Equal(new Rect(41, 20, 40, 40),
+                  Rect.MaximumCoveredRect(new Rect(10, 20, 30, 40), new Rect(41, 20, 40, 40)));
+        // Get the biggest expanded intersection.
+        Assert.Equal(new Rect(0, 0, 9, 19),
+                  Rect.MaximumCoveredRect(new Rect(0, 0, 10, 10), new Rect(0, 9, 9, 10)));
+        Assert.Equal(new Rect(0, 0, 19, 9),
+                  Rect.MaximumCoveredRect(new Rect(0, 0, 10, 10), new Rect(9, 0, 10, 9)));
+        // Otherwise choose the bigger one.
+        Assert.Equal(new Rect(20, 30, 40, 50),
+                  Rect.MaximumCoveredRect(new Rect(10, 20, 30, 40), new Rect(20, 30, 40, 50)));
+        Assert.Equal(new Rect(10, 20, 40, 50),
+                  Rect.MaximumCoveredRect(new Rect(10, 20, 40, 50), new Rect(20, 30, 30, 40)));
+        Assert.Equal(new Rect(10, 20, 40, 50),
+                  Rect.MaximumCoveredRect(new Rect(10, 20, 40, 50), new Rect(20, 30, 40, 50)));
+    }
 }
