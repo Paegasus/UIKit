@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using SkiaSharp;
+using UI.Extensions;
 
 namespace UI.GFX.Geometry;
 
@@ -179,7 +180,7 @@ public struct MaskFilterInfo
             return;
         }
 
-        float kEpsilon = float.Epsilon;
+        float kEpsilon = float.MachineEpsilon;
 
         // Get the flattened 2D matrix elements.
         float scaleX = (float)transform.rc(0, 0);

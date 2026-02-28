@@ -43,31 +43,29 @@ public static class MaskFilterInfoTest
 		info.ApplyTransform(rotation_90_clock);
 		Assert.Equal(expected, info);
 
-        /*
-		Transform rotation_90_unrounded;
+		Transform rotation_90_unrounded = new();
 		rotation_90_unrounded.Rotate(90.0 + 1e-10);
-		info = MaskFilterInfo(
-		  RRectF(RectF(0, 0, 20.f, 25.f), 1.f, 2.f, 3.f, 4.f, 5.f, 6.f, 7.f, 8.f),
+		info = new MaskFilterInfo(
+		  new RRectF(new RectF(0, 0, 20.0f, 25.0f), 1.0f, 2.0f, 3.0f, 4.0f, 5.0f, 6.0f, 7.0f, 8.0f),
 		  CreateGradient(50));
-		EXPECT_TRUE(rotation_90_unrounded.Preserves2dAxisAlignment());
+		Assert.True(rotation_90_unrounded.Preserves2dAxisAlignment());
 		info.ApplyTransform(rotation_90_unrounded);
-		EXPECT_EQ(expected, info);
+		Assert.Equal(expected, info);
 
-		auto scale = Transform::MakeScale(2.f, 3.f);
-		info = MaskFilterInfo(
-		  RRectF(RectF(0, 0, 20.f, 25.f), 1.f, 2.f, 3.f, 4.f, 5.f, 6.f, 7.f, 8.f),
+		var scale = Transform.MakeScale(2.0f, 3.0f);
+		info = new MaskFilterInfo(
+		  new RRectF(new RectF(0, 0, 20.0f, 25.0f), 1.0f, 2.0f, 3.0f, 4.0f, 5.0f, 6.0f, 7.0f, 8.0f),
 		  CreateGradient(50));
-		expected = MaskFilterInfo(RRectF(RectF(0, 0, 40.f, 75.f), 2.f, 6.f, 6.f, 12.f,
-									   10.f, 18.f, 14.f, 24.f),
+		expected = new MaskFilterInfo(new RRectF(new RectF(0, 0, 40.0f, 75.0f), 2.0f, 6.0f, 6.0f, 12.0f,
+									   10.0f, 18.0f, 14.0f, 24.0f),
 								CreateGradient(61));
 		info.ApplyTransform(scale);
-		EXPECT_EQ(expected, info);
-
-		Transform rotation;
+		Assert.Equal(expected, info);
+        
+		Transform rotation = new();
 		rotation.Rotate(45);
 		info.ApplyTransform(rotation);
-		EXPECT_TRUE(info.IsEmpty());
-        */
+		Assert.True(info.IsEmpty());
     }
 
     //[Fact]
