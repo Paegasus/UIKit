@@ -157,4 +157,114 @@ public static class RectTest
         Assert.False(new Rect(0, 0, 0, 0) == new Rect(0, 1, 0, 0));
         Assert.False(new Rect(0, 0, 0, 0) == new Rect(1, 0, 0, 0));
     }
+
+    [Fact]
+    private static void TestAdjustToFit()
+    {
+        (
+        // source
+        int x1, int y1, int w1, int h1,
+        // target
+        int x2, int y2, int w2, int h2,
+        // rect 3: results of invoking AdjustToFit
+        int x3, int y3, int w3, int h3)[] tests =
+        [
+            (0, 0, 2, 2, 0, 0, 2, 2, 0, 0, 2, 2),
+            (2, 2, 3, 3, 0, 0, 4, 4, 1, 1, 3, 3),
+            (-1, -1, 5, 5, 0, 0, 4, 4, 0, 0, 4, 4),
+            (2, 2, 4, 4, 0, 0, 3, 3, 0, 0, 3, 3),
+            (2, 2, 1, 1, 0, 0, 3, 3, 2, 2, 1, 1)
+        ];
+
+        foreach (var (x1, y1, w1, h1, x2, y2, w2, h2, x3, y3, w3, h3) in tests)
+        {
+            Rect r1 = new(x1, y1, w1, h1);
+            Rect r2 = new(x2, y2, w2, h2);
+            Rect r3 = new(x3, y3, w3, h3);
+            Rect u = r1;
+            u.AdjustToFit(r2);
+            Assert.Equal(r3, u);
+        }
+    }
+
+    [Fact]
+    private static void TestSubtract()
+    {
+        Rect result;
+
+        // Matching
+        result = new Rect(10, 10, 20, 20);
+        result.Subtract(new Rect(10, 10, 20, 20));
+        Assert.Equal(new Rect(0, 0, 0, 0), result);
+
+        // Contains
+        result = new Rect(10, 10, 20, 20);
+        result.Subtract(new Rect(5, 5, 30, 30));
+        Assert.Equal(new Rect(0, 0, 0, 0), result);
+
+        // No intersection
+        result = new Rect(10, 10, 20, 20);
+        result.Subtract(new Rect(30, 30, 30, 30));
+        Assert.Equal(new Rect(10, 10, 20, 20), result);
+
+        // Not a complete intersection in either direction
+        result = new Rect(10, 10, 20, 20);
+        result.Subtract(new Rect(15, 15, 20, 20));
+        Assert.Equal(new Rect(10, 10, 20, 20), result);
+
+        // Complete intersection in the x-direction, top edge is fully covered.
+        result = new Rect(10, 10, 20, 20);
+        result.Subtract(new Rect(10, 15, 20, 20));
+        Assert.Equal(new Rect(10, 10, 20, 5), result);
+
+        // Complete intersection in the x-direction, top edge is fully covered.
+        result = new Rect(10, 10, 20, 20);
+        result.Subtract(new Rect(5, 15, 30, 20));
+        Assert.Equal(new Rect(10, 10, 20, 5), result);
+
+        // Complete intersection in the x-direction, bottom edge is fully covered.
+        result = new Rect(10, 10, 20, 20);
+        result.Subtract(new Rect(5, 5, 30, 20));
+        Assert.Equal(new Rect(10, 25, 20, 5), result);
+
+        // Complete intersection in the x-direction, none of the edges is fully
+        // covered.
+        result = new Rect(10, 10, 20, 20);
+        result.Subtract(new Rect(5, 15, 30, 1));
+        Assert.Equal(new Rect(10, 10, 20, 20), result);
+
+        // Complete intersection in the y-direction, left edge is fully covered.
+        result = new Rect(10, 10, 20, 20);
+        result.Subtract(new Rect(10, 10, 10, 30));
+        Assert.Equal(new Rect(20, 10, 10, 20), result);
+
+        // Complete intersection in the y-direction, left edge is fully covered.
+        result = new Rect(10, 10, 20, 20);
+        result.Subtract(new Rect(5, 5, 20, 30));
+        Assert.Equal(new Rect(25, 10, 5, 20), result);
+
+        // Complete intersection in the y-direction, right edge is fully covered.
+        result = new Rect(10, 10, 20, 20);
+        result.Subtract(new Rect(20, 5, 20, 30));
+        Assert.Equal(new Rect(10, 10, 10, 20), result);
+
+        // Complete intersection in the y-direction, none of the edges is fully
+        // covered.
+        result = new Rect(10, 10, 20, 20);
+        result.Subtract(new Rect(15, 5, 1, 30));
+        Assert.Equal(new Rect(10, 10, 20, 20), result);
+    }
+
+    [Fact]
+    private static void TestIsEmpty()
+    {
+        Assert.True(new Rect(0, 0, 0, 0).IsEmpty());
+        Assert.True(new Rect(0, 0, 0, 0).Size.IsEmpty());
+        Assert.True(new Rect(0, 0, 10, 0).IsEmpty());
+        Assert.True(new Rect(0, 0, 10, 0).Size.IsEmpty());
+        Assert.True(new Rect(0, 0, 0, 10).IsEmpty());
+        Assert.True(new Rect(0, 0, 0, 10).Size.IsEmpty());
+        Assert.False(new Rect(0, 0, 10, 10).IsEmpty());
+        Assert.False(new Rect(0, 0, 10, 10).Size.IsEmpty());
+    }
 }
