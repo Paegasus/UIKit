@@ -267,4 +267,88 @@ public static class RectTest
         Assert.False(new Rect(0, 0, 10, 10).IsEmpty());
         Assert.False(new Rect(0, 0, 10, 10).Size.IsEmpty());
     }
+
+    [Fact]
+    private static void TestSplitVertically()
+    {
+        Rect left_half, right_half;
+
+        // Splitting when origin is (0, 0).
+        new Rect(0, 0, 20, 20).SplitVertically(out left_half, out right_half);
+        Assert.True(left_half == new Rect(0, 0, 10, 20));
+        Assert.True(right_half == new Rect(10, 0, 10, 20));
+
+        // Splitting when origin is arbitrary.
+        new Rect(10, 10, 20, 10).SplitVertically(out left_half, out right_half);
+        Assert.True(left_half == new Rect(10, 10, 10, 10));
+        Assert.True(right_half == new Rect(20, 10, 10, 10));
+
+        // Splitting a rectangle of zero width.
+        new Rect(10, 10, 0, 10).SplitVertically(out left_half, out right_half);
+        Assert.True(left_half == new Rect(10, 10, 0, 10));
+        Assert.True(right_half == new Rect(10, 10, 0, 10));
+
+        // Splitting a rectangle of odd width.
+        new Rect(10, 10, 5, 10).SplitVertically(out left_half, out right_half);
+        Assert.True(left_half == new Rect(10, 10, 2, 10));
+        Assert.True(right_half == new Rect(12, 10, 3, 10));
+    }
+
+    [Fact]
+    private static void TestSplitHorizontally()
+    {
+        Rect top_half, bottom_half;
+
+        // Splitting when origin is (0, 0).
+        new Rect(0, 0, 10, 20).SplitHorizontally(out top_half, out bottom_half);
+        Assert.Equal(new Rect(0, 0, 10, 10), top_half);
+        Assert.Equal(new Rect(0, 10, 10, 10), bottom_half);
+
+        // Splitting when origin is arbitrary.
+        new Rect(10, 10, 10, 20).SplitHorizontally(out top_half, out bottom_half);
+        Assert.Equal(new Rect(10, 10, 10, 10), top_half);
+        Assert.Equal(new Rect(10, 20, 10, 10), bottom_half);
+
+        // Splitting a rectangle of zero height.
+        new Rect(10, 10, 10, 0).SplitHorizontally(out top_half, out bottom_half);
+        Assert.Equal(new Rect(10, 10, 10, 0), top_half);
+        Assert.Equal(new Rect(10, 10, 10, 0), bottom_half);
+
+        // Splitting a rectangle of odd height.
+        new Rect(10, 10, 10, 5).SplitHorizontally(out top_half, out bottom_half);
+        Assert.Equal(new Rect(10, 10, 10, 2), top_half);
+        Assert.Equal(new Rect(10, 12, 10, 3), bottom_half);
+    }
+
+    [Fact]
+    private static void TestCenterPoint()
+    {
+        Point center;
+
+        // When origin is (0, 0).
+        center = new Rect(0, 0, 20, 20).CenterPoint();
+        Assert.True(center == new Point(10, 10));
+
+        // When origin is even.
+        center = new Rect(10, 10, 20, 20).CenterPoint();
+        Assert.True(center == new Point(20, 20));
+
+        // When origin is odd.
+        center = new Rect(11, 11, 20, 20).CenterPoint();
+        Assert.True(center == new Point(21, 21));
+
+        // When 0 width or height.
+        center = new Rect(10, 10, 0, 20).CenterPoint();
+        Assert.True(center == new Point(10, 20));
+        center = new Rect(10, 10, 20, 0).CenterPoint();
+        Assert.True(center == new Point(20, 10));
+
+        // When an odd size.
+        center = new Rect(10, 10, 21, 21).CenterPoint();
+        Assert.True(center == new Point(20, 20));
+
+        // When an odd size and position.
+        center = new Rect(11, 11, 21, 21).CenterPoint();
+        Assert.True(center == new Point(21, 21));
+    }
 }
