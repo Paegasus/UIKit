@@ -420,4 +420,66 @@ public static class RectFTest
         r.Inset(InsetsF.TLBR(-1.5f, -2.25f, -3.75f, -4f));
         AssertRectFEqual(new RectF(10f, 20f, 30f, 40f), r);
     }
+
+    [Fact]
+    private static void TestOutset()
+    {
+        RectF r = new(10, 20, 30, 40);
+        r.Outset(0);
+        AssertRectFEqual(new RectF(10f, 20f, 30f, 40f), r);
+        r.Outset(1.5f);
+        AssertRectFEqual(new RectF(8.5f, 18.5f, 33f, 43f), r);
+        r.Outset(-1.5f);
+        AssertRectFEqual(new RectF(10f, 20f, 30f, 40f), r);
+
+        r.Outset(OutsetsF.VH(2.25f, 1.5f));
+        AssertRectFEqual(new RectF(8.5f, 17.75f, 33f, 44.5f), r);
+        r.Outset(OutsetsF.VH(-2.25f, -1.5f));
+        AssertRectFEqual(new RectF(10f, 20f, 30f, 40f), r);
+
+        r.Outset(OutsetsF.TLBR(2.25f, 1.5f, 4f, 3.75f));
+        AssertRectFEqual(new RectF(8.5f, 17.75f, 35.25f, 46.25f), r);
+        r.Outset(OutsetsF.TLBR(-2.25f, -1.5f, -4f, -3.75f));
+        AssertRectFEqual(new RectF(10f, 20f, 30f, 40f), r);
+    }
+
+    [Fact]
+    private static void InsetClamped()
+    {
+        RectF r = new(10, 20, 30, 40);
+        r.Inset(18);
+        AssertRectFEqual(new RectF(28, 38, 0, 4), r);
+        r.Inset(-18);
+        AssertRectFEqual(new RectF(10, 20, 36, 40), r);
+
+        r.Inset(InsetsF.VH(30, 15));
+        AssertRectFEqual(new RectF(25, 50, 6, 0), r);
+        r.Inset(InsetsF.VH(-30, -15));
+        AssertRectFEqual(new RectF(10, 20, 36, 60), r);
+
+        r.Inset(InsetsF.TLBR(30, 20, 50, 40));
+        AssertRectFEqual(new RectF(30, 50, 0, 0), r);
+        r.Inset(InsetsF.TLBR(-30, -20, -50, -40));
+        AssertRectFEqual(new RectF(10, 20, 60, 80), r);
+    }
+
+    [Fact]
+    private static void TestInclusiveIntersect()
+    {
+        RectF rect = new(11, 12, 0, 0);
+        Assert.True(rect.InclusiveIntersect(new RectF(11, 12, 13, 14)));
+        AssertRectFEqual(new RectF(11, 12, 0, 0), rect);
+
+        rect = new RectF(11, 12, 13, 14);
+        Assert.True(rect.InclusiveIntersect(new RectF(24, 8, 0, 7)));
+        AssertRectFEqual(new RectF(24, 12, 0, 3), rect);
+
+        rect = new RectF(11, 12, 13, 14);
+        Assert.True(rect.InclusiveIntersect(new RectF(9, 15, 4, 0)));
+        AssertRectFEqual(new RectF(11, 15, 2, 0), rect);
+
+        rect = new RectF(11, 12, 0, 14);
+        Assert.False(rect.InclusiveIntersect(new RectF(12, 13, 15, 16)));
+        AssertRectFEqual(new RectF(), rect);
+    }
 }
