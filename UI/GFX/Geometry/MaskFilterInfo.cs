@@ -54,4 +54,33 @@ public struct MaskFilterInfo
 
     // True if this contains no effective mask information.
     public readonly bool IsEmpty() => rounded_corner_bounds_.IsEmpty;
+
+    // Transform the mask filter information. If the transform cannot be applied
+    // (e.g. it would make rounded_corner_bounds_ invalid), rounded_corner_bounds_
+    // will be set to empty.
+    public void ApplyTransform(in Transform transform)
+    {
+
+    }
+
+    public void ApplyTransform(in AxisTransform2D transform)
+    {
+        
+    }
+
+    public override string ToString()
+    {
+        
+    }
+
+    public override readonly int GetHashCode() => HashCode.Combine(rounded_corner_bounds_, gradient_mask_, clip_id_);
+
+    public readonly bool Equals(in MaskFilterInfo other) => rounded_corner_bounds_ == other.rounded_corner_bounds_ &&
+                                                            gradient_mask_ == other.gradient_mask_ &&
+                                                            clip_id_ == other.clip_id_;
+        
+    public override readonly bool Equals(object? obj) => obj is MaskFilterInfo other && Equals(other);
+
+    public static bool operator ==(in MaskFilterInfo left, in MaskFilterInfo right) => left.Equals(right);
+    public static bool operator !=(in MaskFilterInfo left, in MaskFilterInfo right) => !left.Equals(right);
 }
