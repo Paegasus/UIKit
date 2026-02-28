@@ -18,27 +18,11 @@ public static class MaskFilterInfoTest
     [Fact]
     private static void TestApplyTransform()
     {
-        var rotation_90_clock = Transform.Make90degRotation();
-
-        var rect = new RectF(0, 0, 20.0f, 25.0f);
-
-        var rrect = new RRectF(rect, 1.0f, 2.0f, 3.0f, 4.0f, 5.0f, 6.0f, 7.0f, 8.0f);
-
-		var info = new MaskFilterInfo(rrect, CreateGradient(50));
-
-        info.ApplyTransform(rotation_90_clock);
-        
-		var expected = new MaskFilterInfo(new RRectF(new RectF(-25.0f, 0, 25.0f, 20.0f), 8.0f, 7.0f, 2.0f,
-									   1.0f, 4.0f, 3.0f, 6.0f, 5.0f), CreateGradient(-40));
-
-		Assert.Equal(expected, info);
-
-        /*
         MaskFilterInfo info = new(new RRectF(1.0f, 2.0f, 20.0f, 25.0f, 5.0f));
   		MaskFilterInfo expected = info;
 		info.ApplyTransform(new Transform());
 		Assert.Equal(expected, info);
-
+        
 		var translation = Transform.MakeTranslation(-3.5f, 7.75f);
 		expected = new MaskFilterInfo(new RRectF(-2.5f, 9.75f, 20.0f, 25.0f, 5.0f));
 		info.ApplyTransform(translation);
@@ -58,7 +42,6 @@ public static class MaskFilterInfoTest
 									   1.0f, 4.0f, 3.0f, 6.0f, 5.0f), CreateGradient(-40));
 		info.ApplyTransform(rotation_90_clock);
 		Assert.Equal(expected, info);
-        */
 
         /*
 		Transform rotation_90_unrounded;

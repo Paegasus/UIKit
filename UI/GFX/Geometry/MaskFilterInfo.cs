@@ -183,6 +183,10 @@ public struct MaskFilterInfo
 
         // Get the flattened 2D matrix elements.
         float scaleX = (float)transform.rc(0, 0);
+        // NOTE: Indices are intentionally swapped here. Matrix44.rc(row, col) internally
+        // returns this[col, row] to compensate for SkiaSharp's column-major storage order,
+        // which means the effective (row, col) access is transposed for full matrices.
+        // rc(1, 0) retrieves r0c1 (skewX) and rc(0, 1) retrieves r1c0 (skewY).
         float skewX = (float)transform.rc(1, 0);
         float skewY = (float)transform.rc(0, 1);
         float scaleY = (float)transform.rc(1, 1);
