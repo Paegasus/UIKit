@@ -482,4 +482,146 @@ public static class RectFTest
         Assert.False(rect.InclusiveIntersect(new RectF(12, 13, 15, 16)));
         AssertRectFEqual(new RectF(), rect);
     }
+
+    [Fact]
+    private static void TestMaximumCoveredRect()
+    {
+        // X aligned and intersect: unite.
+        Assert.Equal(new RectF(10, 20, 30, 60),
+                  RectF.MaximumCoveredRect(new RectF(10, 20, 30, 40), new RectF(10, 30, 30, 50)));
+        // X aligned and adjacent: unite.
+        Assert.Equal(new RectF(10, 20, 30, 90),
+                  RectF.MaximumCoveredRect(new RectF(10, 20, 30, 40), new RectF(10, 60, 30, 50)));
+        // X aligned and separate: choose the bigger one.
+        Assert.Equal(new RectF(10, 61, 30, 50),
+                  RectF.MaximumCoveredRect(new RectF(10, 20, 30, 40), new RectF(10, 61, 30, 50)));
+        // Y aligned and intersect: unite.
+        Assert.Equal(new RectF(10, 20, 60, 40),
+                  RectF.MaximumCoveredRect(new RectF(10, 20, 30, 40), new RectF(30, 20, 40, 40)));
+        // Y aligned and adjacent: unite.
+        Assert.Equal(new RectF(10, 20, 70, 40),
+                  RectF.MaximumCoveredRect(new RectF(10, 20, 30, 40), new RectF(40, 20, 40, 40)));
+        // Y aligned and separate: choose the bigger one.
+        Assert.Equal(new RectF(41, 20, 40, 40),
+                  RectF.MaximumCoveredRect(new RectF(10, 20, 30, 40), new RectF(41, 20, 40, 40)));
+        // Get the biggest expanded intersection.
+        Assert.Equal(new RectF(0, 0, 9, 19),
+                  RectF.MaximumCoveredRect(new RectF(0, 0, 10, 10), new RectF(0, 9, 9, 10)));
+        Assert.Equal(new RectF(0, 0, 19, 9),
+                  RectF.MaximumCoveredRect(new RectF(0, 0, 10, 10), new RectF(9, 0, 10, 9)));
+        // Otherwise choose the bigger one.
+        Assert.Equal(new RectF(20, 30, 40, 50),
+                  RectF.MaximumCoveredRect(new RectF(10, 20, 30, 40), new RectF(20, 30, 40, 50)));
+        Assert.Equal(new RectF(10, 20, 40, 50),
+                  RectF.MaximumCoveredRect(new RectF(10, 20, 40, 50), new RectF(20, 30, 30, 40)));
+        Assert.Equal(new RectF(10, 20, 40, 50),
+                  RectF.MaximumCoveredRect(new RectF(10, 20, 40, 50), new RectF(20, 30, 40, 50)));
+    }
+
+    [Fact]
+    private static void TestClosestPoint()
+    {
+        //         r.x()=50   r.right()=350
+        //            |          |
+        //        1   |    2     |  3
+        //      ------+----------+--------r.y()=100
+        //        4   |    5(in) |  6
+        //      ------+----------+--------r.bottom()=250
+        //        7   |    8     |  9
+
+        RectF r = new(50, 100, 300, 150);
+        // 1
+        Assert.Equal(new PointF(50, 100), r.ClosestPoint(new PointF(10, 20)));
+        // 2
+        Assert.Equal(new PointF(110, 100), r.ClosestPoint(new PointF(110, 80)));
+        // 3
+        Assert.Equal(new PointF(350, 100), r.ClosestPoint(new PointF(400, 80)));
+        // 4
+        Assert.Equal(new PointF(50, 110), r.ClosestPoint(new PointF(10, 110)));
+        // 5
+        Assert.Equal(new PointF(50, 100), r.ClosestPoint(new PointF(50, 100)));
+        Assert.Equal(new PointF(150, 100), r.ClosestPoint(new PointF(150, 100)));
+        Assert.Equal(new PointF(350, 100), r.ClosestPoint(new PointF(350, 100)));
+        Assert.Equal(new PointF(350, 150), r.ClosestPoint(new PointF(350, 150)));
+        Assert.Equal(new PointF(350, 250), r.ClosestPoint(new PointF(350, 250)));
+        Assert.Equal(new PointF(150, 250), r.ClosestPoint(new PointF(150, 250)));
+        Assert.Equal(new PointF(50, 250), r.ClosestPoint(new PointF(50, 250)));
+        Assert.Equal(new PointF(50, 150), r.ClosestPoint(new PointF(50, 150)));
+        Assert.Equal(new PointF(150, 150), r.ClosestPoint(new PointF(150, 150)));
+        // 6
+        Assert.Equal(new PointF(350, 150), r.ClosestPoint(new PointF(380, 150)));
+        // 7
+        Assert.Equal(new PointF(50, 250), r.ClosestPoint(new PointF(10, 280)));
+        // 8
+        Assert.Equal(new PointF(180, 250), r.ClosestPoint(new PointF(180, 300)));
+        // 9
+        Assert.Equal(new PointF(350, 250), r.ClosestPoint(new PointF(450, 450)));
+    }
+
+    [Fact]
+    private static void TestMapRect()
+    {
+        AssertRectFEqual(
+            new RectF(),
+            RectF.MapRect(new RectF(), new RectF(), new RectF()));
+        AssertRectFEqual(
+            new RectF(),
+            RectF.MapRect(new RectF(1, 2, 3, 4), new RectF(), new RectF(5, 6, 7, 8)));
+        AssertRectFEqual(
+            new RectF(1, 2, 3, 4),
+            RectF.MapRect(new RectF(1, 2, 3, 4), new RectF(5, 6, 7, 8), new RectF(5, 6, 7, 8)));
+        AssertRectFEqual(
+            new RectF(5, 6, 7, 8),
+            RectF.MapRect(new RectF(1, 2, 3, 4), new RectF(1, 2, 3, 4), new RectF(5, 6, 7, 8)));
+        AssertRectFEqual(
+            new RectF(200, 300, 300, 400),
+            RectF.MapRect(new RectF(1, 2, 3, 4), new RectF(0, 1, 6, 8), new RectF(100, 200, 600, 800)));
+        AssertRectFEqual(
+            new RectF(1, 2, 3, 4),
+            RectF.MapRect(new RectF(200, 300, 300, 400), new RectF(100, 200, 600, 800), new RectF(0, 1, 6, 8)));
+    }
+
+    [Fact]
+    private static void TestApproximatelyEqual()
+    {
+        RectF rect1 = new(10, 20, 1920, 1080);
+        RectF rect2 = new(10, 20, 1920, 1080);
+        Assert.True(rect1.ApproximatelyEqual(rect2, 0.0f, 0.0f));
+        Assert.True(rect1.ApproximatelyEqual(rect2, 0.001f, 0.001f));
+        Assert.True(rect1.ApproximatelyEqual(rect2, 0.001f, 0.00001f));
+        Assert.True(rect1.ApproximatelyEqual(rect2, 0.00001f, 0.001f));
+        Assert.True(rect1.ApproximatelyEqual(rect2, 0.00001f, 0.00001f));
+
+        RectF rect3 = new(9.999965732f, 20, 1920, 1080);
+        RectF rect4 = new(10, 20, 1920, 1080);
+        Assert.False(rect3.ApproximatelyEqual(rect4, 0.0f, 0.0f));
+        Assert.True(rect3.ApproximatelyEqual(rect4, 0.001f, 0.001f));
+        Assert.True(rect3.ApproximatelyEqual(rect4, 0.001f, 0.000001f));
+        Assert.False(rect3.ApproximatelyEqual(rect4, 0.000001f, 0.001f));
+        Assert.False(rect3.ApproximatelyEqual(rect4, 0.000001f, 0.000001f));
+
+        RectF rect5 = new(10, 20.000001f, 1920, 1080);
+        RectF rect6 = new(10, 20, 1920, 1080);
+        Assert.False(rect5.ApproximatelyEqual(rect6, 0.0f, 0.0f));
+        Assert.True(rect5.ApproximatelyEqual(rect6, 0.001f, 0.001f));
+        Assert.False(rect5.ApproximatelyEqual(rect6, 0.001f, 0.0000001f));
+        Assert.True(rect5.ApproximatelyEqual(rect6, 0.0000001f, 0.001f));
+        Assert.False(rect5.ApproximatelyEqual(rect6, 0.0000001f, 0.0000001f));
+
+        RectF rect7 = new(10, 20, 1919.99987792969f, 1080);
+        RectF rect8 = new(10, 20, 1920, 1080);
+        Assert.False(rect7.ApproximatelyEqual(rect8, 0.0f, 0.0f));
+        Assert.True(rect7.ApproximatelyEqual(rect8, 0.001f, 0.001f));
+        Assert.True(rect7.ApproximatelyEqual(rect8, 0.001f, 0.00001f));
+        Assert.False(rect7.ApproximatelyEqual(rect8, 0.00001f, 0.001f));
+        Assert.False(rect7.ApproximatelyEqual(rect8, 0.00001f, 0.00001f));
+
+        RectF rect9 = new(10, 20, 1920, 1080.0001f);
+        RectF rect10 = new(10, 20, 1920, 1080);
+        Assert.False(rect9.ApproximatelyEqual(rect10, 0.0f, 0.0f));
+        Assert.True(rect9.ApproximatelyEqual(rect10, 0.001f, 0.001f));
+        Assert.False(rect9.ApproximatelyEqual(rect10, 0.001f, 0.000001f));
+        Assert.True(rect9.ApproximatelyEqual(rect10, 0.000001f, 0.001f));
+        Assert.False(rect9.ApproximatelyEqual(rect10, 0.000001f, 0.000001f));
+    }
 }
