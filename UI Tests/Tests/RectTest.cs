@@ -537,4 +537,224 @@ public static class RectTest
                   (new Rect(0, 0, kMaxInt - 2, kMaxInt - 2) -
                    new Vector2D(2 - kMaxInt, 2 - kMaxInt)));
     }
+
+    [Fact]
+    private static void TestCorners()
+    {
+        Rect i = new(1, 2, 3, 4);
+        Assert.Equal(new Point(1, 2), i.Origin);
+        Assert.Equal(new Point(4, 2), i.TopRight);
+        Assert.Equal(new Point(1, 6), i.BottomLeft);
+        Assert.Equal(new Point(4, 6), i.BottomRight);
+    }
+
+    [Fact]
+    private static void TestCenters()
+    {
+        Rect i = new(10, 20, 30, 40);
+        Assert.Equal(new Point(10, 40), i.LeftCenter);
+        Assert.Equal(new Point(25, 20), i.TopCenter);
+        Assert.Equal(new Point(40, 40), i.RightCenter);
+        Assert.Equal(new Point(25, 60), i.BottomCenter);
+    }
+
+    [Fact]
+    private static void TestTranspose()
+    {
+        Rect i = new(10, 20, 30, 40);
+        i.Transpose();
+        Assert.Equal(new Rect(20, 10, 40, 30), i);
+    }
+
+    [Fact]
+    private static void TestManhattanDistanceToPoint()
+    {
+        Rect i = new(1, 2, 3, 4);
+        Assert.Equal(0, i.ManhattanDistanceToPoint(new Point(1, 2)));
+        Assert.Equal(0, i.ManhattanDistanceToPoint(new Point(4, 6)));
+        Assert.Equal(0, i.ManhattanDistanceToPoint(new Point(2, 4)));
+        Assert.Equal(3, i.ManhattanDistanceToPoint(new Point(0, 0)));
+        Assert.Equal(2, i.ManhattanDistanceToPoint(new Point(2, 0)));
+        Assert.Equal(3, i.ManhattanDistanceToPoint(new Point(5, 0)));
+        Assert.Equal(1, i.ManhattanDistanceToPoint(new Point(5, 4)));
+        Assert.Equal(3, i.ManhattanDistanceToPoint(new Point(5, 8)));
+        Assert.Equal(2, i.ManhattanDistanceToPoint(new Point(3, 8)));
+        Assert.Equal(2, i.ManhattanDistanceToPoint(new Point(0, 7)));
+        Assert.Equal(1, i.ManhattanDistanceToPoint(new Point(0, 3)));
+    }
+
+    [Fact]
+    private static void TestManhattanInternalDistance()
+    {
+        Rect i = new(0, 0, 400, 400);
+        Assert.Equal(0, i.ManhattanInternalDistance(new Rect(-1, 0, 2, 1)));
+        Assert.Equal(1, i.ManhattanInternalDistance(new Rect(400, 0, 1, 400)));
+        Assert.Equal(2, i.ManhattanInternalDistance(new Rect(-100, -100, 100, 100)));
+        Assert.Equal(2, i.ManhattanInternalDistance(new Rect(-101, 100, 100, 100)));
+        Assert.Equal(4, i.ManhattanInternalDistance(new Rect(-101, -101, 100, 100)));
+        Assert.Equal(435, i.ManhattanInternalDistance(new Rect(630, 603, 100, 100)));
+    }
+
+    [Fact]
+    private static void TestIntegerOverflow()
+    {
+        int limit = int.MaxValue;
+        int min_limit = int.MinValue;
+        int expected_thickness = 10;
+        int large_number = limit - expected_thickness;
+
+        Rect height_overflow = new(0, large_number, 100, 100);
+        Assert.Equal(large_number, height_overflow.Y);
+        Assert.Equal(expected_thickness, height_overflow.Height);
+
+        Rect width_overflow = new(large_number, 0, 100, 100);
+        Assert.Equal(large_number, width_overflow.X);
+        Assert.Equal(expected_thickness, width_overflow.Width);
+
+        Rect size_height_overflow = new(new Point(0, large_number), new Size(100, 100));
+        Assert.Equal(large_number, size_height_overflow.Y);
+        Assert.Equal(expected_thickness, size_height_overflow.Height);
+
+        Rect size_width_overflow = new(new Point(large_number, 0), new Size(100, 100));
+        Assert.Equal(large_number, size_width_overflow.X);
+        Assert.Equal(expected_thickness, size_width_overflow.Width);
+
+        Rect set_height_overflow = new(0, large_number, 100, 5);
+        Assert.Equal(5, set_height_overflow.Height);
+        set_height_overflow.Height = 100;
+        Assert.Equal(expected_thickness, set_height_overflow.Height);
+
+        Rect set_y_overflow = new(100, 100, 100, 100);
+        Assert.Equal(100, set_y_overflow.Height);
+        set_y_overflow.Y = large_number;
+        Assert.Equal(expected_thickness, set_y_overflow.Height);
+
+        Rect set_width_overflow = new(large_number, 0, 5, 100);
+        Assert.Equal(5, set_width_overflow.Width);
+        set_width_overflow.Width = 100;
+        Assert.Equal(expected_thickness, set_width_overflow.Width);
+
+        Rect set_x_overflow = new(100, 100, 100, 100);
+        Assert.Equal(100, set_x_overflow.Width);
+        set_x_overflow.X = large_number;
+        Assert.Equal(expected_thickness, set_x_overflow.Width);
+
+        Point large_offset = new(large_number, large_number);
+        Size size = new(100, 100);
+        Size expected_size = new(10, 10);
+
+        Rect set_origin_overflow = new(100, 100, 100, 100);
+        Assert.Equal(size, set_origin_overflow.Size);
+        set_origin_overflow.Origin = large_offset;
+        Assert.Equal(large_offset, set_origin_overflow.Origin);
+        Assert.Equal(expected_size, set_origin_overflow.Size);
+
+        Rect set_size_overflow = new(large_number, large_number, 5, 5);
+        Assert.Equal(new Size(5, 5), set_size_overflow.Size);
+        set_size_overflow.Size = size;
+        Assert.Equal(large_offset, set_size_overflow.Origin);
+        Assert.Equal(expected_size, set_size_overflow.Size);
+
+        Rect set_rect_overflow = new();
+        set_rect_overflow.SetRect(large_number, large_number, 100, 100);
+        Assert.Equal(large_offset, set_rect_overflow.Origin);
+        Assert.Equal(expected_size, set_rect_overflow.Size);
+
+        // Insetting an empty rect, but the total inset (left + right) could overflow.
+        Rect inset_overflow = new();
+        inset_overflow.Inset(Insets.TLBR(large_number, large_number, 100, 100));
+        Assert.Equal(large_offset, inset_overflow.Origin);
+        Assert.Equal(new Size(), inset_overflow.Size);
+
+        // Insetting where the total inset (width - left - right) could overflow.
+        // Also, this insetting by the min limit in all directions cannot
+        // represent Width without overflow, so that will also clamp.
+        Rect inset_overflow2 = new();
+        inset_overflow2.Inset(min_limit);
+        Assert.Equal(inset_overflow2, new Rect(min_limit, min_limit, limit, limit));
+
+        // Insetting where the width shouldn't change, but if the insets operations
+        // clamped in the wrong order, e.g. ((width - left) - right) vs (width - (left
+        // + right)) then this will not work properly.  This is the proper order,
+        // as if left + right overflows, the width cannot be decreased by more than
+        // max int anyway.  Additionally, if left + right underflows, it cannot be
+        // increased by more then max int.
+        Rect inset_overflow3 = new(0, 0, limit, limit);
+        inset_overflow3.Inset(Insets.TLBR(-100, -100, 100, 100));
+        Assert.Equal(inset_overflow3, new Rect(-100, -100, limit, limit));
+
+        Rect inset_overflow4 = new(-1000, -1000, limit, limit);
+        inset_overflow4.Inset(Insets.TLBR(100, 100, -100, -100));
+        Assert.Equal(inset_overflow4, new Rect(-900, -900, limit, limit));
+
+        Rect offset_overflow = new(0, 0, 100, 100);
+        offset_overflow.Offset(large_number, large_number);
+        Assert.Equal(large_offset, offset_overflow.Origin);
+        Assert.Equal(expected_size, offset_overflow.Size);
+
+        Rect operator_overflow = new(0, 0, 100, 100);
+        operator_overflow += new Vector2D(large_number, large_number);
+        Assert.Equal(large_offset, operator_overflow.Origin);
+        Assert.Equal(expected_size, operator_overflow.Size);
+
+        Rect origin_maxint = new(limit, limit, limit, limit);
+        Assert.Equal(origin_maxint, new Rect(new Point(limit, limit), new Size()));
+
+        // Expect a rect at the origin and a rect whose right/bottom is maxint
+        // create a rect that extends from 0..maxint in both extents.
+        {
+            Rect origin_small = new(0, 0, 100, 100);
+            Rect big_clamped = new(50, 50, limit, limit);
+            Assert.Equal(big_clamped.Right, limit);
+
+            Rect unioned = Rect.UnionRects(origin_small, big_clamped);
+            Rect rect_limit = new(0, 0, limit, limit);
+            Assert.Equal(unioned, rect_limit);
+        }
+
+        // Expect a rect that would overflow width (but not right) to be clamped
+        // and to have maxint extents after unioning.
+        {
+            Rect small = new(-500, -400, 100, 100);
+            Rect big = new(-400, -500, limit, limit);
+            // Technically, this should be limit + 100 width, but will clamp to maxint.
+            Assert.Equal(Rect.UnionRects(small, big), new Rect(-500, -500, limit, limit));
+        }
+
+        // Expect a rect that would overflow right *and* width to be clamped.
+        {
+            Rect clamped = new(500, 500, limit, limit);
+            Rect positive_origin = new(100, 100, 500, 500);
+
+            // Ideally, this should be (100, 100, limit + 400, limit + 400).
+            // However, width overflows and would be clamped to limit, but right
+            // overflows too and so will be clamped to limit - 100.
+            Rect expected_rect = new(100, 100, limit - 100, limit - 100);
+            Assert.Equal(Rect.UnionRects(clamped, positive_origin), expected_rect);
+        }
+
+        // Unioning a left=minint rect with a right=maxint rect.
+        // We can't represent both ends of the spectrum in the same rect.
+        // Make sure we keep the most useful area.
+        {
+            int part_limit = min_limit / 3;
+            Rect left_minint = new(min_limit, min_limit, 1, 1);
+            Rect right_maxint = new(limit - 1, limit - 1, limit, limit);
+            Rect expected_rect = new(part_limit, part_limit, 2 * part_limit, 2 * part_limit);
+            Rect result = Rect.UnionRects(left_minint, right_maxint);
+
+            // The result should be maximally big.
+            Assert.Equal(limit, result.Height);
+            Assert.Equal(limit, result.Width);
+
+            // The result should include the area near the origin.
+            Assert.True(-part_limit > result.X);
+            Assert.True(part_limit < result.Right);
+            Assert.True(-part_limit > result.Y);
+            Assert.True(part_limit < result.Bottom);
+
+            // More succinctly, but harder to read in the results.
+            Assert.True(Rect.UnionRects(left_minint, right_maxint).Contains(expected_rect));
+        }
+    }
 }
