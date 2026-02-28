@@ -179,6 +179,8 @@ public struct Rect
         return rect;
     }
 
+    public static Rect operator+(in Vector2D lhs, in Rect rhs) => rhs + lhs;
+
     public readonly Insets InsetsFrom(in Rect inner) => Insets.TLBR(inner.Y - Y, inner.X - X, Bottom - inner.Bottom, Right - inner.Right);
 
     // Returns true if the area of the rectangle is zero.

@@ -484,4 +484,57 @@ public static class RectTest
         Assert.Equal(new Rect(1, 1, 2, 3), Rect.ScaleToRoundedRect(new Rect(2, 4, 9, 8), 0.3f));
         TestScaleRectOverflowClamp((rect, x, y) => Rect.ScaleToRoundedRect(rect, x, y));
     }
+
+    [Fact]
+    private static void TestBoundingRect()
+    {
+        (Point a, Point b, Rect expected)[] int_tests =
+        [
+            // If point B dominates A, then A should be the origin.
+            (new Point(4, 6), new Point(4, 6), new Rect(4, 6, 0, 0)),
+            (new Point(4, 6), new Point(8, 6), new Rect(4, 6, 4, 0)),
+            (new Point(4, 6), new Point(4, 9), new Rect(4, 6, 0, 3)),
+            (new Point(4, 6), new Point(8, 9), new Rect(4, 6, 4, 3)),
+            // If point A dominates B, then B should be the origin.
+            (new Point(4, 6), new Point(4, 6), new Rect(4, 6, 0, 0)),
+            (new Point(8, 6), new Point(4, 6), new Rect(4, 6, 4, 0)),
+            (new Point(4, 9), new Point(4, 6), new Rect(4, 6, 0, 3)),
+            (new Point(8, 9), new Point(4, 6), new Rect(4, 6, 4, 3)),
+            // If neither point dominates, then the origin is a combination of the
+            // two.
+            (new Point(4, 6), new Point(6, 4), new Rect(4, 4, 2, 2)),
+            (new Point(-4, -6), new Point(-6, -4), new Rect(-6, -6, 2, 2)),
+            (new Point(-4, 6), new Point(6, -4), new Rect(-4, -4, 10, 10))
+        ];
+
+        foreach(var (a, b, expected) in int_tests)
+        {
+            Rect actual = Rect.BoundingRect(a, b);
+            Assert.Equal(expected, actual);
+        }
+    }
+
+    [Fact]
+    private static void TestOffset()
+    {
+        Rect i = new(1, 2, 3, 4);
+
+        Assert.Equal(new Rect(2, 1, 3, 4), (i + new Vector2D(1, -1)));
+        Assert.Equal(new Rect(2, 1, 3, 4), (new Vector2D(1, -1) + i));
+        i += new Vector2D(1, -1);
+        Assert.Equal(new Rect(2, 1, 3, 4), i);
+        Assert.Equal(new Rect(1, 2, 3, 4), (i - new Vector2D(1, -1)));
+        i -= new Vector2D(1, -1);
+        Assert.Equal(new Rect(1, 2, 3, 4), i);
+
+        i.Offset(2, -2);
+        Assert.Equal(new Rect(3, 0, 3, 4), i);
+
+        Assert.Equal(new Rect(kMaxInt - 2, kMaxInt - 2, 2, 2),
+                  (new Rect(0, 0, kMaxInt - 2, kMaxInt - 2) +
+                   new Vector2D(kMaxInt - 2, kMaxInt - 2)));
+        Assert.Equal(new Rect(kMaxInt - 2, kMaxInt - 2, 2, 2),
+                  (new Rect(0, 0, kMaxInt - 2, kMaxInt - 2) -
+                   new Vector2D(2 - kMaxInt, 2 - kMaxInt)));
+    }
 }
