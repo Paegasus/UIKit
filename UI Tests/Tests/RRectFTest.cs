@@ -11,12 +11,12 @@ public static class RRectFTest
     [Fact]
     private static void TestIsEmpty()
     {
-        Assert.True(new RRectF().IsEmpty());
-        Assert.True(new RRectF(0, 0, 0, 0, 0).IsEmpty());
-        Assert.True(new RRectF(0, 0, 10, 0, 0).IsEmpty());
-        Assert.True(new RRectF(0, 0, 0, 10, 0).IsEmpty());
-        Assert.True(new RRectF(0, 0, 0, 10, 10).IsEmpty());
-        Assert.False(new RRectF(0, 0, 10, 10, 0).IsEmpty());
+        Assert.True(new RRectF().IsEmpty);
+        Assert.True(new RRectF(0, 0, 0, 0, 0).IsEmpty);
+        Assert.True(new RRectF(0, 0, 10, 0, 0).IsEmpty);
+        Assert.True(new RRectF(0, 0, 0, 10, 0).IsEmpty);
+        Assert.True(new RRectF(0, 0, 0, 10, 10).IsEmpty);
+        Assert.False(new RRectF(0, 0, 10, 10, 0).IsEmpty);
     }
 
     [Fact]
@@ -63,7 +63,7 @@ public static class RRectFTest
     {
         RRectF a = new(40, 50, 0, 70, 0);
         Assert.Equal(RRectF.RoundRectType.kEmpty, a.GetRoundRectType());
-        Assert.True(a.IsEmpty());
+        Assert.True(a.IsEmpty);
         a = new RRectF(40, 50, 60, 70, 0);
         Assert.Equal(RRectF.RoundRectType.kRect, a.GetRoundRectType());
         a = new RRectF(40, 50, 60, 70, 5);
@@ -207,7 +207,7 @@ public static class RRectFTest
         a = new RRectF(40, 50, 60, 70, 5, 5);
         Assert.Equal(5, a.GetSimpleRadius());
         a.Clear();
-        Assert.True(a.IsEmpty());
+        Assert.True(a.IsEmpty);
         // Make sure ovals can still get simple radii
         a = new RRectF(40, 50, 60, 70, 30, 35);
         Assert.Equal(RRectF.RoundRectType.kOval, a.GetRoundRectType());

@@ -219,10 +219,9 @@ public struct RRectF
 
     private readonly bool RectIsEmpty => _rect.Width <= 0 || _rect.Height <= 0;
 
-    public readonly bool IsEmpty() => RectIsEmpty;
+    public readonly bool IsEmpty => RectIsEmpty;
 
-    public readonly bool HasRoundedCorners() =>
-        !IsEmpty() && GetRoundRectType() != RoundRectType.kRect;
+    public readonly bool HasRoundedCorners() => !IsEmpty && GetRoundRectType() != RoundRectType.kRect;
 
     // GetCornerRadii may be called for any type of RRect (kRect, kOval, etc.),
     // and it will return "correct" values. If GetType() is kOval or less, all
@@ -314,7 +313,7 @@ public struct RRectF
     // RRectF, and if both this RRectF and rect are not empty.
     public readonly bool Contains(in RectF rect)
     {
-        if (IsEmpty() || rect.IsEmpty())
+        if (IsEmpty || rect.IsEmpty())
             return false;
 
         SKRect r = new(rect.X, rect.Y, rect.Right, rect.Bottom);
@@ -360,7 +359,7 @@ public struct RRectF
     public void Scale(float x_scale, float y_scale)
     {
         // Can't scale empty rects
-        if (IsEmpty())
+        if (IsEmpty)
             return;
 
         // Can't scale to an empty rect

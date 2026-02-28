@@ -21,46 +21,12 @@ class Transform;
 class COMPONENT_EXPORT(GEOMETRY_SKIA) MaskFilterInfo {
  public:
   MaskFilterInfo() = default;
-  explicit MaskFilterInfo(const RRectF& rrect)
-      : rounded_corner_bounds_(rrect) {}
-  MaskFilterInfo(const RRectF& rrect, const gfx::LinearGradient& gradient_mask)
-      : rounded_corner_bounds_(rrect), gradient_mask_(gradient_mask) {}
-  MaskFilterInfo(const RectF& bounds,
-                 const RoundedCornersF& radii,
-                 const gfx::LinearGradient& gradient_mask)
-      : rounded_corner_bounds_(bounds, radii), gradient_mask_(gradient_mask) {}
+  
   MaskFilterInfo(const MaskFilterInfo& copy) = default;
   ~MaskFilterInfo() = default;
 
-  // The bounds the filter will be applied to.
-  RectF bounds() const { return rounded_corner_bounds_.rect(); }
-
-  // Defines the rounded corner bounds to clip.
-  const RRectF& rounded_corner_bounds() const { return rounded_corner_bounds_; }
-
-  // True if this contains a rounded corner mask.
-  bool HasRoundedCorners() const {
-    return rounded_corner_bounds_.HasRoundedCorners();
-  }
-
-  const std::optional<gfx::LinearGradient>& gradient_mask() const {
-    return gradient_mask_;
-  }
-
-  // True if this contains an effective gradient mask (requires filter bounds).
-  bool HasGradientMask() const {
-    if (rounded_corner_bounds_.IsEmpty())
-      return false;
-
-    return gradient_mask_ && !gradient_mask_->IsEmpty();
-  }
-
-  void set_clip_id(int clip_id) { clip_id_ = clip_id; }
-
-  const std::optional<int>& clip_id() const { return clip_id_; }
-
-  // True if this contains no effective mask information.
-  bool IsEmpty() const { return rounded_corner_bounds_.IsEmpty(); }
+  
+  
 
   // Transform the mask filter information. If the transform cannot be applied
   // (e.g. it would make rounded_corner_bounds_ invalid), rounded_corner_bounds_
