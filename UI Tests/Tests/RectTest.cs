@@ -351,4 +351,109 @@ public static class RectTest
         center = new Rect(11, 11, 21, 21).CenterPoint();
         Assert.True(center == new Point(21, 21));
     }
+
+    [Fact]
+    private static void TestSharesEdgeWith()
+    {
+        Rect r = new(2, 3, 4, 5);
+
+        // Must be non-overlapping
+        Assert.False(r.SharesEdgeWith(r));
+
+        Rect just_above = new(2, 1, 4, 2);
+        Rect just_below = new(2, 8, 4, 2);
+        Rect just_left = new(0, 3, 2, 5);
+        Rect just_right = new(6, 3, 2, 5);
+
+        Assert.True(r.SharesEdgeWith(just_above));
+        Assert.True(r.SharesEdgeWith(just_below));
+        Assert.True(r.SharesEdgeWith(just_left));
+        Assert.True(r.SharesEdgeWith(just_right));
+
+        // Wrong placement
+        Rect same_height_no_edge = new(0, 0, 1, 5);
+        Rect same_width_no_edge = new(0, 0, 4, 1);
+
+        Assert.False(r.SharesEdgeWith(same_height_no_edge));
+        Assert.False(r.SharesEdgeWith(same_width_no_edge));
+
+        Rect just_above_no_edge = new(2, 1, 5, 2);  // too wide
+        Rect just_below_no_edge = new(2, 8, 3, 2);  // too narrow
+        Rect just_left_no_edge = new(0, 3, 2, 6);   // too tall
+        Rect just_right_no_edge = new(6, 3, 2, 4);  // too short
+
+        Assert.False(r.SharesEdgeWith(just_above_no_edge));
+        Assert.False(r.SharesEdgeWith(just_below_no_edge));
+        Assert.False(r.SharesEdgeWith(just_left_no_edge));
+        Assert.False(r.SharesEdgeWith(just_right_no_edge));
+    }
+
+    private static void TestScaleRectOverflowClamp(Func<Rect, float, float, Rect> function)
+    {
+        // The whole rect is scaled out of kMinInt.
+        Rect xy_underflow1 = new(-100000, -123456, 10, 20);
+        Assert.Equal(new Rect(kMinInt, kMinInt, 0, 0), function(xy_underflow1, 100000, 100000));
+
+        // This rect's right/bottom is 0. The origin overflows, and is clamped to
+        // -kMaxInt (instead of kMinInt) to keep width/height not overflowing.
+        Rect xy_underflow2 = new(-100000, -123456, 100000, 123456);
+        Assert.Equal(new Rect(-kMaxInt, -kMaxInt, kMaxInt, kMaxInt),
+                  function(xy_underflow2, 100000, 100000));
+
+        // A location overflow means that width/right and bottom/top also
+        // overflow so need to be clamped.
+        Rect xy_overflow = new(100000, 123456, 10, 20);
+        Assert.Equal(new Rect(kMaxInt, kMaxInt, 0, 0),
+                  function(xy_overflow, 100000, 100000));
+
+        // In practice all rects are clamped to 0 width / 0 height so
+        // negative sizes don't matter, but try this for the sake of testing.
+        Rect size_underflow = new(-1, -2, 100000, 100000);
+        Assert.Equal(new Rect(100000, 200000, 0, 0),
+                  function(size_underflow, -100000, -100000));
+
+        Rect size_overflow = new(-1, -2, 123456, 234567);
+        Assert.Equal(new Rect(-100000, -200000, kMaxInt, kMaxInt),
+                  function(size_overflow, 100000, 100000));
+        // Verify width/right gets clamped properly too if x/y positive.
+        Rect size_overflow2 = new(1, 2, 123456, 234567);
+        Assert.Equal(new Rect(100000, 200000, kMaxInt - 100000, kMaxInt - 200000),
+                  function(size_overflow2, 100000, 100000));
+
+        float kMaxIntAsFloat = (float)kMaxInt;
+        Rect max_origin_rect = new(kMaxInt, kMaxInt, kMaxInt, kMaxInt);
+        // width/height of max_origin_rect has already been clamped to 0.
+        Assert.Equal(new Rect(kMaxInt, kMaxInt, 0, 0), max_origin_rect);
+        Assert.Equal(new Rect(kMaxInt, kMaxInt, 0, 0),
+                  function(max_origin_rect, kMaxIntAsFloat, kMaxIntAsFloat));
+
+        Rect max_size_rect1 = new(0, 0, kMaxInt, kMaxInt);
+        // Max sized rect can't be scaled up any further in any dimension.
+        Assert.Equal(max_size_rect1, function(max_size_rect1, 2, 3.5f));
+        Assert.Equal(max_size_rect1,
+                  function(max_size_rect1, kMaxIntAsFloat, kMaxIntAsFloat));
+        // Max sized ret scaled by negative scale is an empty rect.
+        Assert.Equal(new Rect(), function(max_size_rect1, kMinInt, kMinInt));
+
+        Rect max_size_rect2 = new(-kMaxInt, -kMaxInt, kMaxInt, kMaxInt);
+        Assert.Equal(max_size_rect2, function(max_size_rect2, 2, 3.5f));
+        Assert.Equal(max_size_rect2,
+                  function(max_size_rect2, kMaxIntAsFloat, kMaxIntAsFloat));
+        Assert.Equal(new Rect(kMaxInt, kMaxInt, 0, 0),
+                  function(max_size_rect2, kMinInt, kMinInt));
+    }
+
+    [Fact]
+    private static void TestScaleToEnclosedRect()
+    {
+        Assert.Equal(new Rect(), Rect.ScaleToEnclosedRect(new Rect(), 5.0f));
+        Assert.Equal(new Rect(5, 5, 5, 5), Rect.ScaleToEnclosedRect(new Rect(1, 1, 1, 1), 5.0f));
+        Assert.Equal(new Rect(-5, -5, 0, 0), Rect.ScaleToEnclosedRect(new Rect(-1, -1, 0, 0), 5.0f));
+        Assert.Equal(new Rect(5, -5, 0, 5), Rect.ScaleToEnclosedRect(new Rect(1, -1, 0, 1), 5.0f));
+        Assert.Equal(new Rect(-5, 5, 5, 0), Rect.ScaleToEnclosedRect(new Rect(-1, 1, 1, 0), 5.0f));
+        Assert.Equal(new Rect(2, 3, 4, 6), Rect.ScaleToEnclosedRect(new Rect(1, 2, 3, 4), 1.5f));
+        Assert.Equal(new Rect(-1, -3, 0, 0), Rect.ScaleToEnclosedRect(new Rect(-1, -2, 0, 0), 1.5f));
+        Assert.Equal(new Rect(1, 2, 2, 1), Rect.ScaleToEnclosedRect(new Rect(2, 4, 9, 8), 0.3f));
+        TestScaleRectOverflowClamp((rect, x, y) => Rect.ScaleToEnclosedRect(rect, x, y));
+    }
 }
