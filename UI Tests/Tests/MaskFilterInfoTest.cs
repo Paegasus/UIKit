@@ -80,8 +80,7 @@ public static class MaskFilterInfoTest
         expected = new MaskFilterInfo(new RRectF(new RectF(0, 0, 40.0f, 75.0f), 2.0f, 6.0f, 6.0f, 12.0f, 10.0f, 18.0f, 14.0f, 24.0f), CreateGradient(61));
         scaled.ApplyTransform(AxisTransform2D.FromScaleAndTranslation(new Vector2DF(2.0f, 3.0f), new Vector2DF()));
         Assert.Equal(expected, scaled);
-
-        /*
+        
         MaskFilterInfo scaled_translated = scaled;
         expected = new MaskFilterInfo(new RRectF(new RectF(-3.5f, 7.75f, 40.0f, 75.0f), 2.0f, 6.0f, 6.0f, 12.0f, 10.0f, 18.0f, 14.0f, 24.0f), CreateGradient(61));
         scaled_translated.ApplyTransform(AxisTransform2D.FromScaleAndTranslation(new Vector2DF(1.0f, 1.0f), new Vector2DF(-3.5f, 7.75f)));
@@ -90,7 +89,7 @@ public static class MaskFilterInfoTest
         MaskFilterInfo scaled_translated_2 = info;
         scaled_translated_2.ApplyTransform(AxisTransform2D.FromScaleAndTranslation(new Vector2DF(2.0f, 3.0f), new Vector2DF(-3.5f, 7.75f)));
         Assert.Equal(expected, scaled_translated_2);
-
+        
         const float kInf = float.PositiveInfinity;
         const float kNan = float.NaN;
 
@@ -100,11 +99,10 @@ public static class MaskFilterInfoTest
             transformed.ApplyTransform(transform);
             return transformed.IsEmpty();
         }
-
+        
         Assert.True(failure_is_empty(AxisTransform2D.FromScaleAndTranslation(new Vector2DF(kInf, 1), new Vector2DF(1, 1))));
         Assert.True(failure_is_empty(AxisTransform2D.FromScaleAndTranslation(new Vector2DF(kNan, 1), new Vector2DF(1, 1))));
         Assert.True(failure_is_empty(AxisTransform2D.FromScaleAndTranslation(new Vector2DF(1, 1), new Vector2DF(1, kInf))));
         Assert.True(failure_is_empty(AxisTransform2D.FromScaleAndTranslation(new Vector2DF(1, 1), new Vector2DF(1, kNan))));
-        */
     }
 }
