@@ -119,14 +119,14 @@ public struct Matrix44
     public readonly bool Is2DTransform => IsFlat && !HasPerspective;
 
     // Gets a value at |row|, |col| from the matrix.
-  public readonly double rc(int row, int col)
-  {
+    public readonly double rc(int row, int col)
+    {
 #if DEBUG
         Debug.Assert((uint)row <= 3u);
         Debug.Assert((uint)col <= 3u);
 #endif
-    return this[col, row];
-  }
+        return this[col, row];
+    }
 
     // Set a value in the matrix at |row|, |col|.
     public void set_rc(int row, int col, double value)

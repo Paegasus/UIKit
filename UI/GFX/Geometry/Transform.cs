@@ -112,6 +112,18 @@ public class Transform
         axis_2d_ = AxisTransform2D.FromScaleAndTranslation(new Vector2DF(scale_x, scale_y), new Vector2DF(trans_x, trans_y));
     }
 
+    // Creates a transform from explicit 2d elements. All other matrix elements
+    // remain the same as the corresponding elements of an identity matrix.
+    // Always creates a double precision 4x4 matrix.
+    public static Transform Affine(double a,    // a.k.a. r0c0 or scale_x
+                                    double b,    // a.k.a. r1c0 or tan(skew_y)
+                                    double c,    // a.k.a. r0c1 or tan(skew_x)
+                                    double d,    // a.k.a  r1c1 or scale_y
+                                    double e,    // a.k.a  r0c3 or translation_x
+                                    double f) {  // a.k.a  r1c3 or translaiton_y
+        return ColMajor(a, b, 0, 0, c, d, 0, 0, 0, 0, 1, 0, e, f, 0, 1);
+    }
+
     public Transform(in Quaternion q) : this(
           // Col 0.
           1.0 - 2.0 * (q.Y * q.Y + q.Z * q.Z),
@@ -136,6 +148,18 @@ public class Transform
 
     public static Transform MakeTranslation(in Vector2DF v) => MakeTranslation(v.X, v.Y);
 
+    public static Transform MakeScale(float sx, float sy) => new Transform(sx, sy, 0, 0);
+
+    // Creates a transform as a 2d scale.
+    public static Transform MakeScale(float scale) => MakeScale(scale, scale);
+
+    // Accurately rotate by 90, 180 or 270 degrees about the z axis.
+    public static Transform Make90degRotation() => Affine(0, 1, -1, 0, 0, 0);
+
+    public static Transform Make180degRotation() => MakeScale(-1);
+
+    public static Transform Make270degRotation() => Affine(0, -1, 1, 0, 0, 0);
+
     // Gets a value at |row|, |col| from the matrix.
     public double rc(int row, int col)
     {
@@ -159,7 +183,7 @@ public class Transform
 
         return matrix_.rc(row, col);
     }
-
+    
     // Sets a value in the matrix at |row|, |col|. It forces full double precision
     // 4x4 matrix.
     public void set_rc(int row, int col, double v)

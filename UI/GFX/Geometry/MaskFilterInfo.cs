@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using SkiaSharp;
 
 namespace UI.GFX.Geometry;
@@ -55,10 +56,7 @@ public struct MaskFilterInfo
     // True if this contains no effective mask information.
     public readonly bool IsEmpty() => rounded_corner_bounds_.IsEmpty;
 
-    // Transform the mask filter information. If the transform cannot be applied
-    // (e.g. it would make rounded_corner_bounds_ invalid), rounded_corner_bounds_
-    // will be set to empty.
-    //public void ApplyTransform(in Transform transform)
+    /*
     public void ApplyTransform(in Transform transform)
     {
         if (rounded_corner_bounds_.IsEmpty)
@@ -74,8 +72,10 @@ public struct MaskFilterInfo
 
         // Get the flattened 2D matrix elements.
         float scaleX = (float)transform.rc(0, 0);
-        float skewX = (float)transform.rc(0, 1);
-        float skewY = (float)transform.rc(1, 0);
+        //float skewX = (float)transform.rc(0, 1);
+        //float skewY = (float)transform.rc(1, 0);
+        float skewX = (float)transform.rc(1, 0);
+        float skewY = (float)transform.rc(0, 1);
         float scaleY = (float)transform.rc(1, 1);
         float transX = (float)transform.rc(0, 3);
         float transY = (float)transform.rc(1, 3);
@@ -94,14 +94,25 @@ public struct MaskFilterInfo
 
         // Map the bounding rect.
         SKRect newRect;
+
+        //if (swapAxes)
+        //{
+        //    // 90/270 degree rotation: x maps to y and vice versa.
+        //    newRect = new SKRect(
+        //        oldRect.Left * skewX + transX,
+        //        oldRect.Top * skewY + transY,
+        //        oldRect.Right * skewX + transX,
+        //        oldRect.Bottom * skewY + transY);
+        //}
+
         if (swapAxes)
         {
             // 90/270 degree rotation: x maps to y and vice versa.
-            newRect = new SKRect(
-                oldRect.Left * skewX + transX,
-                oldRect.Top * skewY + transY,
-                oldRect.Right * skewX + transX,
-                oldRect.Bottom * skewY + transY);
+            float newLeft = MathF.Min(skewX * oldRect.Top, skewX * oldRect.Bottom) + transX;
+            float newRight = MathF.Max(skewX * oldRect.Top, skewX * oldRect.Bottom) + transX;
+            float newTop = MathF.Min(skewY * oldRect.Left, skewY * oldRect.Right) + transY;
+            float newBottom = MathF.Max(skewY * oldRect.Left, skewY * oldRect.Right) + transY;
+            newRect = new SKRect(newLeft, newTop, newRight, newBottom);
         }
         else
         {
@@ -139,10 +150,141 @@ public struct MaskFilterInfo
 
         rounded_corner_bounds_.Normalize();
 
-        if (gradient_mask_ != null && !gradient_mask_.Value.IsEmpty)
-            gradient_mask_.Value.ApplyTransform(transform);
+        //if (gradient_mask_ != null && !gradient_mask_.Value.IsEmpty)
+        //    gradient_mask_.Value.ApplyTransform(transform);
+
+        if (gradient_mask_.HasValue && !gradient_mask_.Value.IsEmpty)
+        {
+            var g = gradient_mask_.Value;
+            g.ApplyTransform(transform);
+            gradient_mask_ = g;
+        }
+
+        Debug.WriteLine($"scaleX={scaleX} skewX={skewX} skewY={skewY} scaleY={scaleY} transX={transX} transY={transY}");
+        Debug.WriteLine($"swapAxes={swapAxes}");
     }
-    
+    */
+
+    // Transform the mask filter information. If the transform cannot be applied
+    // (e.g. it would make rounded_corner_bounds_ invalid), rounded_corner_bounds_
+    // will be set to empty.
+    public void ApplyTransform(in Transform transform)
+    {
+        if (rounded_corner_bounds_.IsEmpty)
+            return;
+
+        if (!transform.Preserves2dAxisAlignment())
+        {
+            rounded_corner_bounds_ = new RRectF();
+            return;
+        }
+
+        float kEpsilon = float.Epsilon;
+
+        // Get the flattened 2D matrix elements.
+        float scaleX = (float)transform.rc(0, 0);
+        float skewX = (float)transform.rc(1, 0);
+        float skewY = (float)transform.rc(0, 1);
+        float scaleY = (float)transform.rc(1, 1);
+        float transX = (float)transform.rc(0, 3);
+        float transY = (float)transform.rc(1, 3);
+
+        // Round near-zero values to zero, matching the C++ epsilon rounding.
+        if (MathF.Abs(scaleX) < kEpsilon) scaleX = 0f;
+        if (MathF.Abs(skewX) < kEpsilon) skewX = 0f;
+        if (MathF.Abs(skewY) < kEpsilon) skewY = 0f;
+        if (MathF.Abs(scaleY) < kEpsilon) scaleY = 0f;
+
+        // For axis-aligned transforms, either (scaleX, scaleY) or (skewX, skewY)
+        // are non-zero, but not both. A 90-degree rotation swaps axes.
+        bool swapAxes = scaleX == 0f && scaleY == 0f;
+
+        SKRect oldRect = rounded_corner_bounds_._rect;
+
+        // Map the bounding rect.
+        SKRect newRect;
+        if (swapAxes)
+        {
+            // 90/270 degree rotation: x maps to y and vice versa.
+            float newLeft = MathF.Min(skewX * oldRect.Top, skewX * oldRect.Bottom) + transX;
+            float newRight = MathF.Max(skewX * oldRect.Top, skewX * oldRect.Bottom) + transX;
+            float newTop = MathF.Min(skewY * oldRect.Left, skewY * oldRect.Right) + transY;
+            float newBottom = MathF.Max(skewY * oldRect.Left, skewY * oldRect.Right) + transY;
+            newRect = new SKRect(newLeft, newTop, newRight, newBottom);
+        }
+        else
+        {
+            newRect = new SKRect(
+                oldRect.Left * scaleX + transX,
+                oldRect.Top * scaleY + transY,
+                oldRect.Right * scaleX + transX,
+                oldRect.Bottom * scaleY + transY);
+        }
+
+        // makeSorted equivalent — ensure left <= right, top <= bottom.
+        newRect = new SKRect(
+            MathF.Min(newRect.Left, newRect.Right),
+            MathF.Min(newRect.Top, newRect.Bottom),
+            MathF.Max(newRect.Left, newRect.Right),
+            MathF.Max(newRect.Top, newRect.Bottom));
+
+        if (!float.IsFinite(newRect.Left) || !float.IsFinite(newRect.Top) ||
+            !float.IsFinite(newRect.Right) || !float.IsFinite(newRect.Bottom))
+        {
+            rounded_corner_bounds_ = new RRectF();
+            return;
+        }
+
+        // Scale radii — swap x/y components for 90-degree rotations.
+        SKPoint ScaleRadii(SKPoint r) => swapAxes
+            ? new SKPoint(MathF.Abs(r.Y * skewX), MathF.Abs(r.X * skewY))
+            : new SKPoint(MathF.Abs(r.X * scaleX), MathF.Abs(r.Y * scaleY));
+
+        // Snapshot old radii before any writes.
+        var oldUL = rounded_corner_bounds_._radiiUpperLeft;
+        var oldUR = rounded_corner_bounds_._radiiUpperRight;
+        var oldLR = rounded_corner_bounds_._radiiLowerRight;
+        var oldLL = rounded_corner_bounds_._radiiLowerLeft;
+
+        rounded_corner_bounds_._rect = newRect;
+
+        if (swapAxes)
+        {
+            if (skewX < 0)
+            {
+                // 90° CCW rotation: corners rotate CCW.
+                rounded_corner_bounds_._radiiUpperLeft = ScaleRadii(oldLL);
+                rounded_corner_bounds_._radiiUpperRight = ScaleRadii(oldUL);
+                rounded_corner_bounds_._radiiLowerRight = ScaleRadii(oldUR);
+                rounded_corner_bounds_._radiiLowerLeft = ScaleRadii(oldLR);
+            }
+            else
+            {
+                // 90° CW rotation: corners rotate CW.
+                rounded_corner_bounds_._radiiUpperLeft = ScaleRadii(oldUR);
+                rounded_corner_bounds_._radiiUpperRight = ScaleRadii(oldLR);
+                rounded_corner_bounds_._radiiLowerRight = ScaleRadii(oldLL);
+                rounded_corner_bounds_._radiiLowerLeft = ScaleRadii(oldUL);
+            }
+        }
+        else
+        {
+            rounded_corner_bounds_._radiiUpperLeft = ScaleRadii(oldUL);
+            rounded_corner_bounds_._radiiUpperRight = ScaleRadii(oldUR);
+            rounded_corner_bounds_._radiiLowerRight = ScaleRadii(oldLR);
+            rounded_corner_bounds_._radiiLowerLeft = ScaleRadii(oldLL);
+        }
+
+        rounded_corner_bounds_.Normalize();
+
+        if (gradient_mask_.HasValue && !gradient_mask_.Value.IsEmpty)
+        {
+            var g = gradient_mask_.Value;
+            g.ApplyTransform(transform);
+            gradient_mask_ = g;
+        }
+    }
+
     public void ApplyTransform(in AxisTransform2D transform)
     {
         if (rounded_corner_bounds_.IsEmpty)
