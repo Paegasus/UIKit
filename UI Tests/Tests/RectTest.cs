@@ -456,4 +456,32 @@ public static class RectTest
         Assert.Equal(new Rect(1, 2, 2, 1), Rect.ScaleToEnclosedRect(new Rect(2, 4, 9, 8), 0.3f));
         TestScaleRectOverflowClamp((rect, x, y) => Rect.ScaleToEnclosedRect(rect, x, y));
     }
+
+    [Fact]
+    private static void TestScaleToEnclosingRect()
+    {
+        Assert.Equal(new Rect(), Rect.ScaleToEnclosingRect(new Rect(), 5.0f));
+        Assert.Equal(new Rect(5, 5, 5, 5), Rect.ScaleToEnclosingRect(new Rect(1, 1, 1, 1), 5.0f));
+        Assert.Equal(new Rect(-5, -5, 0, 0), Rect.ScaleToEnclosingRect(new Rect(-1, -1, 0, 0), 5.0f));
+        Assert.Equal(new Rect(5, -5, 0, 5), Rect.ScaleToEnclosingRect(new Rect(1, -1, 0, 1), 5.0f));
+        Assert.Equal(new Rect(-5, 5, 5, 0), Rect.ScaleToEnclosingRect(new Rect(-1, 1, 1, 0), 5.0f));
+        Assert.Equal(new Rect(1, 3, 5, 6), Rect.ScaleToEnclosingRect(new Rect(1, 2, 3, 4), 1.5f));
+        Assert.Equal(new Rect(-2, -3, 0, 0), Rect.ScaleToEnclosingRect(new Rect(-1, -2, 0, 0), 1.5f));
+        Assert.Equal(new Rect(0, 1, 4, 3), Rect.ScaleToEnclosingRect(new Rect(2, 4, 9, 8), 0.3f));
+        TestScaleRectOverflowClamp((rect, x, y) => Rect.ScaleToEnclosingRect(rect, x, y));
+    }
+
+    [Fact]
+    private static void TestScaleToRoundedRect()
+    {
+        Assert.Equal(new Rect(), Rect.ScaleToRoundedRect(new Rect(), 5.0f));
+        Assert.Equal(new Rect(5, 5, 5, 5), Rect.ScaleToRoundedRect(new Rect(1, 1, 1, 1), 5.0f));
+        Assert.Equal(new Rect(-5, -5, 0, 0), Rect.ScaleToRoundedRect(new Rect(-1, -1, 0, 0), 5.0f));
+        Assert.Equal(new Rect(5, -5, 0, 5), Rect.ScaleToRoundedRect(new Rect(1, -1, 0, 1), 5.0f));
+        Assert.Equal(new Rect(-5, 5, 5, 0), Rect.ScaleToRoundedRect(new Rect(-1, 1, 1, 0), 5.0f));
+        Assert.Equal(new Rect(2, 3, 4, 6), Rect.ScaleToRoundedRect(new Rect(1, 2, 3, 4), 1.5f));
+        Assert.Equal(new Rect(-2, -3, 0, 0), Rect.ScaleToRoundedRect(new Rect(-1, -2, 0, 0), 1.5f));
+        Assert.Equal(new Rect(1, 1, 2, 3), Rect.ScaleToRoundedRect(new Rect(2, 4, 9, 8), 0.3f));
+        TestScaleRectOverflowClamp((rect, x, y) => Rect.ScaleToRoundedRect(rect, x, y));
+    }
 }
