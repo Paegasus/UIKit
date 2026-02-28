@@ -126,7 +126,7 @@ public struct RRectF
         return curMin;
     }
 
-    private void Normalize()
+    public void Normalize()
     {
         if (RectIsEmpty || !float.IsFinite(_rect.Left) || !float.IsFinite(_rect.Top) ||
                            !float.IsFinite(_rect.Right) || !float.IsFinite(_rect.Bottom))
@@ -519,6 +519,82 @@ public struct RRectF
     public static  RRectF ToEnclosingRRectFIgnoringError(in RRectF rrect_f, float error)
     {
         return new RRectF(new RectF(RectConversions.ToEnclosingRectIgnoringError(rrect_f.rect(), error)), rrect_f.GetRoundedCorners());
+    }
+
+    private static bool AreRadiusPredicatesValid(float rad, float min, float max) =>
+        (min <= max) && (rad <= max - min) && (min + rad <= max) && (max - rad >= min) && rad >= 0;
+
+    public readonly bool IsValid()
+    {
+        // AreRectAndRadiiValid
+        if (!float.IsFinite(_rect.Left) || !float.IsFinite(_rect.Top) ||
+            !float.IsFinite(_rect.Right) || !float.IsFinite(_rect.Bottom) ||
+            _rect.Left > _rect.Right || _rect.Top > _rect.Bottom)
+            return false;
+
+        SKPoint[] radii = { _radiiUpperLeft, _radiiUpperRight, _radiiLowerRight, _radiiLowerLeft };
+
+        foreach (var r in radii)
+        {
+            if (!AreRadiusPredicatesValid(r.X, _rect.Left, _rect.Right) ||
+                !AreRadiusPredicatesValid(r.Y, _rect.Top, _rect.Bottom))
+                return false;
+        }
+
+        bool allRadiiZero = radii[0].X == 0 && radii[0].Y == 0;
+        bool allCornersSquare = radii[0].X == 0 || radii[0].Y == 0;
+        bool allRadiiSame = true;
+
+        for (int i = 1; i < 4; i++)
+        {
+            if (radii[i].X != 0 || radii[i].Y != 0)
+                allRadiiZero = false;
+
+            if (radii[i].X != radii[i - 1].X || radii[i].Y != radii[i - 1].Y)
+                allRadiiSame = false;
+
+            if (radii[i].X != 0 && radii[i].Y != 0)
+                allCornersSquare = false;
+        }
+
+        bool patchesOfNine = _radiiUpperLeft.X == _radiiLowerLeft.X &&
+                             _radiiUpperLeft.Y == _radiiUpperRight.Y &&
+                             _radiiUpperRight.X == _radiiLowerRight.X &&
+                             _radiiLowerLeft.Y == _radiiLowerRight.Y;
+
+        switch (GetRoundRectType())
+        {
+            case RoundRectType.kEmpty:
+                return _rect.IsEmpty && allRadiiZero && allRadiiSame && allCornersSquare;
+
+            case RoundRectType.kRect:
+                return !_rect.IsEmpty && allRadiiZero && allRadiiSame && allCornersSquare;
+
+            case RoundRectType.kOval:
+                if (_rect.IsEmpty || allRadiiZero || !allRadiiSame || allCornersSquare)
+                    return false;
+                float halfW = (_rect.Right - _rect.Left) * 0.5f;  // midpoint to avoid overflow
+                float halfH = (_rect.Bottom - _rect.Top) * 0.5f;
+                const float kTolerance = 1f / (1 << 12); // SK_ScalarNearlyZero
+                foreach (var r in radii)
+                {
+                    if (MathF.Abs(r.X - halfW) > kTolerance ||
+                        MathF.Abs(r.Y - halfH) > kTolerance)
+                        return false;
+                }
+                return true;
+
+            case RoundRectType.kSingle:
+            case RoundRectType.kSimple:
+                return !_rect.IsEmpty && !allRadiiZero && allRadiiSame && !allCornersSquare;
+
+            case RoundRectType.kComplex:
+                return !_rect.IsEmpty && !allRadiiZero && !allRadiiSame &&
+                       !allCornersSquare && !patchesOfNine;
+
+            default:
+                return false;
+        }
     }
 
     public override readonly string ToString()

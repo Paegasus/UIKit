@@ -1,5 +1,5 @@
 using System.Diagnostics;
-
+using UI.Extensions;
 using static UI.GFX.Geometry.ClampFloatGeometryHelper;
 using static UI.GFX.Geometry.PointConversions;
 
@@ -29,6 +29,8 @@ public class Transform
     // according to the value of full_matrix_.
     AxisTransform2D axis_2d_;
     Matrix44 matrix_;
+
+    public static double kEpsilon = float.MachineEpsilon;
 
     public Transform()
     {
@@ -387,6 +389,71 @@ public class Transform
             return;
         
         EnsureFullMatrix().Skew(TanDegrees(degrees_x), TanDegrees(degrees_y));
+    }
+
+    public void SkewX(double degrees) => Skew(degrees, 0);
+    public void SkewY(double degrees) => Skew(0, degrees);
+
+    // Returns true if axis-aligned 2d rects will remain axis-aligned after being
+    // transformed by this matrix.
+    public bool Preserves2dAxisAlignment() // readonly
+    {
+        if (!full_matrix_)
+        {
+            return true;
+        }
+
+        // Check whether an axis aligned 2-dimensional rect would remain axis-aligned
+        // after being transformed by this matrix (and implicitly projected by
+        // dropping any non-zero z-values).
+        //
+        // The 4th column can be ignored because translations don't affect axis
+        // alignment. The 3rd column can be ignored because we are assuming 2d
+        // inputs, where z-values will be zero. The 3rd row can also be ignored
+        // because we are assuming 2d outputs, and any resulting z-value is dropped
+        // anyway. For the inner 2x2 portion, the only effects that keep a rect axis
+        // aligned are (1) swapping axes and (2) scaling axes. This can be checked by
+        // verifying only 1 element of every column and row is non-zero.  Degenerate
+        // cases that project the x or y dimension to zero are considered to preserve
+        // axis alignment.
+        //
+        // If the matrix does have perspective component that is affected by x or y
+        // values: The current implementation conservatively assumes that axis
+        // alignment is not preserved.
+
+        bool has_x_or_y_perspective = matrix_.rc(3, 0) != 0 || matrix_.rc(3, 1) != 0;
+
+        int num_non_zero_in_row_0 = 0;
+        int num_non_zero_in_row_1 = 0;
+        int num_non_zero_in_col_0 = 0;
+        int num_non_zero_in_col_1 = 0;
+
+        if (Math.Abs(matrix_.rc(0, 0)) > kEpsilon)
+        {
+            num_non_zero_in_row_0++;
+            num_non_zero_in_col_0++;
+        }
+
+        if (Math.Abs(matrix_.rc(0, 1)) > kEpsilon)
+        {
+            num_non_zero_in_row_0++;
+            num_non_zero_in_col_1++;
+        }
+
+        if (Math.Abs(matrix_.rc(1, 0)) > kEpsilon)
+        {
+            num_non_zero_in_row_1++;
+            num_non_zero_in_col_0++;
+        }
+
+        if (Math.Abs(matrix_.rc(1, 1)) > kEpsilon) {
+            num_non_zero_in_row_1++;
+            num_non_zero_in_col_1++;
+        }
+
+        return num_non_zero_in_row_0 <= 1 && num_non_zero_in_row_1 <= 1 &&
+            num_non_zero_in_col_0 <= 1 && num_non_zero_in_col_1 <= 1 &&
+            !has_x_or_y_perspective;
     }
 
     // Composes a transform from the given |decomp|, following the routines

@@ -1,4 +1,4 @@
-using System.Diagnostics;
+using SkiaSharp;
 
 namespace UI.GFX.Geometry;
 
@@ -58,19 +58,126 @@ public struct MaskFilterInfo
     // Transform the mask filter information. If the transform cannot be applied
     // (e.g. it would make rounded_corner_bounds_ invalid), rounded_corner_bounds_
     // will be set to empty.
+    //public void ApplyTransform(in Transform transform)
     public void ApplyTransform(in Transform transform)
     {
+        if (rounded_corner_bounds_.IsEmpty)
+            return;
 
+        if (!transform.Preserves2dAxisAlignment())
+        {
+            rounded_corner_bounds_ = new RRectF();
+            return;
+        }
+
+        float kEpsilon = float.Epsilon;
+
+        // Get the flattened 2D matrix elements.
+        float scaleX = (float)transform.rc(0, 0);
+        float skewX = (float)transform.rc(0, 1);
+        float skewY = (float)transform.rc(1, 0);
+        float scaleY = (float)transform.rc(1, 1);
+        float transX = (float)transform.rc(0, 3);
+        float transY = (float)transform.rc(1, 3);
+
+        // Round near-zero values to zero, matching the C++ epsilon rounding.
+        if (MathF.Abs(scaleX) < kEpsilon) scaleX = 0f;
+        if (MathF.Abs(skewX) < kEpsilon) skewX = 0f;
+        if (MathF.Abs(skewY) < kEpsilon) skewY = 0f;
+        if (MathF.Abs(scaleY) < kEpsilon) scaleY = 0f;
+
+        // For axis-aligned transforms, either (scaleX, scaleY) or (skewX, skewY)
+        // are non-zero, but not both. A 90-degree rotation swaps axes.
+        bool swapAxes = scaleX == 0f && scaleY == 0f;
+
+        SKRect oldRect = rounded_corner_bounds_._rect;
+
+        // Map the bounding rect.
+        SKRect newRect;
+        if (swapAxes)
+        {
+            // 90/270 degree rotation: x maps to y and vice versa.
+            newRect = new SKRect(
+                oldRect.Left * skewX + transX,
+                oldRect.Top * skewY + transY,
+                oldRect.Right * skewX + transX,
+                oldRect.Bottom * skewY + transY);
+        }
+        else
+        {
+            newRect = new SKRect(
+                oldRect.Left * scaleX + transX,
+                oldRect.Top * scaleY + transY,
+                oldRect.Right * scaleX + transX,
+                oldRect.Bottom * scaleY + transY);
+        }
+
+        // makeSorted equivalent — ensure left <= right, top <= bottom.
+        newRect = new SKRect(
+            MathF.Min(newRect.Left, newRect.Right),
+            MathF.Min(newRect.Top, newRect.Bottom),
+            MathF.Max(newRect.Left, newRect.Right),
+            MathF.Max(newRect.Top, newRect.Bottom));
+
+        if (!float.IsFinite(newRect.Left) || !float.IsFinite(newRect.Top) ||
+            !float.IsFinite(newRect.Right) || !float.IsFinite(newRect.Bottom))
+        {
+            rounded_corner_bounds_ = new RRectF();
+            return;
+        }
+
+        // Scale radii — swap x/y components for 90-degree rotations.
+        SKPoint ScaleRadii(SKPoint r) => swapAxes
+            ? new SKPoint(MathF.Abs(r.Y * skewX), MathF.Abs(r.X * skewY))
+            : new SKPoint(MathF.Abs(r.X * scaleX), MathF.Abs(r.Y * scaleY));
+
+        rounded_corner_bounds_._rect = newRect;
+        rounded_corner_bounds_._radiiUpperLeft = ScaleRadii(rounded_corner_bounds_._radiiUpperLeft);
+        rounded_corner_bounds_._radiiUpperRight = ScaleRadii(rounded_corner_bounds_._radiiUpperRight);
+        rounded_corner_bounds_._radiiLowerRight = ScaleRadii(rounded_corner_bounds_._radiiLowerRight);
+        rounded_corner_bounds_._radiiLowerLeft = ScaleRadii(rounded_corner_bounds_._radiiLowerLeft);
+
+        rounded_corner_bounds_.Normalize();
+
+        if (gradient_mask_ != null && !gradient_mask_.IsEmpty)
+            gradient_mask_.ApplyTransform(transform);
     }
-
+    
     public void ApplyTransform(in AxisTransform2D transform)
     {
-        
+        if (rounded_corner_bounds_.IsEmpty)
+            return;
+
+        rounded_corner_bounds_.Scale(transform.Scale.X, transform.Scale.Y);
+        rounded_corner_bounds_.Offset(transform.Translation);
+
+        if (!rounded_corner_bounds_.IsValid())
+        {
+            rounded_corner_bounds_ = new RRectF();
+            return;
+        }
+
+        if (gradient_mask_ != null && !gradient_mask_.IsEmpty)
+            gradient_mask_.ApplyTransform(transform);
     }
 
     public override string ToString()
     {
-        
+        string result = "MaskFilterInfo{" + rounded_corner_bounds_.ToString();
+
+        if (gradient_mask_ != null)
+        {
+            result += ", gradient_mask=" + gradient_mask_.ToString();
+        }
+
+        if (clip_id_.HasValue)
+        {
+            result += ", clip_id=" + clip_id_.Value.ToString();
+        }
+
+        result += "}";
+
+        return result;
     }
 
     public override readonly int GetHashCode() => HashCode.Combine(rounded_corner_bounds_, gradient_mask_, clip_id_);
