@@ -318,7 +318,7 @@ public struct Matrix44
     {
         SetConcat(m, this);
     }
-    
+
     // this = a * b.
     public void SetConcat(in Matrix44 x, in Matrix44 y)
     {
@@ -344,25 +344,31 @@ public struct Matrix44
             return;
         }
 
-        _c0r0 = x._c0r0 * y._c0r0 + x._c1r0 * y._c0r1 + x._c2r0 * y._c0r2 + x._c3r0 * y._c0r3;
-        _c0r1 = x._c0r1 * y._c0r0 + x._c1r1 * y._c0r1 + x._c2r1 * y._c0r2 + x._c3r1 * y._c0r3;
-        _c0r2 = x._c0r2 * y._c0r0 + x._c1r2 * y._c0r1 + x._c2r2 * y._c0r2 + x._c3r2 * y._c0r3;
-        _c0r3 = x._c0r3 * y._c0r0 + x._c1r3 * y._c0r1 + x._c2r3 * y._c0r2 + x._c3r3 * y._c0r3;
+        // Snapshot x entirely before any writes, since x may alias this.
+        double x_c0r0 = x._c0r0, x_c0r1 = x._c0r1, x_c0r2 = x._c0r2, x_c0r3 = x._c0r3;
+        double x_c1r0 = x._c1r0, x_c1r1 = x._c1r1, x_c1r2 = x._c1r2, x_c1r3 = x._c1r3;
+        double x_c2r0 = x._c2r0, x_c2r1 = x._c2r1, x_c2r2 = x._c2r2, x_c2r3 = x._c2r3;
+        double x_c3r0 = x._c3r0, x_c3r1 = x._c3r1, x_c3r2 = x._c3r2, x_c3r3 = x._c3r3;
 
-        _c1r0 = x._c0r0 * y._c1r0 + x._c1r0 * y._c1r1 + x._c2r0 * y._c1r2 + x._c3r0 * y._c1r3;
-        _c1r1 = x._c0r1 * y._c1r0 + x._c1r1 * y._c1r1 + x._c2r1 * y._c1r2 + x._c3r1 * y._c1r3;
-        _c1r2 = x._c0r2 * y._c1r0 + x._c1r2 * y._c1r1 + x._c2r2 * y._c1r2 + x._c3r2 * y._c1r3;
-        _c1r3 = x._c0r3 * y._c1r0 + x._c1r3 * y._c1r1 + x._c2r3 * y._c1r2 + x._c3r3 * y._c1r3;
+        _c0r0 = x_c0r0 * y._c0r0 + x_c1r0 * y._c0r1 + x_c2r0 * y._c0r2 + x_c3r0 * y._c0r3;
+        _c0r1 = x_c0r1 * y._c0r0 + x_c1r1 * y._c0r1 + x_c2r1 * y._c0r2 + x_c3r1 * y._c0r3;
+        _c0r2 = x_c0r2 * y._c0r0 + x_c1r2 * y._c0r1 + x_c2r2 * y._c0r2 + x_c3r2 * y._c0r3;
+        _c0r3 = x_c0r3 * y._c0r0 + x_c1r3 * y._c0r1 + x_c2r3 * y._c0r2 + x_c3r3 * y._c0r3;
 
-        _c2r0 = x._c0r0 * y._c2r0 + x._c1r0 * y._c2r1 + x._c2r0 * y._c2r2 + x._c3r0 * y._c2r3;
-        _c2r1 = x._c0r1 * y._c2r0 + x._c1r1 * y._c2r1 + x._c2r1 * y._c2r2 + x._c3r1 * y._c2r3;
-        _c2r2 = x._c0r2 * y._c2r0 + x._c1r2 * y._c2r1 + x._c2r2 * y._c2r2 + x._c3r2 * y._c2r3;
-        _c2r3 = x._c0r3 * y._c2r0 + x._c1r3 * y._c2r1 + x._c2r3 * y._c2r2 + x._c3r3 * y._c2r3;
+        _c1r0 = x_c0r0 * y._c1r0 + x_c1r0 * y._c1r1 + x_c2r0 * y._c1r2 + x_c3r0 * y._c1r3;
+        _c1r1 = x_c0r1 * y._c1r0 + x_c1r1 * y._c1r1 + x_c2r1 * y._c1r2 + x_c3r1 * y._c1r3;
+        _c1r2 = x_c0r2 * y._c1r0 + x_c1r2 * y._c1r1 + x_c2r2 * y._c1r2 + x_c3r2 * y._c1r3;
+        _c1r3 = x_c0r3 * y._c1r0 + x_c1r3 * y._c1r1 + x_c2r3 * y._c1r2 + x_c3r3 * y._c1r3;
 
-        _c3r0 = x._c0r0 * y._c3r0 + x._c1r0 * y._c3r1 + x._c2r0 * y._c3r2 + x._c3r0 * y._c3r3;
-        _c3r1 = x._c0r1 * y._c3r0 + x._c1r1 * y._c3r1 + x._c2r1 * y._c3r2 + x._c3r1 * y._c3r3;
-        _c3r2 = x._c0r2 * y._c3r0 + x._c1r2 * y._c3r1 + x._c2r2 * y._c3r2 + x._c3r2 * y._c3r3;
-        _c3r3 = x._c0r3 * y._c3r0 + x._c1r3 * y._c3r1 + x._c2r3 * y._c3r2 + x._c3r3 * y._c3r3;
+        _c2r0 = x_c0r0 * y._c2r0 + x_c1r0 * y._c2r1 + x_c2r0 * y._c2r2 + x_c3r0 * y._c2r3;
+        _c2r1 = x_c0r1 * y._c2r0 + x_c1r1 * y._c2r1 + x_c2r1 * y._c2r2 + x_c3r1 * y._c2r3;
+        _c2r2 = x_c0r2 * y._c2r0 + x_c1r2 * y._c2r1 + x_c2r2 * y._c2r2 + x_c3r2 * y._c2r3;
+        _c2r3 = x_c0r3 * y._c2r0 + x_c1r3 * y._c2r1 + x_c2r3 * y._c2r2 + x_c3r3 * y._c2r3;
+
+        _c3r0 = x_c0r0 * y._c3r0 + x_c1r0 * y._c3r1 + x_c2r0 * y._c3r2 + x_c3r0 * y._c3r3;
+        _c3r1 = x_c0r1 * y._c3r0 + x_c1r1 * y._c3r1 + x_c2r1 * y._c3r2 + x_c3r1 * y._c3r3;
+        _c3r2 = x_c0r2 * y._c3r0 + x_c1r2 * y._c3r1 + x_c2r2 * y._c3r2 + x_c3r2 * y._c3r3;
+        _c3r3 = x_c0r3 * y._c3r0 + x_c1r3 * y._c3r1 + x_c2r3 * y._c3r2 + x_c3r3 * y._c3r3;
     }
 
     // Special case for x axis of RotateUnitSinCos().
@@ -423,7 +429,7 @@ public struct Matrix44
     // by an angle specified by its sin() and cos(). This does not attempt to
     // verify that axis(x, y, z).length() == 1 or that the sin, cos values are
     // correct. this = this * rotation.
-    void RotateUnitSinCos(double x, double y, double z, double sin_angle, double cos_angle)
+    public void RotateUnitSinCos(double x, double y, double z, double sin_angle, double cos_angle)
     {
         // Optimize cases where the axis is along a major axis.
         // Since we've already normalized the vector we don't need to check that the other two dimensions are zero.

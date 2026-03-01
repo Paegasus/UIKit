@@ -30,7 +30,7 @@ public struct Transform
     // Each constructor must explicitly initialize one of the following,
     // according to the value of full_matrix_.
     AxisTransform2D axis_2d_;
-    Matrix44 matrix_;
+    public Matrix44 matrix_;
 
     public static double kEpsilon = float.MachineEpsilon;
 
@@ -470,6 +470,23 @@ public struct Transform
 
     // Applies the current transformation on an axis-angle rotation and assigns
     // the result to |this|.
+    public void RotateAboutXAxis(double degrees)
+    {
+        SinCos sin_cos = SinCos.SinCosDegrees(degrees);
+        if (sin_cos.IsZeroAngle())
+            return;
+        EnsureFullMatrix();
+        matrix_.RotateAboutXAxisSinCos(sin_cos.sin, sin_cos.cos);
+    }
+
+    public void RotateAboutYAxis(double degrees)
+    {
+        SinCos sin_cos = SinCos.SinCosDegrees(degrees);
+        if (sin_cos.IsZeroAngle())
+            return;
+        EnsureFullMatrix();
+        matrix_.RotateAboutYAxisSinCos(sin_cos.sin, sin_cos.cos);
+    }
 
     public void RotateAboutZAxis(double degrees)
     {
@@ -479,6 +496,28 @@ public struct Transform
         EnsureFullMatrix();
         matrix_.RotateAboutZAxisSinCos(sin_cos.sin, sin_cos.cos);
     }
+
+    public void RotateAbout(double x, double y, double z, double degrees)
+    {
+        SinCos sin_cos = SinCos.SinCosDegrees(degrees);
+        if (sin_cos.IsZeroAngle())
+            return;
+
+        double square_length = x * x + y * y + z * z;
+        if (square_length == 0)
+            return;
+        if (square_length != 1)
+        {
+            double scale = 1.0 / Math.Sqrt(square_length);
+            x *= scale;
+            y *= scale;
+            z *= scale;
+        }
+        EnsureFullMatrix();
+        matrix_.RotateUnitSinCos(x, y, z, sin_cos.sin, sin_cos.cos);
+    }
+
+    public void RotateAbout(in Vector3DF axis, double degrees) => RotateAbout(axis.X, axis.Y, axis.Z, degrees);
 
     // Applies the current transformation on a 2d rotation and assigns the result
     // to |this|, i.e. this = this * rotation.
