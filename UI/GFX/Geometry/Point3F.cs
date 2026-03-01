@@ -35,7 +35,7 @@ public struct Point3F
     public readonly Vector3DF OffsetFromOrigin() => new (X, Y, Z);
 
     // Returns a string representation of 3d point.
-    public override readonly string ToString() => $"{X},{Y},{Z}";
+    public override readonly string ToString() => $"{X:G6},{Y:G6},{Z:G6}";
 
     public override readonly int GetHashCode() => HashCode.Combine(X, Y, Z);
 
