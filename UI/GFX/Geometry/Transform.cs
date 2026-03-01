@@ -72,6 +72,15 @@ public class Transform
                              r0c3, r1c3, r2c3, r3c3);  // col 3
     }
 
+    // Constructs Transform from a float col-major array. Creates an
+    // AxisTransform2d or a Matrix44 depending on the values. GetColMajorF() and
+    // ColMajorF() are used when passing a Transform through mojo.
+    public static Transform ColMajor(ReadOnlySpan<double> a)
+    {
+        return new Transform(a[0], a[1], a[2], a[3], a[4], a[5], a[6], a[7], a[8], a[9],
+                   a[10], a[11], a[12], a[13], a[14], a[15]);
+    }
+
     // Constructs Transform from a float col-major array.
     // Creates an AxisTransform2d or a Matrix44 depending on the values.
     // GetColMajorF() and ColMajorF() are used when passing a Transform through mojo.
