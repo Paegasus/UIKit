@@ -159,26 +159,25 @@ public static class TransformTest
             mn.SkewY(45.0f);
             Assert.True(FloatAlmostEqual(0.0f, (mn.MapPoint(p) - m.MapPoint(n.MapPoint(p))).Length()));
           }
-/*
-          {
+
+        {
             Transform n = new();
             n.ApplyPerspectiveDepth(94.0f);
-            EXPECT_FLOAT_EQ(0.0f, (new Point3F(82.0f, 86.0f, 94.0f) - n.MapPoint(p)).Length());
+            Assert.True(FloatAlmostEqual(0.0f, (new Point3F(82.0f, 86.0f, 94.0f) - n.MapPoint(p)).Length()));
 
             Transform mn = m;
             mn.ApplyPerspectiveDepth(94.0f);
-            EXPECT_FLOAT_EQ(0.0f, (mn.MapPoint(p) - m.MapPoint(n.MapPoint(p))).Length());
-          }
+            Assert.True(FloatAlmostEqual(0.0f, (mn.MapPoint(p) - m.MapPoint(n.MapPoint(p))).Length()));
+        }
 
-                {
-                    Transform n = m;
-                    n.Zoom(2.0f);
-                    Point3F expectation = p;
-                    expectation.Scale(0.5f, 0.5f, 0.5f);
-                    expectation = m.MapPoint(expectation);
-                    expectation.Scale(2.0f, 2.0f, 2.0f);
-                    Assert.Equal(expectation, n.MapPoint(p));
-                }
-                */
+        {
+            Transform n = m;
+            n.Zoom(2.0f);
+            Point3F expectation = p;
+            expectation.Scale(0.5f, 0.5f, 0.5f);
+            expectation = m.MapPoint(expectation);
+            expectation.Scale(2.0f, 2.0f, 2.0f);
+            Assert.Equal(expectation, n.MapPoint(p));
+        }
     }
 }

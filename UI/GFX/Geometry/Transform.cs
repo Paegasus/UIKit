@@ -210,6 +210,23 @@ public struct Transform
     // Returns true if the matrix is either identity or pure translation.
     public readonly bool IsIdentityOrTranslation => !full_matrix_ ? axis_2d_.Scale == new Vector2DF(1, 1) : matrix_.IsIdentityOrTranslation;
 
+    // Returns true if the matrix has only x and y scaling components, including
+    // identity.
+    public readonly bool IsScale2D() => !full_matrix_ ?
+                                       axis_2d_.Translation.IsZero() :
+                                       matrix_.IsScale && matrix_.rc(2, 2) == 1;
+
+    // Returns true if the matrix is has only scaling and translation components,
+    // including identity.
+    public readonly bool IsScaleOrTranslation()
+    {
+        if (!full_matrix_)
+        {
+            return true;
+        }
+        return matrix_.IsScaleOrTranslation;
+    }
+
     public readonly PointF MapPointInternal(in Matrix44 matrix, in PointF point)
     {
 #if DEBUG
@@ -554,6 +571,15 @@ public struct Transform
     public void SkewX(double degrees) => Skew(degrees, 0);
     public void SkewY(double degrees) => Skew(0, degrees);
 
+    public void ApplyPerspectiveDepth(double depth)
+    {
+        if (depth == 0)
+            return;
+
+        EnsureFullMatrix();
+        matrix_.ApplyPerspectiveDepth(depth);
+    }
+
     // Returns true if axis-aligned 2d rects will remain axis-aligned after being
     // transformed by this matrix.
     public readonly bool Preserves2dAxisAlignment()
@@ -615,6 +641,46 @@ public struct Transform
             num_non_zero_in_col_0 <= 1 && num_non_zero_in_col_1 <= 1 &&
             !has_x_or_y_perspective;
     }
+
+    public void Transpose()
+    {
+        if (!IsScale2D())
+            EnsureFullMatrix();
+        matrix_.Transpose();
+    }
+
+    public void ApplyTransformOrigin(float x, float y, float z)
+    {
+        PostTranslate3D(x, y, z);
+        Translate3D(-x, -y, -z);
+    }
+
+    public void Zoom(float zoom_factor)
+    {
+        if (!full_matrix_)
+        {
+            axis_2d_.Zoom(zoom_factor);
+        }
+        else
+        {
+            matrix_.Zoom(zoom_factor);
+        }
+    }
+
+    public void Flatten()
+    {
+        if (full_matrix_)
+        {
+            matrix_.Flatten();
+        }
+#if DEBUG
+        Debug.Assert(IsFlat());
+#endif
+    }
+
+    public readonly bool IsFlat() => !full_matrix_ ? true : matrix_.IsFlat;
+
+    public readonly bool Is2dTransform() => !full_matrix_ ? true : matrix_.Is2DTransform;
 
     // Composes a transform from the given |decomp|, following the routines
     // detailed in this specs:
