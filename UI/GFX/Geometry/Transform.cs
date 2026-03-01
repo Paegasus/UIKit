@@ -241,10 +241,39 @@ public class Transform
         return MapPointInternal(matrix_, point);
     }
 
-    public QuadF MapQuad(in QuadF quad)
+    public Point3F MapPoint(in Point3F point)
     {
-        return new QuadF(MapPoint(quad.p1), MapPoint(quad.p2), MapPoint(quad.p3), MapPoint(quad.p4));
+        if (!full_matrix_)
+        {
+            PointF result = axis_2d_.MapPoint(point.AsPointF());
+            return new Point3F(result.X, result.Y, ClampFloatGeometry(point.Z));
+        }
+
+        return MapPointInternal(matrix_, point);
     }
+
+    public Point3F MapPointInternal(in Matrix44 matrix, in Point3F point)
+    {
+#if DEBUG
+        Debug.Assert(full_matrix_);
+#endif
+        double[] p = [point.X, point.Y, point.Z, 1];
+
+        matrix.MapVector4(p);
+
+        if (p[3] != 1.0 && double.IsNormal(p[3]))
+        {
+            double w_inverse = 1.0 / p[3];
+            return new Point3F(ClampFloatGeometry(p[0] * w_inverse),
+                   ClampFloatGeometry(p[1] * w_inverse),
+                   ClampFloatGeometry(p[2] * w_inverse));
+        }
+
+        return new Point3F(ClampFloatGeometry(p[0]), ClampFloatGeometry(p[1]),
+                 ClampFloatGeometry(p[2]));
+    }
+
+    public QuadF MapQuad(in QuadF quad) => new QuadF(MapPoint(quad.p1), MapPoint(quad.p2), MapPoint(quad.p3), MapPoint(quad.p4));
 
     public static Matrix44 AxisTransform2DToMatrix44(in AxisTransform2D axis_2d)
     {
@@ -312,6 +341,9 @@ public class Transform
             EnsureFullMatrix().PreTranslate3D(x, y, z);
     }
 
+    // Applies the current transformation on a scaling and assigns the result
+    // to |this|, i.e. this = this * scaling.
+
     public void Scale(float x, float y)
     {
         if (!full_matrix_)
@@ -323,6 +355,8 @@ public class Transform
             matrix_.PreScale(x, y);
         }
     }
+
+    public void Scale(float scale) => Scale(scale, scale);
 
     public void Scale3D(float x, float y, float z)
     {

@@ -6,18 +6,24 @@ namespace UI.Tests;
 
 public static class GeometryUtil
 {
-    private static bool FloatAlmostEqual(float a, float b)
+    public static bool FloatAlmostEqual(float a, float b)
     {
         // Handle infinities and NaN explicitly, matching gtest's ULP-based AlmostEquals.
         if (float.IsNaN(a) || float.IsNaN(b)) return false;
-        if (a == b) return true; // handles ∞ == ∞ and -∞ == -∞
 
-        // ULP-based comparison matching gtest's FloatingPoint<float>::AlmostEquals,
-        // which uses a threshold of 4 ULPs.
-        int ulpA = BitConverter.SingleToInt32Bits(a);
-        int ulpB = BitConverter.SingleToInt32Bits(b);
-        if ((ulpA < 0) != (ulpB < 0)) return false; // different signs
-        return Math.Abs(ulpA - ulpB) <= 4;
+        int bitsA = BitConverter.SingleToInt32Bits(a);
+        int bitsB = BitConverter.SingleToInt32Bits(b);
+
+        // Convert sign-and-magnitude to biased representation, matching gtest's DistanceBetweenSignAndMagnitudeNumbers.
+        static uint Biased(int bits) => (bits < 0)
+                                      ? (uint)(~bits + 1)
+                                      : (uint)bits | 0x80000000u;
+
+        uint distance = Biased(bitsA) >= Biased(bitsB)
+            ? Biased(bitsA) - Biased(bitsB)
+            : Biased(bitsB) - Biased(bitsA);
+
+        return distance <= 4;
     }
 
     public static void AssertRectFEqual(in RectF lhs, in RectF rhs)
