@@ -30,7 +30,7 @@ public struct Transform
     // Each constructor must explicitly initialize one of the following,
     // according to the value of full_matrix_.
     AxisTransform2D axis_2d_;
-    public Matrix44 matrix_;
+    Matrix44 matrix_;
 
     public static double kEpsilon = float.MachineEpsilon;
 
@@ -353,6 +353,17 @@ public struct Transform
     {
         PostTranslate(offset.X, offset.Y);
     }
+
+    public void PostTranslate3D(float x, float y, float z)
+    {
+        if (z == 0)
+            PostTranslate(x, y);
+        else
+            EnsureFullMatrix();
+        matrix_.PostTranslate3D(x, y, z);
+    }
+
+    public void PostTranslate3D(in Vector3DF offset) => PostTranslate3D(offset.X, offset.Y, offset.Z);
 
     public void Translate3D(in Vector3DF offset)
     {

@@ -107,59 +107,59 @@ public static class TransformTest
             mn.Translate(5.0f, 6.0f);
             Assert.Equal(mn.MapPoint(p), m.MapPoint(n.MapPoint(p)));
           }
-/*
+
           {
             Transform n = new();
-            n.Translate3d(5.0f, 6.0f, 7.0f);
+            n.Translate3D(5.0f, 6.0f, 7.0f);
             Assert.Equal(new Point3F(46.0f, 49.0f, 54.0f), n.MapPoint(p));
 
             Transform mn = m;
-            mn.Translate3d(5.0f, 6.0f, 7.0f);
+            mn.Translate3D(5.0f, 6.0f, 7.0f);
             Assert.Equal(mn.MapPoint(p), m.MapPoint(n.MapPoint(p)));
           }
 
           {
             Transform nm = m;
             nm.PostTranslate(5.0f, 6.0f);
-            Assert.Equal(nm.MapPoint(p), m.MapPoint(p) + Vector3dF(5.0f, 6.0f, 0.0f));
+            Assert.Equal(nm.MapPoint(p), m.MapPoint(p) + new Vector3DF(5.0f, 6.0f, 0.0f));
           }
 
           {
             Transform nm = m;
-            nm.PostTranslate3d(5.0f, 6.0f, 7.0f);
-            Assert.Equal(nm.MapPoint(p), m.MapPoint(p) + Vector3dF(5.0f, 6.0f, 7.0f));
+            nm.PostTranslate3D(5.0f, 6.0f, 7.0f);
+            Assert.Equal(nm.MapPoint(p), m.MapPoint(p) + new Vector3DF(5.0f, 6.0f, 7.0f));
           }
 
           {
             Transform n = new();
             n.Skew(45.0f, -45.0f);
-            EXPECT_FLOAT_EQ(0.0f, (new Point3F(84.0f, 2.0f, 47.0f) - n.MapPoint(p)).Length());
+            Assert.True(FloatAlmostEqual(0.0f, (new Point3F(84.0f, 2.0f, 47.0f) - n.MapPoint(p)).Length()));
 
             Transform mn = m;
             mn.Skew(45.0f, -45.0f);
-            EXPECT_FLOAT_EQ(0.0f, (mn.MapPoint(p) - m.MapPoint(n.MapPoint(p))).Length());
+            Assert.True(FloatAlmostEqual(0.0f, (mn.MapPoint(p) - m.MapPoint(n.MapPoint(p))).Length()));
           }
 
           {
             Transform n = new();
             n.SkewX(45.0f);
-            EXPECT_FLOAT_EQ(0.0f, (new Point3F(84.0f, 43.0f, 47.0f) - n.MapPoint(p)).Length());
+            Assert.True(FloatAlmostEqual(0.0f, (new Point3F(84.0f, 43.0f, 47.0f) - n.MapPoint(p)).Length()));
 
             Transform mn = m;
             mn.SkewX(45.0f);
-            EXPECT_FLOAT_EQ(0.0f, (mn.MapPoint(p) - m.MapPoint(n.MapPoint(p))).Length());
+            Assert.True(FloatAlmostEqual(0.0f, (mn.MapPoint(p) - m.MapPoint(n.MapPoint(p))).Length()));
           }
 
           {
             Transform n = new();
             n.SkewY(45.0f);
-            EXPECT_FLOAT_EQ(0.0f, (new Point3F(41.0f, 84.0f, 47.0f) - n.MapPoint(p)).Length());
+            Assert.True(FloatAlmostEqual(0.0f, (new Point3F(41.0f, 84.0f, 47.0f) - n.MapPoint(p)).Length()));
 
             Transform mn = m;
             mn.SkewY(45.0f);
-            EXPECT_FLOAT_EQ(0.0f, (mn.MapPoint(p) - m.MapPoint(n.MapPoint(p))).Length());
+            Assert.True(FloatAlmostEqual(0.0f, (mn.MapPoint(p) - m.MapPoint(n.MapPoint(p))).Length()));
           }
-
+/*
           {
             Transform n = new();
             n.ApplyPerspectiveDepth(94.0f);
