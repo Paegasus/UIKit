@@ -135,6 +135,13 @@ public struct Transform
         return ColMajor(a, b, 0, 0, c, d, 0, 0, 0, 0, 1, 0, e, f, 0, 1);
     }
 
+    // Resets this transform to the identity transform.
+    public void MakeIdentity()
+    {
+        full_matrix_ = false;
+        axis_2d_ = new AxisTransform2D();
+    }
+
     public Transform(in Quaternion q) : this(
           // Col 0.
           1.0 - 2.0 * (q.Y * q.Y + q.Z * q.Z),

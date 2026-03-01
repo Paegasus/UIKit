@@ -9,6 +9,171 @@ namespace UI.Tests;
 
 public static class TransformTest
 {
+    private static void STATIC_ROW0_EQ(double a, double b, double c, double d, Transform t)
+    {
+        Debug.Assert(a == t.rc(0, 0));
+        Debug.Assert(b == t.rc(0, 1));
+        Debug.Assert(c == t.rc(0, 2));
+        Debug.Assert(d == t.rc(0, 3));
+    }
+
+    private static void STATIC_ROW1_EQ(double a, double b, double c, double d, Transform t)
+    {
+        Debug.Assert(a == t.rc(1, 0));
+        Debug.Assert(b == t.rc(1, 1));
+        Debug.Assert(c == t.rc(1, 2));
+        Debug.Assert(d == t.rc(1, 3));
+    }
+
+    private static void STATIC_ROW2_EQ(double a, double b, double c, double d, Transform t)
+    {
+        Debug.Assert(a == t.rc(2, 0));
+        Debug.Assert(b == t.rc(2, 1));
+        Debug.Assert(c == t.rc(2, 2));
+        Debug.Assert(d == t.rc(2, 3));
+    }
+
+    private static void STATIC_ROW3_EQ(double a, double b, double c, double d, Transform t)
+    {
+        Debug.Assert(a == t.rc(3, 0));
+        Debug.Assert(b == t.rc(3, 1));
+        Debug.Assert(c == t.rc(3, 2));
+        Debug.Assert(d == t.rc(3, 3));
+    }
+
+    private static void EXPECT_ROW0_EQ(float a, float b, float c, float d, in Transform t)
+    {
+        FloatAlmostEqual(a, (float)t.rc(0, 0));
+        FloatAlmostEqual(b, (float)t.rc(0, 1));
+        FloatAlmostEqual(c, (float)t.rc(0, 2));
+        FloatAlmostEqual(d, (float)t.rc(0, 3));
+    }
+
+    private static void EXPECT_ROW1_EQ(float a, float b, float c, float d, in Transform t)
+    {
+        FloatAlmostEqual(a, (float)t.rc(1, 0));
+        FloatAlmostEqual(b, (float)t.rc(1, 1));
+        FloatAlmostEqual(c, (float)t.rc(1, 2));
+        FloatAlmostEqual(d, (float)t.rc(1, 3));
+    }
+
+    private static void EXPECT_ROW2_EQ(float a, float b, float c, float d, in Transform t)
+    {
+        FloatAlmostEqual(a, (float)t.rc(2, 0));
+        FloatAlmostEqual(b, (float)t.rc(2, 1));
+        FloatAlmostEqual(c, (float)t.rc(2, 2));
+        FloatAlmostEqual(d, (float)t.rc(2, 3));
+    }
+
+    private static void EXPECT_ROW3_EQ(float a, float b, float c, float d, in Transform t)
+    {
+        FloatAlmostEqual(a, (float)t.rc(3, 0));
+        FloatAlmostEqual(b, (float)t.rc(3, 1));
+        FloatAlmostEqual(c, (float)t.rc(3, 2));
+        FloatAlmostEqual(d, (float)t.rc(3, 3));
+    }
+
+    // Checking float values for equality close to zero is not robust using
+    // EXPECT_FLOAT_EQ (see gtest documentation). So, to verify rotation matrices,
+    // we must use a looser absolute error threshold in some places.
+    private static void EXPECT_ROW0_NEAR(double a, double b, double c, double d, Transform transform, double errorThreshold)
+    {
+        Assert.Equal(a, transform.rc(0, 0), errorThreshold);
+        Assert.Equal(b, transform.rc(0, 1), errorThreshold);
+        Assert.Equal(c, transform.rc(0, 2), errorThreshold);
+        Assert.Equal(d, transform.rc(0, 3), errorThreshold);
+    }
+
+    private static void EXPECT_ROW1_NEAR(double a, double b, double c, double d, Transform transform, double errorThreshold)
+    {
+        Assert.Equal(a, transform.rc(1, 0), errorThreshold);
+        Assert.Equal(b, transform.rc(1, 1), errorThreshold);
+        Assert.Equal(c, transform.rc(1, 2), errorThreshold);
+        Assert.Equal(d, transform.rc(1, 3), errorThreshold);
+    }
+
+    private static void EXPECT_ROW2_NEAR(double a, double b, double c, double d, Transform transform, double errorThreshold)
+    {
+        Assert.Equal(a, transform.rc(2, 0), errorThreshold);
+        Assert.Equal(b, transform.rc(2, 1), errorThreshold);
+        Assert.Equal(c, transform.rc(2, 2), errorThreshold);
+        Assert.Equal(d, transform.rc(2, 3), errorThreshold);
+    }
+
+    private static bool PointsAreNearlyEqual(in PointF lhs, in PointF rhs)
+    {
+        return lhs.IsWithinDistance(rhs, 0.01f);
+    }
+
+    private static bool PointsAreNearlyEqual(in Point3F lhs, in Point3F rhs)
+    {
+        return lhs.SquaredDistanceTo(rhs) < 0.0001f;
+    }
+
+    private static bool MatricesAreNearlyEqual(in Transform lhs, in Transform rhs)
+    {
+        float epsilon = 0.0001f;
+        for (int row = 0; row < 4; ++row)
+        {
+            for (int col = 0; col < 4; ++col)
+            {
+                if (Math.Abs(lhs.rc(row, col) - rhs.rc(row, col)) > epsilon)
+                    return false;
+            }
+        }
+        return true;
+    }
+
+    private static Transform GetTestMatrix1()
+    {
+        // clang-format off
+        Transform transform = Transform.ColMajor(10.0, 11.0, 12.0, 13.0,
+                                                 14.0, 15.0, 16.0, 17.0,
+                                                 18.0, 19.0, 20.0, 21.0,
+                                                 22.0, 23.0, 24.0, 25.0);
+        // clang-format on
+
+        STATIC_ROW0_EQ(10.0, 14.0, 18.0, 22.0, transform);
+        STATIC_ROW1_EQ(11.0, 15.0, 19.0, 23.0, transform);
+        STATIC_ROW2_EQ(12.0, 16.0, 20.0, 24.0, transform);
+        STATIC_ROW3_EQ(13.0, 17.0, 21.0, 25.0, transform);
+
+        EXPECT_ROW0_EQ(10.0f, 14.0f, 18.0f, 22.0f, transform);
+        EXPECT_ROW1_EQ(11.0f, 15.0f, 19.0f, 23.0f, transform);
+        EXPECT_ROW2_EQ(12.0f, 16.0f, 20.0f, 24.0f, transform);
+        EXPECT_ROW3_EQ(13.0f, 17.0f, 21.0f, 25.0f, transform);
+        return transform;
+    }
+
+    private static Transform GetTestMatrix2()
+    {
+        Transform transform =
+              Transform.RowMajor(30.0, 34.0, 38.0, 42.0, 31.0, 35.0, 39.0, 43.0, 32.0,
+                                  36.0, 40.0, 44.0, 33.0, 37.0, 41.0, 45.0);
+        // clang-format on
+
+        STATIC_ROW0_EQ(30.0, 34.0, 38.0, 42.0, transform);
+        STATIC_ROW1_EQ(31.0, 35.0, 39.0, 43.0, transform);
+        STATIC_ROW2_EQ(32.0, 36.0, 40.0, 44.0, transform);
+        STATIC_ROW3_EQ(33.0, 37.0, 41.0, 45.0, transform);
+
+        EXPECT_ROW0_EQ(30.0f, 34.0f, 38.0f, 42.0f, transform);
+        EXPECT_ROW1_EQ(31.0f, 35.0f, 39.0f, 43.0f, transform);
+        EXPECT_ROW2_EQ(32.0f, 36.0f, 40.0f, 44.0f, transform);
+        EXPECT_ROW3_EQ(33.0f, 37.0f, 41.0f, 45.0f, transform);
+        return transform;
+    }
+
+    private static Transform ApproxIdentityMatrix(double error)
+    {
+        return Transform.ColMajor(1.0 - error, error, error, error,  // col0
+                                  error, 1.0 - error, error, error,  // col1
+                                  error, error, 1.0 - error, error,  // col2
+                                  error, error, error, 1.0 - error); // col3
+    }
+
+    private static double kErrorThreshold = 1e-7;
+
     // This test is to make it easier to understand the order of operations.
     [Fact]
     private static void TestPrePostOperations()
@@ -178,5 +343,102 @@ public static class TransformTest
             expectation.Scale(2.0f, 2.0f, 2.0f);
             Assert.Equal(expectation, n.MapPoint(p));
         }
+    }
+
+    [Fact]
+    private static void TestEquality()
+    {
+        Transform lhs = new();
+        Transform interpolated;
+        var rhs = GetTestMatrix1();
+        interpolated = lhs;
+        for (int i = 0; i <= 100; ++i)
+        {
+            for (int row = 0; row < 4; ++row)
+            {
+                for (int col = 0; col < 4; ++col)
+                {
+                    float a = (float)lhs.rc(row, col);
+                    float b = (float)rhs.rc(row, col);
+                    float t = i / 100.0f;
+                    interpolated.set_rc(row, col, a + (b - a) * t);
+                }
+            }
+            if (i == 100)
+            {
+                Assert.True(rhs == interpolated);
+            }
+            else
+            {
+                Assert.True(rhs != interpolated);
+            }
+        }
+        lhs = new Transform();
+        rhs = new Transform();
+        for (int i = 1; i < 100; ++i)
+        {
+            lhs.MakeIdentity();
+            rhs.MakeIdentity();
+            lhs.Translate(i, i);
+            rhs.Translate(-i, -i);
+            Assert.True(lhs != rhs);
+            rhs.Translate(2 * i, 2 * i);
+            Assert.True(lhs == rhs);
+        }
+    }
+
+    private static void TestConcatTranslate()
+    {
+        
+    }
+
+    private static void TestConcatScale()
+    {
+        
+    }
+
+    private static void TestConcatRotate()
+    {
+        
+    }
+
+    private static void TestConcatSelf()
+    {
+        
+    }
+
+    private static void TestTranslate()
+    {
+        
+    }
+
+    private static void TestScale()
+    {
+        
+    }
+
+    private static void TestSetRotate()
+    {
+        
+    }
+
+    private static void TestConcatTranslate2D()
+    {
+        
+    }
+
+    private static void TestConcatScale2D()
+    {
+        
+    }
+
+    private static void TestConcatRotate2D()
+    {
+        
+    }
+
+    private static void TestSetTranslate2D()
+    {
+        
     }
 }
