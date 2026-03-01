@@ -57,7 +57,6 @@ public static class TransformTest
             Assert.Equal(mn.MapPoint(p), m.MapPoint(n.MapPoint(p)));
         }
 
-
         {
             Transform n = new();
             n.Scale(2.0f, 3.0f);
@@ -67,8 +66,8 @@ public static class TransformTest
             mn.Scale(2.0f, 3.0f);
             Assert.Equal(mn.MapPoint(p), m.MapPoint(n.MapPoint(p)));
         }
-        
-          {
+
+        {
             Transform n = new();
             n.Scale3D(2.0f, 3.0f, 4.0f);
             Assert.Equal(new Point3F(82.0f, 129.0f, 188.0f), n.MapPoint(p));
@@ -76,9 +75,9 @@ public static class TransformTest
             Transform mn = m;
             mn.Scale3D(2.0f, 3.0f, 4.0f);
             Assert.Equal(mn.MapPoint(p), m.MapPoint(n.MapPoint(p)));
-          }
+        }
 
-          {
+        {
             Transform n = new();
             n.Rotate(90.0f);
             Assert.True(FloatAlmostEqual(0.0f, (new Point3F(-43.0f, 41.0f, 47.0f) - n.MapPoint(p)).Length()));
@@ -86,9 +85,9 @@ public static class TransformTest
             Transform mn = m;
             mn.Rotate(90.0f);
             Assert.True(FloatAlmostEqual(0.0f, (mn.MapPoint(p) - m.MapPoint(n.MapPoint(p))).Length()));
-          }
+        }
 
-          {
+        {
             Transform n = new();
             n.RotateAbout(10.0f, 10.0f, 10.0f, 120.0f);
             Assert.True(FloatAlmostEqual(0.0f, (new Point3F(47.0f, 41.0f, 43.0f) - n.MapPoint(p)).Length()));
@@ -96,9 +95,9 @@ public static class TransformTest
             Transform mn = m;
             mn.RotateAbout(10.0f, 10.0f, 10.0f, 120.0f);
             Assert.True(FloatAlmostEqual(0.0f, (mn.MapPoint(p) - m.MapPoint(n.MapPoint(p))).Length()));
-          }
+        }
 
-          {
+        {
             Transform n = new();
             n.Translate(5.0f, 6.0f);
             Assert.Equal(new Point3F(46.0f, 49.0f, 47.0f), n.MapPoint(p));
@@ -106,9 +105,9 @@ public static class TransformTest
             Transform mn = m;
             mn.Translate(5.0f, 6.0f);
             Assert.Equal(mn.MapPoint(p), m.MapPoint(n.MapPoint(p)));
-          }
+        }
 
-          {
+        {
             Transform n = new();
             n.Translate3D(5.0f, 6.0f, 7.0f);
             Assert.Equal(new Point3F(46.0f, 49.0f, 54.0f), n.MapPoint(p));
@@ -116,21 +115,21 @@ public static class TransformTest
             Transform mn = m;
             mn.Translate3D(5.0f, 6.0f, 7.0f);
             Assert.Equal(mn.MapPoint(p), m.MapPoint(n.MapPoint(p)));
-          }
+        }
 
-          {
+        {
             Transform nm = m;
             nm.PostTranslate(5.0f, 6.0f);
             Assert.Equal(nm.MapPoint(p), m.MapPoint(p) + new Vector3DF(5.0f, 6.0f, 0.0f));
-          }
+        }
 
-          {
+        {
             Transform nm = m;
             nm.PostTranslate3D(5.0f, 6.0f, 7.0f);
             Assert.Equal(nm.MapPoint(p), m.MapPoint(p) + new Vector3DF(5.0f, 6.0f, 7.0f));
-          }
+        }
 
-          {
+        {
             Transform n = new();
             n.Skew(45.0f, -45.0f);
             Assert.True(FloatAlmostEqual(0.0f, (new Point3F(84.0f, 2.0f, 47.0f) - n.MapPoint(p)).Length()));
@@ -138,9 +137,9 @@ public static class TransformTest
             Transform mn = m;
             mn.Skew(45.0f, -45.0f);
             Assert.True(FloatAlmostEqual(0.0f, (mn.MapPoint(p) - m.MapPoint(n.MapPoint(p))).Length()));
-          }
+        }
 
-          {
+        {
             Transform n = new();
             n.SkewX(45.0f);
             Assert.True(FloatAlmostEqual(0.0f, (new Point3F(84.0f, 43.0f, 47.0f) - n.MapPoint(p)).Length()));
@@ -148,9 +147,9 @@ public static class TransformTest
             Transform mn = m;
             mn.SkewX(45.0f);
             Assert.True(FloatAlmostEqual(0.0f, (mn.MapPoint(p) - m.MapPoint(n.MapPoint(p))).Length()));
-          }
+        }
 
-          {
+        {
             Transform n = new();
             n.SkewY(45.0f);
             Assert.True(FloatAlmostEqual(0.0f, (new Point3F(41.0f, 84.0f, 47.0f) - n.MapPoint(p)).Length()));
@@ -158,7 +157,7 @@ public static class TransformTest
             Transform mn = m;
             mn.SkewY(45.0f);
             Assert.True(FloatAlmostEqual(0.0f, (mn.MapPoint(p) - m.MapPoint(n.MapPoint(p))).Length()));
-          }
+        }
 
         {
             Transform n = new();
