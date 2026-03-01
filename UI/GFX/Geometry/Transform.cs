@@ -282,7 +282,7 @@ public class Transform
         Translate(offset.X, offset.Y);
     }
 
-    void PostTranslate(float x, float y)
+    public void PostTranslate(float x, float y)
     {
         if (!full_matrix_)
         {
@@ -294,7 +294,7 @@ public class Transform
         }
     }
 
-    void PostTranslate(in Vector2DF offset)
+    public void PostTranslate(in Vector2DF offset)
     {
         PostTranslate(offset.X, offset.Y);
     }
