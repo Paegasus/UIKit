@@ -1,5 +1,7 @@
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using UI.Extensions;
+
 using static UI.GFX.Geometry.ClampFloatGeometryHelper;
 using static UI.GFX.Geometry.PointConversions;
 
@@ -19,7 +21,7 @@ namespace UI.GFX.Geometry;
 //   in the method comments.
 // - On assignment, the new matrix will keep the choice of the rhs matrix.
 //
-public class Transform
+public struct Transform
 {
     // axis_2d_ is used if full_matrix_ is false, otherwise matrix_ is used.
     // See the class documentation for more details about how we use them.
@@ -103,7 +105,7 @@ public class Transform
     }
 
     // Used internally to construct Transform with parameters in col-major order.
-    Transform(double r0c0, double r1c0, double r2c0, double r3c0,
+    private Transform(double r0c0, double r1c0, double r2c0, double r3c0,
               double r0c1, double r1c1, double r2c1, double r3c1,
               double r0c2, double r1c2, double r2c2, double r3c2,
               double r0c3, double r1c3, double r2c3, double r3c3)
@@ -170,7 +172,7 @@ public class Transform
     public static Transform Make270degRotation() => Affine(0, -1, 1, 0, 0, 0);
 
     // Gets a value at |row|, |col| from the matrix.
-    public double rc(int row, int col)
+    public readonly double rc(int row, int col)
     {
 #if DEBUG
         Debug.Assert((uint)row <= 3u);
@@ -201,13 +203,14 @@ public class Transform
         Debug.Assert((uint)row <= 3u);
         Debug.Assert((uint)col <= 3u);
 #endif
-        EnsureFullMatrix().set_rc(row, col, v);
+        EnsureFullMatrix();
+        matrix_.set_rc(row, col, v);
     }
 
     // Returns true if the matrix is either identity or pure translation.
-    public bool IsIdentityOrTranslation => !full_matrix_ ? axis_2d_.Scale == new Vector2DF(1, 1) : matrix_.IsIdentityOrTranslation;
+    public readonly bool IsIdentityOrTranslation => !full_matrix_ ? axis_2d_.Scale == new Vector2DF(1, 1) : matrix_.IsIdentityOrTranslation;
 
-    public PointF MapPointInternal(in Matrix44 matrix, in PointF point)
+    public readonly PointF MapPointInternal(in Matrix44 matrix, in PointF point)
     {
 #if DEBUG
         Debug.Assert(full_matrix_);
@@ -227,21 +230,22 @@ public class Transform
         return new PointF(ClampFloatGeometry(p[0]), ClampFloatGeometry(p[1]));
     }
 
-    public Point MapPoint(in Point point)
+    public readonly Point MapPoint(in Point point)
     {
         return ToRoundedPoint(MapPoint(new PointF(point)));
     }
 
-    public PointF MapPoint(in PointF point)
+    public readonly PointF MapPoint(in PointF point)
     {
         if (!full_matrix_)
         {
             return axis_2d_.MapPoint(point);
         }
+        
         return MapPointInternal(matrix_, point);
     }
 
-    public Point3F MapPoint(in Point3F point)
+    public readonly Point3F MapPoint(in Point3F point)
     {
         if (!full_matrix_)
         {
@@ -252,7 +256,7 @@ public class Transform
         return MapPointInternal(matrix_, point);
     }
 
-    public Point3F MapPointInternal(in Matrix44 matrix, in Point3F point)
+    public readonly Point3F MapPointInternal(in Matrix44 matrix, in Point3F point)
     {
 #if DEBUG
         Debug.Assert(full_matrix_);
@@ -273,7 +277,7 @@ public class Transform
                  ClampFloatGeometry(p[2]));
     }
 
-    public QuadF MapQuad(in QuadF quad) => new QuadF(MapPoint(quad.p1), MapPoint(quad.p2), MapPoint(quad.p3), MapPoint(quad.p4));
+    public readonly QuadF MapQuad(in QuadF quad) => new QuadF(MapPoint(quad.p1), MapPoint(quad.p2), MapPoint(quad.p3), MapPoint(quad.p4));
 
     public static Matrix44 AxisTransform2DToMatrix44(in AxisTransform2D axis_2d)
     {
@@ -282,8 +286,19 @@ public class Transform
                             0, 0, 1, 0,                // col 2
                             axis_2d.Translation.X, axis_2d.Translation.Y, 0, 1);
     }
+    
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public void EnsureFullMatrix()
+    {
+        if (!full_matrix_)
+        {
+            full_matrix_ = true;
+            matrix_ = AxisTransform2DToMatrix44(axis_2d_);
+        }
+    }
 
-    public ref Matrix44 EnsureFullMatrix()
+    /*
+    public Matrix44 EnsureFullMatrix()
     {
         if (!full_matrix_)
         {
@@ -291,7 +306,18 @@ public class Transform
             matrix_ = AxisTransform2DToMatrix44(axis_2d_);
         }
         
-        return ref matrix_;
+        return matrix_;
+    }
+    */
+
+    public readonly Matrix44 GetFullMatrix()
+    {
+        if (!full_matrix_)
+        {
+            return AxisTransform2DToMatrix44(axis_2d_);
+        }
+        
+        return matrix_;
     }
 
     public void Translate(float x, float y)
@@ -336,9 +362,14 @@ public class Transform
     public void Translate3D(float x, float y, float z)
     {
         if (z == 0)
+        {
             Translate(x, y);
+        }
         else
-            EnsureFullMatrix().PreTranslate3D(x, y, z);
+        {
+            EnsureFullMatrix();
+            matrix_.PreTranslate3D(x, y, z);
+        }
     }
 
     // Applies the current transformation on a scaling and assigns the result
@@ -361,9 +392,14 @@ public class Transform
     public void Scale3D(float x, float y, float z)
     {
         if (z == 1)
+        {
             Scale(x, y);
+        }
         else
-            EnsureFullMatrix().PreScale3D(x, y, z);
+        {
+            EnsureFullMatrix();
+            matrix_.PreScale3D(x, y, z);
+        }
     }
 
     public void PostScale(float x, float y)
@@ -440,7 +476,8 @@ public class Transform
         SinCos sin_cos = SinCos.SinCosDegrees(degrees);
         if (sin_cos.IsZeroAngle())
             return;
-        EnsureFullMatrix().RotateAboutZAxisSinCos(sin_cos.sin, sin_cos.cos);
+        EnsureFullMatrix();
+        matrix_.RotateAboutZAxisSinCos(sin_cos.sin, sin_cos.cos);
     }
 
     // Applies the current transformation on a 2d rotation and assigns the result
@@ -460,7 +497,8 @@ public class Transform
         if (degrees_x == 0 && degrees_y == 0)
             return;
         
-        EnsureFullMatrix().Skew(TanDegrees(degrees_x), TanDegrees(degrees_y));
+        EnsureFullMatrix();
+        matrix_.Skew(TanDegrees(degrees_x), TanDegrees(degrees_y));
     }
 
     public void SkewX(double degrees) => Skew(degrees, 0);
@@ -468,7 +506,7 @@ public class Transform
 
     // Returns true if axis-aligned 2d rects will remain axis-aligned after being
     // transformed by this matrix.
-    public bool Preserves2dAxisAlignment() // readonly
+    public readonly bool Preserves2dAxisAlignment()
     {
         if (!full_matrix_)
         {
@@ -552,28 +590,21 @@ public class Transform
         result.PreConcat(new Transform(decomp.Quaternion));
 
         if (decomp.Skew.X != 0 || decomp.Skew.Y != 0 || decomp.Skew.Z != 0)
-            result.EnsureFullMatrix().ApplyDecomposedSkews(decomp.Skew);
+        {
+            result.EnsureFullMatrix();
+            result.matrix_.ApplyDecomposedSkews(decomp.Skew);
+        }
 
         result.Scale3D((float)decomp.Scale.X, (float)decomp.Scale.Y, (float)decomp.Scale.Z);
 
         return result;
-        
-    }
-
-    public Matrix44 GetFullMatrix()
-    {
-        if (!full_matrix_)
-        {
-            return AxisTransform2DToMatrix44(axis_2d_);
-        }
-        return matrix_;
     }
 
     // It's not easy to get a hash code
     // because a Transform either uses a AxisTransform2D or a Matrix44
     //public override int GetHashCode() => HashCode.Combine();
 
-    public bool Equals(Transform other)
+    public readonly bool Equals(in Transform other)
     {
         if (!full_matrix_ && !other.full_matrix_)
         {
@@ -586,7 +617,7 @@ public class Transform
         return GetFullMatrix() == other.GetFullMatrix();
     }
 
-    public override bool Equals(object? obj) => obj is Transform other && Equals(other);
+    public override readonly bool Equals(object? obj) => obj is Transform other && Equals(other);
 
     public static bool operator ==(in Transform left, in Transform right) => left.Equals(right);
     public static bool operator !=(in Transform left, in Transform right) => !left.Equals(right);
