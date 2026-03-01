@@ -67,18 +67,28 @@ public static class Point3FTest
         Assert.Equal(new Point3F(12.0f, -6.0f, 6.0f).ToString(), point.ToString());
     }
 
-    private static void Test2()
+    [Fact]
+    private static void TestIsOrigin()
     {
-
+        Assert.True(new Point3F().IsOrigin());
+        Assert.False(new Point3F(0, 0, 0.1f).IsOrigin());
+        Assert.False(new Point3F(0, 0.1f, 0).IsOrigin());
+        Assert.False(new Point3F(0.1f, 0, 0).IsOrigin());
+        Assert.False(new Point3F(0, 0, -0.1f).IsOrigin());
+        Assert.False(new Point3F(0, -0.1f, 0).IsOrigin());
+        Assert.False(new Point3F(-0.1f, 0, 0).IsOrigin());
     }
 
-    private static void Test3()
+    [Fact]
+    private static void TestOffsetFromOrigin()
     {
-
+        Assert.Equal(new Vector3DF(1.25f, 2.5f, -3.75f),
+            new Point3F(1.25f, 2.5f, -3.75f).OffsetFromOrigin());
     }
 
-    private static void Test4()
+    [Fact]
+    private static void TestToString()
     {
-
+        Assert.Equal("1.03125,2.5,-3", new Point3F(1.03125f, 2.5f, -3f).ToString());
     }
 }
