@@ -762,6 +762,61 @@ public struct Transform
         return result;
     }
 
+    // Decomposes |this| into |decomp|. Returns nullopt if |this| can't be
+    // decomposed. |decomp| must be identity on input.
+    //
+    // Uses routines described in the following specs:
+    // 2d: https://www.w3.org/TR/css-transforms-1/#decomposing-a-2d-matrix
+    // 3d: https://www.w3.org/TR/css-transforms-2/#decomposing-a-3d-matrix
+    //<
+    // Note: when the determinant is negative, the 2d spec calls for flipping one
+    // of the axis, while the general 3d spec calls for flipping all of the
+    // scales. The latter not only introduces rotation in the case of a trivial
+    // scale inversion, but causes transformed objects to needlessly shrink and
+    // grow as they transform through scale = 0 along multiple axes. Thus 2d
+    // transforms should follow the 2d spec regarding matrix decomposition.
+    public readonly DecomposedTransform? Decompose()
+    {
+        if (!full_matrix_)
+        {
+            // Consider letting 2d decomposition always succeed.
+            if (!axis_2d_.IsInvertible())
+                return null;
+            return axis_2d_.Decompose();
+        }
+        return matrix_.Decompose();
+    }
+
+    // Decomposes |this| and |from|, interpolates the decomposed values, and
+    // sets |this| to the reconstituted result. Returns false and leaves |this|
+    // unchanged if either matrix can't be decomposed.
+    // Uses routines described in this spec:
+    // https://www.w3.org/TR/css-transforms-2/#matrix-interpolation
+    //
+    // Note: this call is expensive for complex transforms since we need to
+    // decompose the transforms. If you're going to be calling this rapidly
+    // (e.g., in an animation) for complex transforms, you should decompose once
+    // using Decompose() and reuse your DecomposedTransform with
+    // BlendDecomposedTransforms() (see transform_util.h).
+    public bool Blend(in Transform from, double progress)
+    {
+        DecomposedTransform? to_decomp = Decompose();
+
+        if (!to_decomp.HasValue)
+            return false;
+
+        DecomposedTransform? from_decomp = from.Decompose();
+
+        if (!from_decomp.HasValue)
+            return false;
+
+        to_decomp = TransformUtil.BlendDecomposedTransforms(to_decomp.Value, from_decomp.Value, progress);
+
+        this = Compose(to_decomp.Value);
+
+        return true;
+    }
+
     // It's not easy to get a hash code
     // because a Transform either uses a AxisTransform2D or a Matrix44
     //public override int GetHashCode() => HashCode.Combine();

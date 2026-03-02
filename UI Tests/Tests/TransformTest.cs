@@ -43,34 +43,34 @@ public static class TransformTest
 
     private static void EXPECT_ROW0_EQ(float a, float b, float c, float d, in Transform t)
     {
-        FloatAlmostEqual(a, (float)t.rc(0, 0));
-        FloatAlmostEqual(b, (float)t.rc(0, 1));
-        FloatAlmostEqual(c, (float)t.rc(0, 2));
-        FloatAlmostEqual(d, (float)t.rc(0, 3));
+        Assert.True(FloatAlmostEqual(a, (float)t.rc(0, 0)));
+        Assert.True(FloatAlmostEqual(b, (float)t.rc(0, 1)));
+        Assert.True(FloatAlmostEqual(c, (float)t.rc(0, 2)));
+        Assert.True(FloatAlmostEqual(d, (float)t.rc(0, 3)));
     }
 
     private static void EXPECT_ROW1_EQ(float a, float b, float c, float d, in Transform t)
     {
-        FloatAlmostEqual(a, (float)t.rc(1, 0));
-        FloatAlmostEqual(b, (float)t.rc(1, 1));
-        FloatAlmostEqual(c, (float)t.rc(1, 2));
-        FloatAlmostEqual(d, (float)t.rc(1, 3));
+        Assert.True(FloatAlmostEqual(a, (float)t.rc(1, 0)));
+        Assert.True(FloatAlmostEqual(b, (float)t.rc(1, 1)));
+        Assert.True(FloatAlmostEqual(c, (float)t.rc(1, 2)));
+        Assert.True(FloatAlmostEqual(d, (float)t.rc(1, 3)));
     }
 
     private static void EXPECT_ROW2_EQ(float a, float b, float c, float d, in Transform t)
     {
-        FloatAlmostEqual(a, (float)t.rc(2, 0));
-        FloatAlmostEqual(b, (float)t.rc(2, 1));
-        FloatAlmostEqual(c, (float)t.rc(2, 2));
-        FloatAlmostEqual(d, (float)t.rc(2, 3));
+        Assert.True(FloatAlmostEqual(a, (float)t.rc(2, 0)));
+        Assert.True(FloatAlmostEqual(b, (float)t.rc(2, 1)));
+        Assert.True(FloatAlmostEqual(c, (float)t.rc(2, 2)));
+        Assert.True(FloatAlmostEqual(d, (float)t.rc(2, 3)));
     }
 
     private static void EXPECT_ROW3_EQ(float a, float b, float c, float d, in Transform t)
     {
-        FloatAlmostEqual(a, (float)t.rc(3, 0));
-        FloatAlmostEqual(b, (float)t.rc(3, 1));
-        FloatAlmostEqual(c, (float)t.rc(3, 2));
-        FloatAlmostEqual(d, (float)t.rc(3, 3));
+        Assert.True(FloatAlmostEqual(a, (float)t.rc(3, 0)));
+        Assert.True(FloatAlmostEqual(b, (float)t.rc(3, 1)));
+        Assert.True(FloatAlmostEqual(c, (float)t.rc(3, 2)));
+        Assert.True(FloatAlmostEqual(d, (float)t.rc(3, 3)));
     }
 
     // Checking float values for equality close to zero is not robust using
@@ -832,16 +832,78 @@ public static class TransformTest
         }
     }
 
-    private static void Test2()
+    [Fact]
+    private static void TestSetRotate2D()
     {
+        (int x, int y, float degree, int xprime, int yprime)[] set_rotate_cases =
+        [
+            (100, 0, 90.0f, 0, 100),
+            (0, 0, 90.0f, 0, 0),
+            (0, 100, 90.0f, -100, 0),
+            (0, 1, -90.0f, 1, 0),
+            (100, 0, 0.0f, 100, 0),
+            (0, 0, 0.0f, 0, 0),
+            (0, 0, float.NaN, 0, 0),
+            (100, 0, 360.0f, 100, 0)
+        ];
+
+        foreach (var (x, y, degree, xprime, yprime) in set_rotate_cases)
+        {
+            for (int j = 1; j >= -1; --j)
+            {
+                float epsilon = 0.1f;
+                Point pt = new(x, y);
+                Transform xform = new();
+                // should be invariant to small floating point errors.
+                xform.Rotate(degree + j * epsilon);
+                // just want to make sure that we don't crash in the case of NaN.
+                //if (degree == degree)
+                if(!float.IsNaN(degree))
+                {
+                    pt = xform.MapPoint(pt);
+                    Assert.Equal(xprime, pt.X);
+                    Assert.Equal(yprime, pt.Y);
+                    Point? transformed_pt = xform.InverseMapPoint(pt);
+                    Assert.NotNull(transformed_pt);
+                    Assert.Equal(transformed_pt.Value.X, x);
+                    Assert.Equal(transformed_pt.Value.Y, y);
+                }
+            }
+        }
     }
 
-    private static void Test3()
+    [Fact]
+    private static void TestMapPointWithExtremePerspective()
     {
+        Point3F point = new(1.0f, 1.0f, 1.0f);
+        Transform perspective = new();
+        perspective.ApplyPerspectiveDepth(1.0f);
+        Point3F transformed = perspective.MapPoint(point);
+        Assert.Equal(point.ToString(), transformed.ToString());
+
+        perspective.MakeIdentity();
+        perspective.ApplyPerspectiveDepth(1.1f);
+        transformed = perspective.MapPoint(point);
+        
+        Assert.True(FloatAlmostEqual(11.0f, transformed.X));
+        Assert.True(FloatAlmostEqual(11.0f, transformed.Y));
+        Assert.True(FloatAlmostEqual(11.0f, transformed.Z));
     }
 
-    private static void Test4()
+    [Fact]
+    private static void TestBlendTranslate()
     {
+        Transform from = new();
+        for (int i = -5; i < 15; ++i)
+        {
+            Transform to = new();
+            to.Translate3D(1, 1, 1);
+            double t = i / 9.0;
+            Assert.True(to.Blend(from, t));
+            Assert.True(FloatAlmostEqual((float)t, (float)to.rc(0, 3)));
+            Assert.True(FloatAlmostEqual((float)t, (float)to.rc(1, 3)));
+            Assert.True(FloatAlmostEqual((float)t, (float)to.rc(2, 3)));
+        }
     }
 
     private static void Test5()
