@@ -109,10 +109,12 @@ public static class SkiaConversions
 
     public static Transform SkM44ToTransform(in SKMatrix44 matrix)
     {
-        // Note: SkiaSharp's SKMatrix44 indexer [i, j] uses column-major convention
-        // (i = column, j = row), which is the opposite of Skia C++'s SkM44::rc(row, col).
-        // So we swap the indices here to correctly read row, col.
-        return Transform.RowMajor(
+        // SKMatrix44[i, j] uses column-major convention (i = column, j = row).
+        // We read row-by-row by fixing j (row) and iterating i (column),
+        // then pass the results to ColMajor which expects column-major input.
+        // The combination of SkiaSharp's transposed indexer and ColMajor's
+        // column-major interpretation cancels out to give the correct result.
+        return Transform.ColMajor(
             matrix[0, 0], matrix[1, 0], matrix[2, 0], matrix[3, 0],
             matrix[0, 1], matrix[1, 1], matrix[2, 1], matrix[3, 1],
             matrix[0, 2], matrix[1, 2], matrix[2, 2], matrix[3, 2],
@@ -129,11 +131,8 @@ public static class SkiaConversions
 
     public static Transform SkMatrixToTransform(in SKMatrix matrix)
     {
-        // SKMatrix uses named properties rather than indexed access,
-        // so the SkiaSharp row/column naming inversion doesn't apply here.
-        // The C++ uses Transform::RowMajor, but ColMajor is correct in C#
-        // due to how SkiaSharp exposes SKMatrix fields.
-        return Transform.ColMajor(
+        // SKMatrix properties are in row-major order, so use RowMajor.
+        return Transform.RowMajor(
         matrix.ScaleX, matrix.SkewX, 0, matrix.TransX,     // row 0
         matrix.SkewY, matrix.ScaleY, 0, matrix.TransY,     // row 1
         0, 0, 1, 0,                                        // row 2

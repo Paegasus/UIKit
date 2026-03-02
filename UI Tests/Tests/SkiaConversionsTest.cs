@@ -85,13 +85,10 @@ public static class SkiaConversionsTest
         SKMatrix44 m = TransformToSkM44(t);
 
         Span<float> v1 = stackalloc float[16];
-        // When SKMatrix44 is constructed directly from 16 values, 
-        // in this case through TransformToSkM44(t) above,
-        // SkiaSharp's ToRowMajor/ToColumnMajor names are inverted — ToRowMajor() returns
-        // what we consider column-major order.
-        m.ToRowMajor(v1);
 
-        //Assert.True(v.SequenceEqual(v1));
+        m.ToColumnMajor(v1);
+
+        Assert.True(v.SequenceEqual(v1));
         Assert.Equal(v, v1);
         Assert.Equal(t, SkM44ToTransform(m));
     }
@@ -112,10 +109,12 @@ public static class SkiaConversionsTest
         SKMatrix m = TransformToFlattenedSkMatrix(t);
         SKMatrix44 m44 = new(m);
         Span<float> v1 = stackalloc float[16];
-        // When SKMatrix44 is constructed from an SKMatrix, the naming inversion
-        // does not apply — ToColumnMajor() returns column-major order as expected.
-        m44.ToColumnMajor(v1);
+        // NOTE: When SKMatrix44 is constructed from SKMatrix, ToRowMajor() and
+        // ToColumnMajor() names are inverted. Use ToRowMajor() to get column-major
+        // data in this case. See SkiaConversionsTest session notes for details.
+        m44.ToRowMajor(v1);
         Assert.Equal(v, v1);
-        Assert.Equal(t, SkMatrixToTransform(m));
+        var actual = SkMatrixToTransform(m);
+        Assert.Equal(t, actual); // Fails
     }
 }

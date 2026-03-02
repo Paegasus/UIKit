@@ -126,12 +126,10 @@ public static class TransformTest
 
     private static Transform GetTestMatrix1()
     {
-        // clang-format off
         Transform transform = Transform.ColMajor(10.0, 11.0, 12.0, 13.0,
                                                  14.0, 15.0, 16.0, 17.0,
                                                  18.0, 19.0, 20.0, 21.0,
                                                  22.0, 23.0, 24.0, 25.0);
-        // clang-format on
 
         STATIC_ROW0_EQ(10.0, 14.0, 18.0, 22.0, transform);
         STATIC_ROW1_EQ(11.0, 15.0, 19.0, 23.0, transform);
@@ -150,7 +148,6 @@ public static class TransformTest
         Transform transform =
               Transform.RowMajor(30.0, 34.0, 38.0, 42.0, 31.0, 35.0, 39.0, 43.0, 32.0,
                                   36.0, 40.0, 44.0, 33.0, 37.0, 41.0, 45.0);
-        // clang-format on
 
         STATIC_ROW0_EQ(30.0, 34.0, 38.0, 42.0, transform);
         STATIC_ROW1_EQ(31.0, 35.0, 39.0, 43.0, transform);

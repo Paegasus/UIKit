@@ -119,6 +119,13 @@ public struct Matrix44
     public readonly bool Is2DTransform => IsFlat && !HasPerspective;
 
     // Gets a value at |row|, |col| from the matrix.
+    public readonly double rc(int row, int col) => this[row, col];
+
+    // Set a value in the matrix at |row|, |col|.
+    public void set_rc(int row, int col, double value) => this[row, col] = value;
+
+/*
+    // Gets a value at |row|, |col| from the matrix.
     public readonly double rc(int row, int col)
     {
 #if DEBUG
@@ -137,6 +144,7 @@ public struct Matrix44
 #endif
         this[col, row] = value;
     }
+*/
 
     /*
     void Matrix44::GetColMajor(base::span<double, 16> dst) const
