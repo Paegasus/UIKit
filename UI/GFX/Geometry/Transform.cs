@@ -471,9 +471,7 @@ public struct Transform
         {
             AxisTransform2D self = axis_2d_;
             // Copy from the transform
-            full_matrix_ = transform.full_matrix_;
-            axis_2d_ = transform.axis_2d_;
-            matrix_ = transform.matrix_;
+            this = transform;
             PostConcat(self);
         }
         else
@@ -498,9 +496,7 @@ public struct Transform
         {
             AxisTransform2D self = axis_2d_;
             // Copy from the trasnform
-            full_matrix_ = transform.full_matrix_;
-            axis_2d_ = transform.axis_2d_;
-            matrix_ = transform.matrix_;
+            this = transform;
             PreConcat(self);
         }
         else
