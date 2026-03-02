@@ -936,19 +936,91 @@ public static class TransformTest
         }
     }
 
-    private static void Test7()
+    [Fact]
+    private static void TestCanBlend180DegreeRotation()
+    {
+        Vector3DF[] axes =
+        [
+            new(1, 0, 0),
+            new(0, 1, 0),
+            new(0, 0, 1),
+            new(1, 1, 1)
+        ];
+
+        Transform from = new();
+        foreach (var axis in axes)
+        {
+            for (int i = -5; i < 15; ++i)
+            {
+                Transform to = new();
+                to.RotateAbout(axis, 180.0);
+                double t = i / 9.0;
+                Assert.True(to.Blend(from, t));
+
+                // A 180 degree rotation is exactly opposite on the sphere, therefore
+                // either great circle arc to it is equivalent (and numerical precision
+                // will determine which is closer).  Test both directions.
+                Transform expected1 = new();
+                expected1.RotateAbout(axis, 180.0 * t);
+                Transform expected2 = new();
+                expected2.RotateAbout(axis, -180.0 * t);
+
+                Assert.True(MatricesAreNearlyEqual(expected1, to) || MatricesAreNearlyEqual(expected2, to));
+            }
+        }
+    }
+
+    [Fact]
+    private static void TestBlendScale()
+    {
+        Transform from = new();
+        for (int i = -5; i < 15; ++i)
+        {
+            Transform to = new();
+            to.Scale3D(5, 4, 3);
+            double s1 = i / 9.0;
+            double s2 = 1 - s1;
+            Assert.True(to.Blend(from, s1));
+            
+            FloatAlmostEqual((float)(5 * s1 + s2), (float)to.rc(0, 0));
+            FloatAlmostEqual((float)(4 * s1 + s2), (float)to.rc(1, 1));
+            FloatAlmostEqual((float)(3 * s1 + s2), (float)to.rc(2, 2));
+        }
+    }
+
+    [Fact]
+    private static void TestBlendSkew()
+    {
+        Transform from = new();
+        for (int i = 0; i < 2; ++i)
+        {
+            Transform to = new();
+            to.Skew(10, 5);
+            double t = i;
+            Transform expected = new();
+            expected.Skew(t * 10, t * 5);
+            Assert.True(to.Blend(from, t));
+            Assert.True(MatricesAreNearlyEqual(expected, to));
+        }
+    }
+
+    private static void Test1()
     {
     }
 
-    private static void Test8()
+    private static void Test2()
     {
     }
 
-    private static void Test9()
+    private static void Test3()
     {
     }
 
-    private static void Test10()
+    private static void Test4()
+    {
+    }
+
+    private static void Test5()
     {
     }
 }
