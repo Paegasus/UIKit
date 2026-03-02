@@ -1704,38 +1704,52 @@ public static class TransformTest
         expected.SetTranslate(0, 0, 0);
         expected.SetScale(-2, 2, 1);
         expected.SetSkew(0, 0, 0);
-        expected.SetPerspective( 0, 0, 0, 1);
-        expected.SetQuaternion( 0, 0, 0, 1);
+        expected.SetPerspective(0, 0, 0, 1);
+        expected.SetQuaternion(0, 0, 0, 1);
 
         AssertDecomposedTransformFloatEqual(expected, decomp_flip_x);
+
+        DecomposedTransform decomp_flip_y;
+        Transform.MakeScale(2, -2).Decompose(out decomp_flip_y);
+
+        expected = new DecomposedTransform();
+
+        expected.SetTranslate(0, 0, 0);
+        expected.SetScale(2, -2, 1);
+        expected.SetSkew(0, 0, 0);
+        expected.SetPerspective(0, 0, 0, 1);
+        expected.SetQuaternion(0, 0, 0, 1);
+        
+        AssertDecomposedTransformFloatEqual(expected, decomp_flip_y);
+
+        DecomposedTransform decomp_rotate_180;
+        Transform.Make180degRotation().Decompose(out decomp_rotate_180);
+
+        expected = new DecomposedTransform();
+
+        expected.SetTranslate(0, 0, 0);
+        expected.SetScale(1, 1, 1);
+        expected.SetSkew(0, 0, 0);
+        expected.SetPerspective(0, 0, 0, 1);
+        expected.SetQuaternion(0, 0, 1, 0);
+
+        AssertDecomposedTransformFloatEqual(expected, decomp_rotate_180);
+
+        DecomposedTransform decomp_rotate_90;
+        Transform.Make90degRotation().Decompose(out decomp_rotate_90);
+
+        expected = new DecomposedTransform();
+
+        var sqrt2 = Math.Sqrt(2);
+
+        expected.SetTranslate(0, 0, 0);
+        expected.SetScale(1, 1, 1);
+        expected.SetSkew(0, 0, 0);
+        expected.SetPerspective(0, 0, 0, 1);
+        expected.SetQuaternion(0, 0, 1.0 / sqrt2, 1.0 / sqrt2);
+
+        AssertDecomposedTransformFloatEqual(expected, decomp_rotate_90);
 /*
-        DecomposedTransform decomp_flip_y = *Transform::MakeScale(2, -2).Decompose();
-        EXPECT_DECOMPOSED_TRANSFORM_EQ(
-            (DecomposedTransform{
-            { 0, 0, 0}, { 2, -2, 1}, { 0, 0, 0}, { 0, 0, 0, 1}, { 0, 0, 0, 1}
-        }),
-      decomp_flip_y);
-
-        DecomposedTransform decomp_rotate_180 =
-            *Transform::Make180degRotation().Decompose();
-        EXPECT_DECOMPOSED_TRANSFORM_EQ(
-            (DecomposedTransform{
-            { 0, 0, 0}, { 1, 1, 1}, { 0, 0, 0}, { 0, 0, 0, 1}, { 0, 0, 1, 0}
-        }),
-      decomp_rotate_180);
-
-        DecomposedTransform decomp_rotate_90 =
-            *Transform::Make90degRotation().Decompose();
-        EXPECT_DECOMPOSED_TRANSFORM_EQ(
-            (DecomposedTransform{
-            { 0, 0, 0},
-          { 1, 1, 1},
-          { 0, 0, 0},
-          { 0, 0, 0, 1},
-          { 0, 0, 1.0 / std::numbers::sqrt2, 1.0 / std::numbers::sqrt2}
-        }),
-      decomp_rotate_90);
-
         auto translate_rotate_90 =
             Transform::MakeTranslation(-1, 1) * Transform::Make90degRotation();
         DecomposedTransform decomp_translate_rotate_90 =
