@@ -1617,11 +1617,201 @@ public static class TransformTest
         AssertTransformFloatEqual(expected, to_matrix);
     }
 
-    private static void Test9()
+    [Fact]
+    private static void TestComposeIdentity()
     {
+        DecomposedTransform decomp = new();
+
+        Assert.Equal(0.0, decomp.Translate.X);
+        Assert.Equal(1.0, decomp.Scale.X);
+        Assert.Equal(0.0, decomp.Skew.X);
+        Assert.Equal(0.0, decomp.Perspective.X);
+
+        Assert.Equal(0.0, decomp.Translate.Y);
+        Assert.Equal(1.0, decomp.Scale.Y);
+        Assert.Equal(0.0, decomp.Skew.Y);
+        Assert.Equal(0.0, decomp.Perspective.Y);
+
+        Assert.Equal(0.0, decomp.Translate.Z);
+        Assert.Equal(1.0, decomp.Scale.Z);
+        Assert.Equal(0.0, decomp.Skew.Z);
+        Assert.Equal(0.0, decomp.Perspective.Z);
+
+
+        Assert.Equal(1.0, decomp.Perspective.W);
+
+        Assert.Equal(0.0, decomp.Quaternion.X);
+        Assert.Equal(0.0, decomp.Quaternion.Y);
+        Assert.Equal(0.0, decomp.Quaternion.Z);
+        Assert.Equal(1.0, decomp.Quaternion.W);
+
+        Assert.True(Transform.Compose(decomp).IsIdentity());
+    }
+/*
+    [Fact]
+    private static void TestDecomposeTranslateRotateScale()
+    {
+        for (int degrees = 0; degrees < 180; ++degrees)
+        {
+            // build a transformation matrix.
+            gfx::Transform transform;
+            transform.Translate(degrees * 2, -degrees * 3);
+            transform.Rotate(degrees);
+            transform.Scale(degrees + 1, 2 * degrees + 1);
+
+            // factor the matrix
+            std::optional<DecomposedTransform> decomp = transform.Decompose();
+            EXPECT_TRUE(decomp);
+            EXPECT_FLOAT_EQ(decomp->translate[0], degrees * 2);
+            EXPECT_FLOAT_EQ(decomp->translate[1], -degrees * 3);
+            double rotation =
+                base::RadToDeg(std::acos(double{ decomp->quaternion.w()}) *2);
+        while (rotation < 0.0)
+            rotation += 360.0;
+        while (rotation > 360.0)
+            rotation -= 360.0;
+
+        const float epsilon = 0.00015f;
+        EXPECT_NEAR(rotation, degrees, epsilon);
+        EXPECT_NEAR(decomp->scale[0], degrees + 1, epsilon);
+        EXPECT_NEAR(decomp->scale[1], 2 * degrees + 1, epsilon);
+    }
     }
 
-    private static void Test10()
+    [Fact]
+    private static void TestDecomposeScaleTransform()
     {
+        for (float scale = 0.001f; scale < 2.0f; scale += 0.001f)
+        {
+            Transform transform = Transform::MakeScale(scale);
+
+            std::optional<DecomposedTransform> decomp = transform.Decompose();
+            EXPECT_TRUE(decomp);
+
+            Transform compose_transform = Transform::Compose(*decomp);
+            EXPECT_TRUE(compose_transform.Preserves2dAxisAlignment());
+            EXPECT_EQ(transform, compose_transform);
+        }
     }
+
+    [Fact]
+    private static void TestDecompose2d()
+    {
+        DecomposedTransform decomp_flip_x = *Transform::MakeScale(-2, 2).Decompose();
+        EXPECT_DECOMPOSED_TRANSFORM_EQ(
+            (DecomposedTransform{
+            { 0, 0, 0}, { -2, 2, 1}, { 0, 0, 0}, { 0, 0, 0, 1}, { 0, 0, 0, 1}
+        }),
+      decomp_flip_x);
+
+        DecomposedTransform decomp_flip_y = *Transform::MakeScale(2, -2).Decompose();
+        EXPECT_DECOMPOSED_TRANSFORM_EQ(
+            (DecomposedTransform{
+            { 0, 0, 0}, { 2, -2, 1}, { 0, 0, 0}, { 0, 0, 0, 1}, { 0, 0, 0, 1}
+        }),
+      decomp_flip_y);
+
+        DecomposedTransform decomp_rotate_180 =
+            *Transform::Make180degRotation().Decompose();
+        EXPECT_DECOMPOSED_TRANSFORM_EQ(
+            (DecomposedTransform{
+            { 0, 0, 0}, { 1, 1, 1}, { 0, 0, 0}, { 0, 0, 0, 1}, { 0, 0, 1, 0}
+        }),
+      decomp_rotate_180);
+
+        DecomposedTransform decomp_rotate_90 =
+            *Transform::Make90degRotation().Decompose();
+        EXPECT_DECOMPOSED_TRANSFORM_EQ(
+            (DecomposedTransform{
+            { 0, 0, 0},
+          { 1, 1, 1},
+          { 0, 0, 0},
+          { 0, 0, 0, 1},
+          { 0, 0, 1.0 / std::numbers::sqrt2, 1.0 / std::numbers::sqrt2}
+        }),
+      decomp_rotate_90);
+
+        auto translate_rotate_90 =
+            Transform::MakeTranslation(-1, 1) * Transform::Make90degRotation();
+        DecomposedTransform decomp_translate_rotate_90 =
+            *translate_rotate_90.Decompose();
+        EXPECT_DECOMPOSED_TRANSFORM_EQ(
+            (DecomposedTransform{
+            { -1, 1, 0},
+          { 1, 1, 1},
+          { 0, 0, 0},
+          { 0, 0, 0, 1},
+          { 0, 0, 1.0 / std::numbers::sqrt2, 1.0 / std::numbers::sqrt2}
+        }),
+      decomp_translate_rotate_90);
+
+        DecomposedTransform decomp_skew_rotate =
+            *Transform::Affine(1, 1, 1, 0, 0, 0).Decompose();
+        EXPECT_DECOMPOSED_TRANSFORM_EQ(
+            (DecomposedTransform{
+            { 0, 0, 0},
+                           { std::numbers::sqrt2, -1.0 / std::numbers::sqrt2, 1},
+                           { -1, 0, 0},
+                           { 0, 0, 0, 1},
+                           {
+                0, 0, std::sin(std::numbers::pi / 8),
+                            std::cos(std::numbers::pi / 8)}
+        }),
+      decomp_skew_rotate);
+    }
+
+    private static double ComputeDecompRecompError(in Transform transform)
+    {
+        DecomposedTransform decomp = *transform.Decompose();
+        Transform composed = Transform::Compose(decomp);
+
+        float expected[16];
+        float actual[16];
+        transform.GetColMajorF(expected);
+        composed.GetColMajorF(actual);
+        double sse = 0;
+        for (int i = 0; i < 16; i++)
+        {
+            double diff = UNSAFE_TODO(expected[i]) - UNSAFE_TODO(actual[i]);
+            sse += diff * diff;
+        }
+        return sse;
+    }
+
+    [Fact]
+    private static void TestDecomposeAndCompose()
+    {
+        
+    }
+
+    [Fact]
+    private static void TestIsIdentityOr2dTranslation()
+    {
+        
+    }
+
+    [Fact]
+    private static void TestIntegerTranslation()
+    {
+        
+    }
+
+    [Fact]
+    private static void TestInteger2dTranslation()
+    {
+        
+    }
+
+    [Fact]
+    private static void TestInverse()
+    {
+        
+    }
+
+    [Fact]
+    private static void TestVerifyBackfaceVisibilityBasicCases()
+    {
+        
+    }
+*/
 }

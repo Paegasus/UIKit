@@ -220,6 +220,19 @@ public struct Transform
         matrix_.set_rc(row, col, v);
     }
 
+    // Returns true if this is the identity matrix.
+    // This function modifies a mutable variable in |matrix_|.
+    public readonly bool IsIdentity()
+    {
+        if (!full_matrix_)
+        {
+            // Note: Consider creating a static AxisTransform2D.Identity to compare against
+            // instead of creating a new AxisTransform2D every time
+            return axis_2d_ == new AxisTransform2D();
+        }
+        return matrix_.IsIdentity;
+    }
+
     // Returns true if the matrix is either identity or pure translation.
     public readonly bool IsIdentityOrTranslation => !full_matrix_ ? axis_2d_.Scale == new Vector2DF(1, 1) : matrix_.IsIdentityOrTranslation;
 
@@ -605,6 +618,9 @@ public struct Transform
         return Math.Tan(double.DegreesToRadians(degrees));
     }
 
+    // Applies the current transformation on a skew and assigns the result
+    // to |this|, i.e. this = this * skew.
+
     public void Skew(double degrees_x, double degrees_y)
     {
         if (degrees_x == 0 && degrees_y == 0)
@@ -617,6 +633,8 @@ public struct Transform
     public void SkewX(double degrees) => Skew(degrees, 0);
     public void SkewY(double degrees) => Skew(0, degrees);
 
+    // Applies the current transformation on a perspective transform and assigns
+    // the result to |this|.
     public void ApplyPerspectiveDepth(double depth)
     {
         if (depth == 0)
