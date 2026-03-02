@@ -59,4 +59,15 @@ public static class GeometryUtil
             }
         }
     }
+
+    public static void AssertTransformFloatNear(in Transform lhs, in Transform rhs, float abs_error)
+    {
+        for (int row = 0; row < 4; ++row)
+        {
+            for (int col = 0; col < 4; ++col)
+            {
+                Assert.Equal(lhs.rc(row, col), rhs.rc(row, col), abs_error);
+            }
+        }
+    }
 }

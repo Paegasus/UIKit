@@ -1575,8 +1575,46 @@ public static class TransformTest
         AssertTransformFloatEqual(rotate_z_180deg, Transform.Compose(GetRotationDecomp(0, 0, 1, 0)));
     }
 
-    private static void Test8()
+    [Fact]
+    private static void TestQuaternionInterpolation()
     {
+        // Rotate from identity matrix.
+        Transform from_matrix = new();
+        Transform to_matrix = new();
+        to_matrix.RotateAbout(0, 0, 1, 120);
+        to_matrix.Blend(from_matrix, 0.5);
+        Transform rotate_z_60 = new();
+        rotate_z_60.Rotate(60);
+        AssertTransformFloatEqual(rotate_z_60, to_matrix);
+
+        // Rotate to identity matrix.
+        from_matrix.MakeIdentity();
+        from_matrix.RotateAbout(0, 0, 1, 120);
+        to_matrix.MakeIdentity();
+        Assert.True(to_matrix.Blend(from_matrix, 0.5));
+        AssertTransformFloatEqual(rotate_z_60, to_matrix);
+
+        // Interpolation about a common axis of rotation.
+        from_matrix.MakeIdentity();
+        from_matrix.RotateAbout(1, 1, 0, 45);
+        to_matrix.MakeIdentity();
+        from_matrix.RotateAbout(1, 1, 0, 135);
+        Assert.True(to_matrix.Blend(from_matrix, 0.5));
+        Transform rotate_xy_90 = new();
+        rotate_xy_90.RotateAbout(1, 1, 0, 90);
+        AssertTransformFloatNear(rotate_xy_90, to_matrix, 1e-15f);
+
+        // Interpolation without a common axis of rotation.
+
+        from_matrix.MakeIdentity();
+        from_matrix.RotateAbout(1, 0, 0, 90);
+        to_matrix.MakeIdentity();
+        to_matrix.RotateAbout(0, 0, 1, 90);
+        Assert.True(to_matrix.Blend(from_matrix, 0.5));
+        Transform expected = new();
+        double sqrt2 = Math.Sqrt(2);
+        expected.RotateAbout(1 / sqrt2, 0, 1 / sqrt2, 70.528778372);
+        AssertTransformFloatEqual(expected, to_matrix);
     }
 
     private static void Test9()
