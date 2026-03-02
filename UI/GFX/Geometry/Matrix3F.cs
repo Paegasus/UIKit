@@ -1,8 +1,8 @@
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+
 using UI.Extensions;
-using UI.Numerics;
 
 namespace UI.GFX.Geometry;
 
@@ -12,7 +12,10 @@ public struct Matrix3F
     // Row-major storage: data_[i * 3 + j] = element at row i, col j.
     // Matches C++ MatrixToArrayCoords(i, j) = i * 3 + j.
     [InlineArray(9)]
-    private struct Matrix3FData { private float _element0; }
+    private struct Matrix3FData
+    {
+        private float _element0; 
+    }
 
     private Matrix3FData _data;
 
@@ -43,13 +46,17 @@ public struct Matrix3F
 
     public readonly float Get(int i, int j)
     {
+#if DEBUG
         Debug.Assert(i >= 0 && i < 3 && j >= 0 && j < 3);
+#endif
         return ((ReadOnlySpan<float>)_data)[i * 3 + j];
     }
 
     public void Set(int i, int j, float v)
     {
+#if DEBUG
         Debug.Assert(i >= 0 && i < 3 && j >= 0 && j < 3);
+#endif
         ((Span<float>)_data)[i * 3 + j] = v;
     }
 
@@ -65,13 +72,17 @@ public struct Matrix3F
 
     public readonly Vector3DF GetRow(int i)
     {
+#if DEBUG
         Debug.Assert(i >= 0 && i < 3);
+#endif
         return new Vector3DF(Get(i, 0), Get(i, 1), Get(i, 2));
     }
 
     public readonly Vector3DF GetColumn(int j)
     {
+#if DEBUG
         Debug.Assert(j >= 0 && j < 3);
+#endif
         return new Vector3DF(Get(0, j), Get(1, j), Get(2, j));
     }
 
@@ -166,7 +177,9 @@ public struct Matrix3F
 
     public readonly bool IsNear(in Matrix3F rhs, float precision)
     {
+#if DEBUG
         Debug.Assert(precision >= 0);
+#endif
         ReadOnlySpan<float> a = _data;
         ReadOnlySpan<float> b = rhs._data;
         for (int i = 0; i < 9; i++)
