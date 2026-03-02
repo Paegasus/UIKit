@@ -1429,16 +1429,117 @@ public static class TransformTest
         Assert.True(MatricesAreNearlyEqual(normalized_expected_end_of_animation, to));
     }
 
-    private static void Test4()
+    [Fact]
+    private static void TestBlend2dXFlip()
     {
+        // Test 2D x-flip (crbug.com/797472).
+        var from = Transform.Affine(1, 0, 0, 1, 100, 150);
+        var to = Transform.Affine(-1, 0, 0, 1, 400, 150);
+
+        Assert.True(from.Is2dTransform());
+        Assert.True(to.Is2dTransform());
+
+        // OK for interpolated transform to be degenerate.
+        Transform result = to;
+        Assert.True(result.Blend(from, 0.5));
+        var expected = Transform.Affine(0, 0, 0, 1, 250, 150);
+        AssertTransformFloatEqual(expected, result);
     }
 
-    private static void Test5()
+    [Fact]
+    private static void TestBlend2dRotationDirection()
     {
+        // Interpolate taking shorter rotation path.
+        var from = Transform.Affine(-0.5, 0.86602575498, -0.86602575498, -0.5, 0, 0);
+        var to = Transform.Affine(-0.5, -0.86602575498, 0.86602575498, -0.5, 0, 0);
+
+        // Expect clockwise Rotation.
+        Transform result = to;
+        Assert.True(result.Blend(from, 0.5));
+        var expected = Transform.Affine(-1, 0, 0, -1, 0, 0);
+        AssertTransformFloatEqual(expected, result);
+
+        // Reverse from and to.
+        // Expect same midpoint with counter-clockwise rotation.
+        result = from;
+        Assert.True(result.Blend(to, 0.5));
+        AssertTransformFloatEqual(expected, result);
     }
 
-    private static void Test6()
+    private static DecomposedTransform GetRotationDecomp(double x, double y, double z, double w)
     {
+        DecomposedTransform decomp = new()
+        {
+            Quaternion = new Quaternion(x, y, z, w)
+        };
+        return decomp;
+    }
+
+    private static readonly double kCos30deg = Math.Cos(double.DegreesToRadians(30.0));
+    private static readonly double kSin30deg = 0.5;
+
+    [Fact]
+    private static void TestQuaternionFromRotationMatrix()
+    {
+        // Test rotation around each axis.
+
+        Transform m = new();
+        m.RotateAbout(1, 0, 0, 60);
+        DecomposedTransform decomp;
+        Assert.True(m.Decompose(out decomp));
+        AssertQuaternionFloatNear(decomp.Quaternion, new Quaternion(kSin30deg, 0, 0, kCos30deg), 1e-6f);
+
+        m.MakeIdentity();
+        m.RotateAbout(0, 1, 0, 60);
+        Assert.True(m.Decompose(out decomp));
+        AssertQuaternionFloatNear(decomp.Quaternion, new Quaternion(0, kSin30deg, 0, kCos30deg), 1e-6f);
+
+        m.MakeIdentity();
+        m.RotateAbout(0, 0, 1, 60);
+        Assert.True(m.Decompose(out decomp));
+        AssertQuaternionFloatNear(decomp.Quaternion, new Quaternion(0, 0, kSin30deg, kCos30deg), 1e-6f);
+
+        // Test rotation around non-axis aligned vector.
+        double sqrt2 = Math.Sqrt(2);
+        m.MakeIdentity();
+        m.RotateAbout(1, 1, 0, 60);
+        Assert.True(m.Decompose(out decomp));
+        AssertQuaternionFloatNear(
+        decomp.Quaternion,
+        new Quaternion(kSin30deg / sqrt2,
+                       kSin30deg / sqrt2, 0, kCos30deg), 1e-6f);
+
+        // Test edge tests.
+
+        // Cases where q_w = 0. In such cases we resort to basing the calculations on
+        // the largest diagonal element in the rotation matrix to ensure numerical
+        // stability.
+
+        m.MakeIdentity();
+        m.RotateAbout(1, 0, 0, 180);
+        Assert.True(m.Decompose(out decomp));
+        AssertQuaternionFloatNear(decomp.Quaternion, new Quaternion(1, 0, 0, 0), 1e-6f);
+
+        m.MakeIdentity();
+        m.RotateAbout(0, 1, 0, 180);
+        Assert.True(m.Decompose(out decomp));
+        AssertQuaternionFloatNear(decomp.Quaternion, new Quaternion(0, 1, 0, 0), 1e-6f);
+
+        m.MakeIdentity();
+        m.RotateAbout(0, 0, 1, 180);
+        Assert.True(m.Decompose(out decomp));
+        AssertQuaternionFloatNear(decomp.Quaternion, new Quaternion(0, 0, 1, 0), 1e-6f);
+
+        // No rotation.
+
+        m.MakeIdentity();
+        Assert.True(m.Decompose(out decomp));
+        AssertQuaternionFloatNear(decomp.Quaternion, new Quaternion(0, 0, 0, 1), 1e-6f);
+
+        m.MakeIdentity();
+        m.RotateAbout(0, 0, 1, 360);
+        Assert.True(m.Decompose(out decomp));
+        AssertQuaternionFloatNear(decomp.Quaternion, new Quaternion(0, 0, 0, 1), 1e-6f);
     }
 
     private static void Test7()

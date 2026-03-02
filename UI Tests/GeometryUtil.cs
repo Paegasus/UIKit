@@ -40,4 +40,23 @@ public static class GeometryUtil
         Assert.Equal(lhs.Y, rhs.Y, tolerance);
         Assert.Equal(lhs.Z, rhs.Z, tolerance);
     }
+
+    public static void AssertQuaternionFloatNear(in Quaternion lhs, in Quaternion rhs, float abs_error)
+    {
+        Assert.Equal(lhs.X, rhs.X, abs_error);
+        Assert.Equal(lhs.Y, rhs.Y, abs_error);
+        Assert.Equal(lhs.Z, rhs.Z, abs_error);
+        Assert.Equal(lhs.W, rhs.W, abs_error);
+    }
+
+    public static void AssertTransformFloatEqual(in Transform lhs, in Transform rhs)
+    {
+        for (int row = 0; row < 4; ++row)
+        {
+            for (int col = 0; col < 4; ++col)
+            {
+                Assert.True(FloatAlmostEqual((float)lhs.rc(row, col), (float)rhs.rc(row, col)));
+            }
+        }
+    }
 }
