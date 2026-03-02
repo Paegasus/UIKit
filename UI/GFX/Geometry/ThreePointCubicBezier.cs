@@ -40,11 +40,6 @@ public struct ThreePointCubicBezier
         midpointy_ = midpointy;
     }
 
-    public ThreePointCubicBezier(in ThreePointCubicBezier other)
-    {
-
-    }
-
     // Evaluates y at the given x.
     public readonly double Solve(double x)
     {
