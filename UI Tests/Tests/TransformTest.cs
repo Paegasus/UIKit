@@ -404,7 +404,8 @@ public static class TransformTest
             xform = translation * xform;
             Point3F p1 = xform.MapPoint(new Point3F(x1, y1, 0));
             Point3F p2 = new(x2, y2, 0);
-            if (tx == tx && ty == ty)
+            //if (tx == tx && ty == ty)
+            if (!float.IsNaN(tx) && !float.IsNaN(ty))
             {
                 Assert.True(PointsAreNearlyEqual(p1, p2));
             }
