@@ -471,9 +471,22 @@ public static class TransformTest
         }
     }
 
+    [Fact]
     private static void TestConcatSelf()
     {
-        
+        var a = Transform.ColMajor(2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15,
+                               16, 17);
+        var expected_a_times_a =
+            Transform.ColMajor(132, 146, 160, 174, 260, 290, 320, 350, 388, 434, 480,
+                                526, 516, 578, 640, 702);
+        a.PreConcat(a);
+        Assert.Equal(expected_a_times_a, a);
+
+        a = Transform.Affine(2, 3, 4, 5, 6, 7);
+        expected_a_times_a = Transform.Affine(16, 21, 28, 37, 46, 60);
+        a.PreConcat(a);
+        Assert.True(a.Is2dTransform());
+        Assert.Equal(expected_a_times_a, a);
     }
 
     private static void TestTranslate()

@@ -356,31 +356,37 @@ public struct Matrix44
             return;
         }
 
-        // Snapshot x entirely before any writes, since x may alias this.
+        // Snapshot both x and y entirely before any writes,
+        // since either may alias this.
         double x_c0r0 = x._c0r0, x_c0r1 = x._c0r1, x_c0r2 = x._c0r2, x_c0r3 = x._c0r3;
         double x_c1r0 = x._c1r0, x_c1r1 = x._c1r1, x_c1r2 = x._c1r2, x_c1r3 = x._c1r3;
         double x_c2r0 = x._c2r0, x_c2r1 = x._c2r1, x_c2r2 = x._c2r2, x_c2r3 = x._c2r3;
         double x_c3r0 = x._c3r0, x_c3r1 = x._c3r1, x_c3r2 = x._c3r2, x_c3r3 = x._c3r3;
 
-        _c0r0 = x_c0r0 * y._c0r0 + x_c1r0 * y._c0r1 + x_c2r0 * y._c0r2 + x_c3r0 * y._c0r3;
-        _c0r1 = x_c0r1 * y._c0r0 + x_c1r1 * y._c0r1 + x_c2r1 * y._c0r2 + x_c3r1 * y._c0r3;
-        _c0r2 = x_c0r2 * y._c0r0 + x_c1r2 * y._c0r1 + x_c2r2 * y._c0r2 + x_c3r2 * y._c0r3;
-        _c0r3 = x_c0r3 * y._c0r0 + x_c1r3 * y._c0r1 + x_c2r3 * y._c0r2 + x_c3r3 * y._c0r3;
+        double y_c0r0 = y._c0r0, y_c0r1 = y._c0r1, y_c0r2 = y._c0r2, y_c0r3 = y._c0r3;
+        double y_c1r0 = y._c1r0, y_c1r1 = y._c1r1, y_c1r2 = y._c1r2, y_c1r3 = y._c1r3;
+        double y_c2r0 = y._c2r0, y_c2r1 = y._c2r1, y_c2r2 = y._c2r2, y_c2r3 = y._c2r3;
+        double y_c3r0 = y._c3r0, y_c3r1 = y._c3r1, y_c3r2 = y._c3r2, y_c3r3 = y._c3r3;
 
-        _c1r0 = x_c0r0 * y._c1r0 + x_c1r0 * y._c1r1 + x_c2r0 * y._c1r2 + x_c3r0 * y._c1r3;
-        _c1r1 = x_c0r1 * y._c1r0 + x_c1r1 * y._c1r1 + x_c2r1 * y._c1r2 + x_c3r1 * y._c1r3;
-        _c1r2 = x_c0r2 * y._c1r0 + x_c1r2 * y._c1r1 + x_c2r2 * y._c1r2 + x_c3r2 * y._c1r3;
-        _c1r3 = x_c0r3 * y._c1r0 + x_c1r3 * y._c1r1 + x_c2r3 * y._c1r2 + x_c3r3 * y._c1r3;
+        _c0r0 = x_c0r0 * y_c0r0 + x_c1r0 * y_c0r1 + x_c2r0 * y_c0r2 + x_c3r0 * y_c0r3;
+        _c0r1 = x_c0r1 * y_c0r0 + x_c1r1 * y_c0r1 + x_c2r1 * y_c0r2 + x_c3r1 * y_c0r3;
+        _c0r2 = x_c0r2 * y_c0r0 + x_c1r2 * y_c0r1 + x_c2r2 * y_c0r2 + x_c3r2 * y_c0r3;
+        _c0r3 = x_c0r3 * y_c0r0 + x_c1r3 * y_c0r1 + x_c2r3 * y_c0r2 + x_c3r3 * y_c0r3;
 
-        _c2r0 = x_c0r0 * y._c2r0 + x_c1r0 * y._c2r1 + x_c2r0 * y._c2r2 + x_c3r0 * y._c2r3;
-        _c2r1 = x_c0r1 * y._c2r0 + x_c1r1 * y._c2r1 + x_c2r1 * y._c2r2 + x_c3r1 * y._c2r3;
-        _c2r2 = x_c0r2 * y._c2r0 + x_c1r2 * y._c2r1 + x_c2r2 * y._c2r2 + x_c3r2 * y._c2r3;
-        _c2r3 = x_c0r3 * y._c2r0 + x_c1r3 * y._c2r1 + x_c2r3 * y._c2r2 + x_c3r3 * y._c2r3;
+        _c1r0 = x_c0r0 * y_c1r0 + x_c1r0 * y_c1r1 + x_c2r0 * y_c1r2 + x_c3r0 * y_c1r3;
+        _c1r1 = x_c0r1 * y_c1r0 + x_c1r1 * y_c1r1 + x_c2r1 * y_c1r2 + x_c3r1 * y_c1r3;
+        _c1r2 = x_c0r2 * y_c1r0 + x_c1r2 * y_c1r1 + x_c2r2 * y_c1r2 + x_c3r2 * y_c1r3;
+        _c1r3 = x_c0r3 * y_c1r0 + x_c1r3 * y_c1r1 + x_c2r3 * y_c1r2 + x_c3r3 * y_c1r3;
 
-        _c3r0 = x_c0r0 * y._c3r0 + x_c1r0 * y._c3r1 + x_c2r0 * y._c3r2 + x_c3r0 * y._c3r3;
-        _c3r1 = x_c0r1 * y._c3r0 + x_c1r1 * y._c3r1 + x_c2r1 * y._c3r2 + x_c3r1 * y._c3r3;
-        _c3r2 = x_c0r2 * y._c3r0 + x_c1r2 * y._c3r1 + x_c2r2 * y._c3r2 + x_c3r2 * y._c3r3;
-        _c3r3 = x_c0r3 * y._c3r0 + x_c1r3 * y._c3r1 + x_c2r3 * y._c3r2 + x_c3r3 * y._c3r3;
+        _c2r0 = x_c0r0 * y_c2r0 + x_c1r0 * y_c2r1 + x_c2r0 * y_c2r2 + x_c3r0 * y_c2r3;
+        _c2r1 = x_c0r1 * y_c2r0 + x_c1r1 * y_c2r1 + x_c2r1 * y_c2r2 + x_c3r1 * y_c2r3;
+        _c2r2 = x_c0r2 * y_c2r0 + x_c1r2 * y_c2r1 + x_c2r2 * y_c2r2 + x_c3r2 * y_c2r3;
+        _c2r3 = x_c0r3 * y_c2r0 + x_c1r3 * y_c2r1 + x_c2r3 * y_c2r2 + x_c3r3 * y_c2r3;
+
+        _c3r0 = x_c0r0 * y_c3r0 + x_c1r0 * y_c3r1 + x_c2r0 * y_c3r2 + x_c3r0 * y_c3r3;
+        _c3r1 = x_c0r1 * y_c3r0 + x_c1r1 * y_c3r1 + x_c2r1 * y_c3r2 + x_c3r1 * y_c3r3;
+        _c3r2 = x_c0r2 * y_c3r0 + x_c1r2 * y_c3r1 + x_c2r2 * y_c3r2 + x_c3r2 * y_c3r3;
+        _c3r3 = x_c0r3 * y_c3r0 + x_c1r3 * y_c3r1 + x_c2r3 * y_c3r2 + x_c3r3 * y_c3r3;
     }
 
     // Special case for x axis of RotateUnitSinCos().
