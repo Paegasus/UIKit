@@ -541,6 +541,7 @@ public static class TransformTest
         }
     }
 
+    [Fact]
     private static void TestScale()
     {
         
