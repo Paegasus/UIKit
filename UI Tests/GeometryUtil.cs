@@ -33,4 +33,11 @@ public static class GeometryUtil
         Assert.True(FloatAlmostEqual(lhs.Width, rhs.Width), $"Width: {lhs.Width} != {rhs.Width}");
         Assert.True(FloatAlmostEqual(lhs.Height, rhs.Height), $"Height: {lhs.Height} != {rhs.Height}");
     }
+
+    public static void AssertPoint3FNear(in Point3F lhs, in Point3F rhs, float tolerance)
+    {
+        Assert.Equal(lhs.X, rhs.X, tolerance);
+        Assert.Equal(lhs.Y, rhs.Y, tolerance);
+        Assert.Equal(lhs.Z, rhs.Z, tolerance);
+    }
 }

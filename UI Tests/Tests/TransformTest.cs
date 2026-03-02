@@ -442,9 +442,33 @@ public static class TransformTest
         }
     }
 
+    [Fact]
     private static void TestConcatRotate()
     {
-        
+        (int x1, int y1, float degrees, int x2, int y2)[] test_cases =
+        [
+            (1, 0, 90.0f, 0, 1),
+            (1, 0, -90.0f, 1, 0),
+            (1, 0, 90.0f, 0, 1),
+            (1, 0, 360.0f, 0, 1),
+            (1, 0, 0.0f, 0, 1),
+            (1, 0, float.NaN, 1, 0)
+        ];
+
+        Transform xform = new();
+        foreach (var (x1, y1, degrees, x2, y2) in test_cases)
+        {
+            Transform rotation = new();
+            rotation.Rotate(degrees);
+            xform = rotation * xform;
+            Point3F p1 = xform.MapPoint(new Point3F(x1, y1, 0));
+            Point3F p2 = new(x2, y2, 0);
+            //if (degrees == degrees)
+            if(!float.IsNaN(degrees))
+            {
+                AssertPoint3FNear(p1, p2, 0.0001f);
+            }
+        }
     }
 
     private static void TestConcatSelf()
