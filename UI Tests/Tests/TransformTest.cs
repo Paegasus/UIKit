@@ -771,4 +771,96 @@ public static class TransformTest
             }
         }
     }
+
+    [Fact]
+    private static void TestSetScale2D()
+    {
+        (int before, float s, int after)[] test_cases =
+        [
+            (1, 10.0f, 10),
+            (1, 1.0f, 1),
+            (1, 0.0f, 0),
+            (0, 10.0f, 0)
+        ];
+
+        foreach (var (before, s, after) in test_cases)
+        {
+            for (int j = -1; j < 2; ++j)
+            {
+                for (int k = 0; k < 3; ++k)
+                {
+                    float epsilon = 0.0001f;
+                    Point p0;
+                    Point p1 = new();
+                    Point p2 = new();
+                    Transform xform = new();
+                    switch (k)
+                    {
+                        case 0:
+                            p1.SetPoint(before, 0);
+                            p2.SetPoint(after, 0);
+                            xform.Scale(s + j * epsilon, 1.0f);
+                            break;
+                        case 1:
+                            p1.SetPoint(0, before);
+                            p2.SetPoint(0, after);
+                            xform.Scale(1.0f, s + j * epsilon);
+                            break;
+                        case 2:
+                            p1.SetPoint(before, before);
+                            p2.SetPoint(after, after);
+                            xform.Scale(s + j * epsilon, s + j * epsilon);
+                            break;
+                    }
+                    p0 = p1;
+                    p1 = xform.MapPoint(p1);
+                    //if (s == s)
+                    if (!float.IsNaN(s))
+                    {
+                        Assert.Equal(p1.X, p2.X);
+                        Assert.Equal(p1.Y, p2.Y);
+                        if (s != 0.0f)
+                        {
+                            Point? transformed_p1 = xform.InverseMapPoint(p1);
+                            Assert.NotNull(transformed_p1);
+                            Assert.Equal(transformed_p1.Value.X, p0.X);
+                            Assert.Equal(transformed_p1.Value.Y, p0.Y);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private static void Test2()
+    {
+    }
+
+    private static void Test3()
+    {
+    }
+
+    private static void Test4()
+    {
+    }
+
+    private static void Test5()
+    {
+    }
+
+    private static void Test7()
+    {
+    }
+
+    private static void Test8()
+    {
+    }
+
+    private static void Test9()
+    {
+    }
+
+    private static void Test10()
+    {
+    }
 }
