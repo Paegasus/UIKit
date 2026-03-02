@@ -1637,7 +1637,6 @@ public static class TransformTest
         Assert.Equal(0.0, decomp.Skew.Z);
         Assert.Equal(0.0, decomp.Perspective.Z);
 
-
         Assert.Equal(1.0, decomp.Perspective.W);
 
         Assert.Equal(0.0, decomp.Quaternion.X);
@@ -1647,37 +1646,37 @@ public static class TransformTest
 
         Assert.True(Transform.Compose(decomp).IsIdentity());
     }
-/*
+
     [Fact]
     private static void TestDecomposeTranslateRotateScale()
     {
         for (int degrees = 0; degrees < 180; ++degrees)
         {
             // build a transformation matrix.
-            gfx::Transform transform;
+            Transform transform = new();
             transform.Translate(degrees * 2, -degrees * 3);
             transform.Rotate(degrees);
             transform.Scale(degrees + 1, 2 * degrees + 1);
 
             // factor the matrix
-            std::optional<DecomposedTransform> decomp = transform.Decompose();
-            EXPECT_TRUE(decomp);
-            EXPECT_FLOAT_EQ(decomp->translate[0], degrees * 2);
-            EXPECT_FLOAT_EQ(decomp->translate[1], -degrees * 3);
+            DecomposedTransform decomp;
+            Assert.True(transform.Decompose(out decomp));
+            FloatAlmostEqual((float)decomp.Translate.X, degrees * 2);
+            FloatAlmostEqual((float)decomp.Translate.Y, -degrees * 3);
             double rotation =
-                base::RadToDeg(std::acos(double{ decomp->quaternion.w()}) *2);
-        while (rotation < 0.0)
+                double.RadiansToDegrees(Math.Acos(decomp.Quaternion.W) * 2);
+            while (rotation < 0.0)
             rotation += 360.0;
-        while (rotation > 360.0)
+            while (rotation > 360.0)
             rotation -= 360.0;
 
-        const float epsilon = 0.00015f;
-        EXPECT_NEAR(rotation, degrees, epsilon);
-        EXPECT_NEAR(decomp->scale[0], degrees + 1, epsilon);
-        EXPECT_NEAR(decomp->scale[1], 2 * degrees + 1, epsilon);
+            const float epsilon = 0.00015f;
+            Assert.Equal(rotation, degrees, epsilon);
+            Assert.Equal(decomp.Scale.X, degrees + 1, epsilon);
+            Assert.Equal(decomp.Scale.Y, 2 * degrees + 1, epsilon);
+        }
     }
-    }
-
+/*
     [Fact]
     private static void TestDecomposeScaleTransform()
     {
