@@ -115,6 +115,6 @@ public static class SkiaConversionsTest
         m44.ToRowMajor(v1);
         Assert.Equal(v, v1);
         var actual = SkMatrixToTransform(m);
-        Assert.Equal(t, actual); // Fails
+        Assert.Equal(t, actual);
     }
 }
