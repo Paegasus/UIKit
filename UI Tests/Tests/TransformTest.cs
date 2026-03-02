@@ -659,9 +659,32 @@ public static class TransformTest
         }
     }
 
+    [Fact]
     private static void TestConcatScale2D()
     {
+        (int before, float scale, int after)[] test_cases =
+        [
+            (1, 10.0f, 10),
+            (1, .1f, 1),
+            (1, 100.0f, 100),
+            (1, -1.0f, -100)
+        ];
 
+        Transform xform = new();
+        foreach (var (before, scale, after) in test_cases)
+        {
+            Transform scale_transform = new();
+            scale_transform.Scale(scale, scale);
+            xform = scale_transform * xform;
+            Point p1 = xform.MapPoint(new Point(before, before));
+            Point p2 = new(after, after);
+            //if (scale == scale)
+            if(!float.IsNaN(scale))
+            {
+                Assert.Equal(p1.X, p2.X);
+                Assert.Equal(p1.Y, p2.Y);
+            }
+        }
     }
 
     private static void TestConcatRotate2D()
