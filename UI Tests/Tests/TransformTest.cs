@@ -384,9 +384,31 @@ public static class TransformTest
         }
     }
 
+    [Fact]
     private static void TestConcatTranslate()
     {
-        
+        (int x1, int y1, float tx, float ty, int x2, int y2)[] test_cases =
+        [
+            (0, 0, 10.0f, 20.0f, 10, 20),
+            (0, 0, -10.0f, -20.0f, 0, 0),
+            (0, 0, -10.0f, -20.0f, -10, -20),
+            (0, 0, float.NaN, float.NaN, 10, 20),
+        ];
+
+        Transform xform = new();
+
+        foreach (var (x1, y1, tx, ty, x2, y2) in test_cases)
+        {
+            Transform translation = new();
+            translation.Translate(tx, ty);
+            xform = translation * xform;
+            Point3F p1 = xform.MapPoint(new Point3F(x1, y1, 0));
+            Point3F p2 = new(x2, y2, 0);
+            if (tx == tx && ty == ty)
+            {
+                Assert.True(PointsAreNearlyEqual(p1, p2));
+            }
+        }
     }
 
     private static void TestConcatScale()

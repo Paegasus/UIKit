@@ -8,6 +8,8 @@ namespace UI.GFX.Geometry;
 [StructLayout(LayoutKind.Sequential)]
 public struct Matrix44
 {
+    public enum UninitializedTag { kUninitialized };
+
     // 16 explicit fields, column-major layout:
     // _c0r0 = column 0, row 0, etc.
     private double _c0r0, _c0r1, _c0r2, _c0r3;
@@ -22,6 +24,8 @@ public struct Matrix44
         readonly get => Unsafe.Add(ref Unsafe.AsRef(in _c0r0), col * 4 + row);
         set => Unsafe.Add(ref _c0r0, col * 4 + row) = value;
     }
+
+    public Matrix44(UninitializedTag uninitializedTag) {}
 
     public Matrix44()
     {

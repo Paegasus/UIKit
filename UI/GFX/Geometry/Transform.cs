@@ -44,6 +44,13 @@ public struct Transform
         axis_2d_ = axis_2d;
     }
 
+    // Used internally to construct a Transform with uninitialized full matrix.
+    private Transform(Matrix44.UninitializedTag uninitializedTag)
+    {
+        full_matrix_ = true;
+        matrix_ = new Matrix44(uninitializedTag);
+    }
+
     // Creates a transform from explicit 16 matrix elements in row-major order.
     // Always creates a double precision 4x4 matrix.
     public static Transform RowMajor(
@@ -743,6 +750,34 @@ public struct Transform
 
     public static bool operator ==(in Transform left, in Transform right) => left.Equals(right);
     public static bool operator !=(in Transform left, in Transform right) => !left.Equals(right);
+
+    // Returns |this| * |other|.
+    public static Transform operator *(in Transform left, in Transform right)
+    {
+        Transform result;
+
+        if (!right.full_matrix_)
+        {
+            result = left;
+            result.PreConcat(right.axis_2d_);
+            return result;
+        }
+        if (!left.full_matrix_)
+        {
+            result = right;
+            result.PostConcat(left.axis_2d_);
+            return result;
+        }
+        result = new(Matrix44.UninitializedTag.kUninitialized);
+        result.matrix_.SetConcat(left.matrix_, right.matrix_);
+        return result;
+    }
+
+    // Sets |this| = |this| * |other|
+    public void operator *=(in Transform other)
+    {
+        PreConcat(other);
+    }
 
     public override int GetHashCode()
     {
