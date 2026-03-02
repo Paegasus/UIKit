@@ -544,7 +544,56 @@ public static class TransformTest
     [Fact]
     private static void TestScale()
     {
-        
+        (int before, float s, int after)[] test_cases =
+        [
+            (1, 10.0f, 10),
+            (1, 1.0f, 1),
+            (1, 0.0f, 0),
+            (0, 10.0f, 0),
+            (1, float.NaN, 0)
+        ];
+
+        foreach (var (before, s, after) in test_cases)
+        {
+            for (int k = 0; k < 3; ++k)
+            {
+                Point3F p0;
+                Point3F p1 = new();
+                Point3F p2 = new();
+                Transform xform = new();
+
+                switch (k)
+                {
+                    case 0:
+                        p1.SetPoint(before, 0, 0);
+                        p2.SetPoint(after, 0, 0);
+                        xform.Scale(s, 1.0f);
+                        break;
+                    case 1:
+                        p1.SetPoint(0, before, 0);
+                        p2.SetPoint(0, after, 0);
+                        xform.Scale(1.0f, s);
+                        break;
+                    case 2:
+                        p1.SetPoint(before, before, 0);
+                        p2.SetPoint(after, after, 0);
+                        xform.Scale(s, s);
+                        break;
+                }
+                p0 = p1;
+                p1 = xform.MapPoint(p1);
+                if (!float.IsNaN(s))
+                {
+                    Assert.True(PointsAreNearlyEqual(p1, p2));
+                    if (s != 0.0f)
+                    {
+                        Point3F? transformed_p1 = xform.InverseMapPoint(p1);
+                        Assert.NotNull(transformed_p1);
+                        Assert.True(PointsAreNearlyEqual(transformed_p1.Value, p0));
+                    }
+                }
+            }
+        }
     }
 
     private static void TestSetRotate()
