@@ -775,6 +775,23 @@ public struct Transform
     // scale inversion, but causes transformed objects to needlessly shrink and
     // grow as they transform through scale = 0 along multiple axes. Thus 2d
     // transforms should follow the 2d spec regarding matrix decomposition.
+    public readonly bool Decompose(out DecomposedTransform result)
+    {
+        if (!full_matrix_)
+        {
+            if (!axis_2d_.IsInvertible())
+            {
+                result = default;
+                return false;
+            }
+            
+            result = axis_2d_.Decompose();
+            return true;
+        }
+
+        return matrix_.Decompose(out result);
+    }
+    /*
     public readonly DecomposedTransform? Decompose()
     {
         if (!full_matrix_)
@@ -786,6 +803,7 @@ public struct Transform
         }
         return matrix_.Decompose();
     }
+    */
 
     // Decomposes |this| and |from|, interpolates the decomposed values, and
     // sets |this| to the reconstituted result. Returns false and leaves |this|
@@ -800,19 +818,15 @@ public struct Transform
     // BlendDecomposedTransforms() (see transform_util.h).
     public bool Blend(in Transform from, double progress)
     {
-        DecomposedTransform? to_decomp = Decompose();
-
-        if (!to_decomp.HasValue)
+        if (!Decompose(out DecomposedTransform to_decomp))
             return false;
 
-        DecomposedTransform? from_decomp = from.Decompose();
-
-        if (!from_decomp.HasValue)
+        if (!from.Decompose(out DecomposedTransform from_decomp))
             return false;
 
-        to_decomp = TransformUtil.BlendDecomposedTransforms(to_decomp.Value, from_decomp.Value, progress);
+        to_decomp = TransformUtil.BlendDecomposedTransforms(to_decomp, from_decomp, progress);
 
-        this = Compose(to_decomp.Value);
+        this = Compose(to_decomp);
 
         return true;
     }

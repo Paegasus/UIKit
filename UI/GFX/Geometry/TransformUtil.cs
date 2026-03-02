@@ -1,6 +1,4 @@
-using System.Diagnostics;
 using System.Runtime.CompilerServices;
-using static UI.Numerics.SafeConversions;
 
 namespace UI.GFX.Geometry;
 

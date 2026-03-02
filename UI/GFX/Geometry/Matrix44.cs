@@ -647,7 +647,7 @@ public struct Matrix44
     }
 
     // TODO(crbug.com/40237414): Consider letting this function always succeed.
-    public readonly DecomposedTransform? Decompose2D()
+    public readonly bool Decompose2D(out DecomposedTransform result)
     {
 #if DEBUG
         Debug.Assert(Is2DTransform);
@@ -672,9 +672,13 @@ public struct Matrix44
         double m22 = _c1r1;
 
         double determinant = m11 * m22 - m12 * m21;
+
         // Test for matrix being singular.
         if (determinant == 0)
-            return null;
+        {
+            result = default;
+            return false;
+        }
 
         DecomposedTransform decomp = new();
 
@@ -758,14 +762,20 @@ public struct Matrix44
         decomp.Quaternion.Z = Math.Sin(0.5 * angle);
         decomp.Quaternion.W = Math.Cos(0.5 * angle);
 
-        return decomp;
+        result = decomp;
+
+        return true;
     }
 
-    public readonly DecomposedTransform? Decompose()
+    public readonly bool Decompose(out DecomposedTransform result)
     {
         // See documentation of Transform::Decompose() for why we need the 2d branch.
         if (Is2DTransform)
-            return Decompose2D();
+        {
+            Decompose2D(out result);
+
+            return true;
+        }
 
         // https://www.w3.org/TR/css-transforms-2/#decomposing-a-3d-matrix.
 
@@ -776,7 +786,10 @@ public struct Matrix44
 
         // Normalize the matrix.
         if (!double.IsNormal(c3.V3))
-            return null;
+        {
+            result = default;
+            return false;
+        }
 
         double inv_w = 1.0 / c3.V3;
         c0 *= inv_w;
@@ -796,7 +809,10 @@ public struct Matrix44
         Double4 inverse_c3 = c3;
 
         if (!InverseWithDouble4Cols(ref inverse_c0, ref inverse_c1, ref inverse_c2, ref inverse_c3))
-            return null;
+        {
+            result = default;
+            return false;
+        }
 
         DecomposedTransform decomp = new();
 
@@ -849,16 +865,20 @@ public struct Matrix44
 
         // Compute X scale factor and normalize the first column.
         if (!extract_scale(ref c0, out decomp.Scale.X))
-            return null;
-
+        {
+            result = default;
+            return false;
+        }
         // Compute XY shear factor and make 2nd column orthogonal to 1st.
         decomp.Skew.X = epsilon_to_zero(sum3(c0 * c1));
         c1 -= c0 * decomp.Skew.X;
 
         // Now, compute Y scale and normalize 2nd column.
         if (!extract_scale(ref c1, out decomp.Scale.Y))
-            return null;
-
+        {
+            result = default;
+            return false;
+        }
         decomp.Skew.X /= decomp.Scale.Y;
 
         // Compute XZ and YZ shears, and orthogonalize the 3rd column.
@@ -869,7 +889,10 @@ public struct Matrix44
 
         // Next, get Z scale and normalize the 3rd column.
         if (!extract_scale(ref c2, out decomp.Scale.Z))
-            return null;
+        {
+            result = default;
+            return false;
+        }
 
         decomp.Skew.Y /= decomp.Scale.Z;
         decomp.Skew.Z /= decomp.Scale.Z;
@@ -980,8 +1003,9 @@ public struct Matrix44
         decomp.Quaternion.Y = y;
         decomp.Quaternion.Z = z;
         decomp.Quaternion.W = w;
-
-        return decomp;
+        
+        result = decomp;
+        return true;
     }
 
     // Based on:
