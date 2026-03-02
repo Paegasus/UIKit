@@ -1245,11 +1245,215 @@ public static class TransformTest
         EXPECT_ROW3_EQ(0.0f, 0.0f, 0.0f, 1.0f, to);
     }
 
+    [Fact]
+    private static void TestBlendForRotationAboutX()
+    {
+        // Even though Blending uses quaternions,
+        // axis-aligned rotations should Blend the same with quaternions or Euler angles.
+        // So we can test rotation Blending by comparing against manually specified matrices from Euler angles.
+
+        Transform from = new();
+        from.RotateAbout(new Vector3DF(1.0f, 0.0f, 0.0f), 0.0);
+
+        Transform to = new();
+
+        to.RotateAbout(new Vector3DF(1.0f, 0.0f, 0.0f), 90.0);
+        to.Blend(from, 0.0);
+        Assert.Equal(from, to);
+
+        double expectedRotationAngle = double.DegreesToRadians(22.5);
+        to = new Transform();
+        to.RotateAbout(new Vector3DF(1.0f, 0.0f, 0.0f), 90.0);
+        to.Blend(from, 0.25);
+        EXPECT_ROW0_EQ(1.0f, 0.0f, 0.0f, 0.0f, to);
+        EXPECT_ROW1_NEAR(0.0, Math.Cos(expectedRotationAngle),
+                         -Math.Sin(expectedRotationAngle), 0.0, to, kErrorThreshold);
+        EXPECT_ROW2_NEAR(0.0, Math.Sin(expectedRotationAngle),
+                         Math.Cos(expectedRotationAngle), 0.0, to, kErrorThreshold);
+        EXPECT_ROW3_EQ(0.0f, 0.0f, 0.0f, 1.0f, to);
+
+        expectedRotationAngle = double.DegreesToRadians(45.0);
+        to = new Transform();
+        to.RotateAbout(new Vector3DF(1.0f, 0.0f, 0.0f), 90.0);
+        to.Blend(from, 0.5);
+        EXPECT_ROW0_EQ(1.0f, 0.0f, 0.0f, 0.0f, to);
+        EXPECT_ROW1_NEAR(0.0, Math.Cos(expectedRotationAngle),
+                         -Math.Sin(expectedRotationAngle), 0.0, to, kErrorThreshold);
+        EXPECT_ROW2_NEAR(0.0, Math.Sin(expectedRotationAngle),
+                         Math.Cos(expectedRotationAngle), 0.0, to, kErrorThreshold);
+        EXPECT_ROW3_EQ(0.0f, 0.0f, 0.0f, 1.0f, to);
+
+        to = new Transform();
+        to.RotateAbout(new Vector3DF(1.0f, 0.0f, 0.0f), 90.0);
+        to.Blend(from, 1.0);
+        EXPECT_ROW0_EQ(1.0f, 0.0f, 0.0f, 0.0f, to);
+        EXPECT_ROW1_NEAR(0.0, 0.0, -1.0, 0.0, to, kErrorThreshold);
+        EXPECT_ROW2_NEAR(0.0, 1.0, 0.0, 0.0, to, kErrorThreshold);
+        EXPECT_ROW3_EQ(0.0f, 0.0f, 0.0f, 1.0f, to);
+    }
+
+    [Fact]
+    private static void TestBlendForRotationAboutY()
+    {
+        Transform from = new();
+        from.RotateAbout(new Vector3DF(0.0f, 1.0f, 0.0f), 0.0);
+
+        Transform to = new();
+
+        to.RotateAbout(new Vector3DF(0.0f, 1.0f, 0.0f), 90.0);
+        to.Blend(from, 0.0);
+        Assert.Equal(from, to);
+
+        double expectedRotationAngle = double.DegreesToRadians(22.5);
+        to = new Transform();
+        to.RotateAbout(new Vector3DF(0.0f, 1.0f, 0.0f), 90.0);
+        to.Blend(from, 0.25);
+        EXPECT_ROW0_NEAR(Math.Cos(expectedRotationAngle), 0.0,
+                         Math.Sin(expectedRotationAngle), 0.0, to, kErrorThreshold);
+        EXPECT_ROW1_EQ(0.0f, 1.0f, 0.0f, 0.0f, to);
+        EXPECT_ROW2_NEAR(-Math.Sin(expectedRotationAngle), 0.0,
+                         Math.Cos(expectedRotationAngle), 0.0, to, kErrorThreshold);
+        EXPECT_ROW3_EQ(0.0f, 0.0f, 0.0f, 1.0f, to);
+
+        expectedRotationAngle = double.DegreesToRadians(45.0);
+        to = new Transform();
+        to.RotateAbout(new Vector3DF(0.0f, 1.0f, 0.0f), 90.0);
+        to.Blend(from, 0.5);
+        EXPECT_ROW0_NEAR(Math.Cos(expectedRotationAngle), 0.0,
+                         Math.Sin(expectedRotationAngle), 0.0, to, kErrorThreshold);
+        EXPECT_ROW1_EQ(0.0f, 1.0f, 0.0f, 0.0f, to);
+        EXPECT_ROW2_NEAR(-Math.Sin(expectedRotationAngle), 0.0,
+                         Math.Cos(expectedRotationAngle), 0.0, to, kErrorThreshold);
+        EXPECT_ROW3_EQ(0.0f, 0.0f, 0.0f, 1.0f, to);
+
+        to = new Transform();
+        to.RotateAbout(new Vector3DF(0.0f, 1.0f, 0.0f), 90.0);
+        to.Blend(from, 1.0);
+        EXPECT_ROW0_NEAR(0.0, 0.0, 1.0, 0.0, to, kErrorThreshold);
+        EXPECT_ROW1_EQ(0.0f, 1.0f, 0.0f, 0.0f, to);
+        EXPECT_ROW2_NEAR(-1.0, 0.0, 0.0, 0.0, to, kErrorThreshold);
+        EXPECT_ROW3_EQ(0.0f, 0.0f, 0.0f, 1.0f, to);
+    }
+
+    [Fact]
+    private static void TestBlendForRotationAboutZ()
+    {
+        Transform from = new();
+        from.RotateAbout(new Vector3DF(0.0f, 0.0f, 1.0f), 0.0);
+
+        Transform to = new();
+
+        to.RotateAbout(new Vector3DF(0.0f, 0.0f, 1.0f), 90.0);
+        to.Blend(from, 0.0);
+        Assert.Equal(from, to);
+
+        double expectedRotationAngle = double.DegreesToRadians(22.5);
+        to = new Transform();
+        to.RotateAbout(new Vector3DF(0.0f, 0.0f, 1.0f), 90.0);
+        to.Blend(from, 0.25);
+        EXPECT_ROW0_NEAR(Math.Cos(expectedRotationAngle),
+                         -Math.Sin(expectedRotationAngle), 0.0, 0.0, to,
+                         kErrorThreshold);
+        EXPECT_ROW1_NEAR(Math.Sin(expectedRotationAngle),
+                         Math.Cos(expectedRotationAngle), 0.0, 0.0, to,
+                         kErrorThreshold);
+        EXPECT_ROW2_EQ(0.0f, 0.0f, 1.0f, 0.0f, to);
+        EXPECT_ROW3_EQ(0.0f, 0.0f, 0.0f, 1.0f, to);
+
+        expectedRotationAngle = double.DegreesToRadians(45.0);
+        to = new Transform();
+        to.RotateAbout(new Vector3DF(0.0f, 0.0f, 1.0f), 90.0);
+        to.Blend(from, 0.5);
+        EXPECT_ROW0_NEAR(Math.Cos(expectedRotationAngle),
+                         -Math.Sin(expectedRotationAngle), 0.0, 0.0, to,
+                         kErrorThreshold);
+        EXPECT_ROW1_NEAR(Math.Sin(expectedRotationAngle),
+                         Math.Cos(expectedRotationAngle), 0.0, 0.0, to,
+                         kErrorThreshold);
+        EXPECT_ROW2_EQ(0.0f, 0.0f, 1.0f, 0.0f, to);
+        EXPECT_ROW3_EQ(0.0f, 0.0f, 0.0f, 1.0f, to);
+
+        to = new Transform();
+        to.RotateAbout(new Vector3DF(0.0f, 0.0f, 1.0f), 90.0);
+        to.Blend(from, 1.0);
+        EXPECT_ROW0_NEAR(0.0, -1.0, 0.0, 0.0, to, kErrorThreshold);
+        EXPECT_ROW1_NEAR(1.0, 0.0, 0.0, 0.0, to, kErrorThreshold);
+        EXPECT_ROW2_EQ(0.0f, 0.0f, 1.0f, 0.0f, to);
+        EXPECT_ROW3_EQ(0.0f, 0.0f, 0.0f, 1.0f, to);
+    }
+
+    [Fact]
+    private static void TestBlendForCompositeTransform()
+    {
+        // Verify that the.Blending was done with a decomposition in correct order
+        // by blending a composite transform. Using matrix x vector notation
+        // (Ax = b, where x is column vector), the ordering should be:
+        // perspective * translation * rotation * skew * scale
+        //
+        // It is not as important (or meaningful) to check intermediate
+        // interpolations; order of operations will be tested well enough by the
+        // end cases that are easier to specify.
+
+        Transform from = new();
+        Transform to;
+
+        Transform expected_end_of_animation = new();
+        expected_end_of_animation.ApplyPerspectiveDepth(1.0);
+        expected_end_of_animation.Translate3D(10.0f, 20.0f, 30.0f);
+        expected_end_of_animation.RotateAbout(new Vector3DF(0.0f, 0.0f, 1.0f), 25.0);
+        expected_end_of_animation.Skew(0.0, 45.0);
+        expected_end_of_animation.Scale3D(6.0f, 7.0f, 8.0f);
+
+        to = expected_end_of_animation;
+        to.Blend(from, 0.0);
+        Assert.Equal(from, to);
+
+        to = expected_end_of_animation;
+        // We short circuit if blend is >= 1, so to check the numerics, we will
+        // check that we get close to what we expect when we're nearly done
+        // interpolating.
+        to.Blend(from, .99999f);
+
+        // Recomposing the matrix results in a normalized matrix, so to verify we
+        // need to normalize the expectedEndOfAnimation before comparing elements.
+        // Normalizing means dividing everything by expectedEndOfAnimation.m44().
+        Transform normalized_expected_end_of_animation = expected_end_of_animation;
+        Transform normalization_matrix = new();
+        double inv_w = 1.0 / expected_end_of_animation.rc(3, 3);
+        normalization_matrix.set_rc(0, 0, inv_w);
+        normalization_matrix.set_rc(1, 1, inv_w);
+        normalization_matrix.set_rc(2, 2, inv_w);
+        normalization_matrix.set_rc(3, 3, inv_w);
+        normalized_expected_end_of_animation.PreConcat(normalization_matrix);
+
+        Assert.True(MatricesAreNearlyEqual(normalized_expected_end_of_animation, to));
+    }
+
     private static void Test4()
     {
     }
 
     private static void Test5()
+    {
+    }
+
+    private static void Test6()
+    {
+    }
+
+    private static void Test7()
+    {
+    }
+
+    private static void Test8()
+    {
+    }
+
+    private static void Test9()
+    {
+    }
+
+    private static void Test10()
     {
     }
 }
