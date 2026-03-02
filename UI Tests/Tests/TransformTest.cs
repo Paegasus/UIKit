@@ -1054,22 +1054,195 @@ public static class TransformTest
         Transform to = new();
         to.set_rc(1, 1, 0);
         Transform original_to = to;
-        Assert.False(to.Blend(from, 0.25)); //Fails, Expected: False, Actual:   True
+        Assert.False(to.Blend(from, 0.25));
         Assert.Equal(original_to, to);
         Assert.False(to.Blend(from, 0.75));
         Assert.Equal(original_to, to);
     }
 
+    [Fact]
     private static void TestVerifyBlendForTranslation()
     {
+        Transform from = new();
+        from.Translate3D(100.0f, 200.0f, 100.0f);
+
+        Transform to = new();
+
+        to.Translate3D(200.0f, 100.0f, 300.0f);
+        to.Blend(from, 0.0);
+        Assert.Equal(from, to);
+
+        to = new Transform();
+        to.Translate3D(200.0f, 100.0f, 300.0f);
+        to.Blend(from, 0.25);
+        EXPECT_ROW0_EQ(1.0f, 0.0f, 0.0f, 125.0f, to);
+        EXPECT_ROW1_EQ(0.0f, 1.0f, 0.0f, 175.0f, to);
+        EXPECT_ROW2_EQ(0.0f, 0.0f, 1.0f, 150.0f, to);
+        EXPECT_ROW3_EQ(0.0f, 0.0f, 0.0f, 1.0f, to);
+
+        to = new Transform();
+        to.Translate3D(200.0f, 100.0f, 300.0f);
+        to.Blend(from, 0.5);
+        EXPECT_ROW0_EQ(1.0f, 0.0f, 0.0f, 150.0f, to);
+        EXPECT_ROW1_EQ(0.0f, 1.0f, 0.0f, 150.0f, to);
+        EXPECT_ROW2_EQ(0.0f, 0.0f, 1.0f, 200.0f, to);
+        EXPECT_ROW3_EQ(0.0f, 0.0f, 0.0f, 1.0f, to);
+
+        to = new Transform();
+        to.Translate3D(200.0f, 100.0f, 300.0f);
+        to.Blend(from, 1.0);
+        EXPECT_ROW0_EQ(1.0f, 0.0f, 0.0f, 200.0f, to);
+        EXPECT_ROW1_EQ(0.0f, 1.0f, 0.0f, 100.0f, to);
+        EXPECT_ROW2_EQ(0.0f, 0.0f, 1.0f, 300.0f, to);
+        EXPECT_ROW3_EQ(0.0f, 0.0f, 0.0f, 1.0f, to);
     }
 
-    private static void Test2()
+    [Fact]
+    private static void TestVerifyBlendForScale()
     {
+        Transform from = new();
+        from.Scale3D(100.0f, 200.0f, 100.0f);
+
+        Transform to = new();
+
+        to.Scale3D(200.0f, 100.0f, 300.0f);
+        to.Blend(from, 0.0);
+        Assert.Equal(from, to);
+
+        to = new Transform();
+        to.Scale3D(200.0f, 100.0f, 300.0f);
+        to.Blend(from, 0.25);
+        EXPECT_ROW0_EQ(125.0f, 0.0f, 0.0f, 0.0f, to);
+        EXPECT_ROW1_EQ(0.0f, 175.0f, 0.0f, 0.0f, to);
+        EXPECT_ROW2_EQ(0.0f, 0.0f, 150.0f, 0.0f, to);
+        EXPECT_ROW3_EQ(0.0f, 0.0f, 0.0f, 1.0f, to);
+
+        to = new Transform();
+        to.Scale3D(200.0f, 100.0f, 300.0f);
+        to.Blend(from, 0.5);
+        EXPECT_ROW0_EQ(150.0f, 0.0f, 0.0f, 0.0f, to);
+        EXPECT_ROW1_EQ(0.0f, 150.0f, 0.0f, 0.0f, to);
+        EXPECT_ROW2_EQ(0.0f, 0.0f, 200.0f, 0.0f, to);
+        EXPECT_ROW3_EQ(0.0f, 0.0f, 0.0f, 1.0f, to);
+
+        to = new Transform();
+        to.Scale3D(200.0f, 100.0f, 300.0f);
+        to.Blend(from, 1.0);
+        EXPECT_ROW0_EQ(200.0f, 0.0f, 0.0f, 0.0f, to);
+        EXPECT_ROW1_EQ(0.0f, 100.0f, 0.0f, 0.0f, to);
+        EXPECT_ROW2_EQ(0.0f, 0.0f, 300.0f, 0.0f, to);
+        EXPECT_ROW3_EQ(0.0f, 0.0f, 0.0f, 1.0f, to);
     }
 
-    private static void Test3()
+    [Fact]
+    private static void TestVerifyBlendForSkew()
     {
+        // Along X axis only
+        Transform from = new();
+        from.Skew(0.0, 0.0);
+
+        Transform to = new();
+
+        to.Skew(45.0, 0.0);
+        to.Blend(from, 0.0);
+        Assert.Equal(from, to);
+
+        to = new Transform();
+        to.Skew(45.0, 0.0);
+        to.Blend(from, 0.5);
+        EXPECT_ROW0_EQ(1.0f, 0.5f, 0.0f, 0.0f, to);
+        EXPECT_ROW1_EQ(0.0f, 1.0f, 0.0f, 0.0f, to);
+        EXPECT_ROW2_EQ(0.0f, 0.0f, 1.0f, 0.0f, to);
+        EXPECT_ROW3_EQ(0.0f, 0.0f, 0.0f, 1.0f, to);
+
+        to = new Transform();
+        to.Skew(45.0, 0.0);
+        to.Blend(from, 0.25);
+        EXPECT_ROW0_EQ(1.0f, 0.25f, 0.0f, 0.0f, to);
+        EXPECT_ROW1_EQ(0.0f, 1.0f, 0.0f, 0.0f, to);
+        EXPECT_ROW2_EQ(0.0f, 0.0f, 1.0f, 0.0f, to);
+        EXPECT_ROW3_EQ(0.0f, 0.0f, 0.0f, 1.0f, to);
+
+        to = new Transform();
+        to.Skew(45.0, 0.0);
+        to.Blend(from, 1.0);
+        EXPECT_ROW0_EQ(1.0f, 1.0f, 0.0f, 0.0f, to);
+        EXPECT_ROW1_EQ(0.0f, 1.0f, 0.0f, 0.0f, to);
+        EXPECT_ROW2_EQ(0.0f, 0.0f, 1.0f, 0.0f, to);
+        EXPECT_ROW3_EQ(0.0f, 0.0f, 0.0f, 1.0f, to);
+
+        // NOTE CAREFULLY: Decomposition of skew and rotation terms of the matrix
+        // is inherently underconstrained, and so it does not always compute the
+        // originally intended skew parameters. The current implementation uses QR
+        // decomposition, which decomposes the shear into a rotation + non-uniform scale.
+        //
+        // It is unlikely that the decomposition implementation will need to change
+        // very often, so to get any test coverage, the compromise is to verify the
+        // exact matrix that the.Blend() operation produces.
+        //
+        // This problem also potentially exists for skew along the X axis, but the
+        // current QR decomposition implementation just happens to decompose those
+        // test matrices intuitively.
+        //
+        // Unfortunately, this case suffers from uncomfortably large precision error.
+
+        from = new Transform();
+        from.Skew(0.0, 0.0);
+
+        to = new Transform();
+
+        to.Skew(0.0, 45.0);
+        to.Blend(from, 0.0);
+        Assert.Equal(from, to);
+
+        to = new Transform();
+        to.Skew(0.0, 45.0);
+        to.Blend(from, 0.25);
+        Assert.True(1.0 < to.rc(0, 0));
+        Assert.True(1.5 > to.rc(0, 0));
+        Assert.True(0.0 < to.rc(0, 1));
+        Assert.True(0.5 > to.rc(0, 1));
+        Assert.True(FloatAlmostEqual(0.0f, (float) to.rc(0, 2)));
+        Assert.True(FloatAlmostEqual(0.0f, (float) to.rc(0, 3)));
+
+        Assert.True(0.0 < to.rc(1, 0));
+        Assert.True(0.5 > to.rc(1, 0));
+        Assert.True(0.0 < to.rc(1, 1));
+        Assert.True(1.0 > to.rc(1, 1));
+        Assert.True(FloatAlmostEqual(0.0f, (float) to.rc(1, 2)));
+        Assert.True(FloatAlmostEqual(0.0f, (float) to.rc(1, 3)));
+
+        EXPECT_ROW2_EQ(0.0f, 0.0f, 1.0f, 0.0f, to);
+        EXPECT_ROW3_EQ(0.0f, 0.0f, 0.0f, 1.0f, to);
+
+        to = new Transform();
+        to.Skew(0.0, 45.0);
+        to.Blend(from, 0.5);
+
+        Assert.True(1.0 < to.rc(0, 0));
+        Assert.True(1.5 > to.rc(0, 0));
+        Assert.True(0.0 < to.rc(0, 1));
+        Assert.True(0.5 > to.rc(0, 1));
+        Assert.True(FloatAlmostEqual(0.0f, (float) to.rc(0, 2)));
+        Assert.True(FloatAlmostEqual(0.0f, (float) to.rc(0, 3)));
+
+        Assert.True(0.0 < to.rc(1, 0));
+        Assert.True(1.0 > to.rc(1, 0));
+        Assert.True(0.0 < to.rc(1, 1));
+        Assert.True(1.0 > to.rc(1, 1));
+        Assert.True(FloatAlmostEqual(0.0f, (float) to.rc(1, 2)));
+        Assert.True(FloatAlmostEqual(0.0f, (float) to.rc(1, 3)));
+
+        EXPECT_ROW2_EQ(0.0f, 0.0f, 1.0f, 0.0f, to);
+        EXPECT_ROW3_EQ(0.0f, 0.0f, 0.0f, 1.0f, to);
+
+        to = new Transform();
+        to.Skew(0.0, 45.0);
+        to.Blend(from, 1.0);
+        EXPECT_ROW0_NEAR(1.0, 0.0, 0.0, 0.0, to, kErrorThreshold);
+        EXPECT_ROW1_NEAR(1.0, 1.0, 0.0, 0.0, to, kErrorThreshold);
+        EXPECT_ROW2_EQ(0.0f, 0.0f, 1.0f, 0.0f, to);
+        EXPECT_ROW3_EQ(0.0f, 0.0f, 0.0f, 1.0f, to);
     }
 
     private static void Test4()
