@@ -128,46 +128,31 @@ public struct Matrix44
     // Set a value in the matrix at |row|, |col|.
     public void set_rc(int row, int col, double value) => this[row, col] = value;
 
-/*
-    // Gets a value at |row|, |col| from the matrix.
-    public readonly double rc(int row, int col)
+    //public readonly void GetColMajor(base::span<double, 16> dst)
+    public readonly void GetColMajor(Span<double> dst)
     {
-#if DEBUG
-        Debug.Assert((uint)row <= 3u);
-        Debug.Assert((uint)col <= 3u);
-#endif
-        return this[col, row];
-    }
+        throw new NotImplementedException();
 
-    // Set a value in the matrix at |row|, |col|.
-    public void set_rc(int row, int col, double value)
-    {
-#if DEBUG
-        Debug.Assert((uint)row <= 3u);
-        Debug.Assert((uint)col <= 3u);
-#endif
-        this[col, row] = value;
-    }
-*/
-
-    /*
-    void Matrix44::GetColMajor(base::span<double, 16> dst) const
-    {
+        /*
         base::span UNSAFE_TODO(src{&matrix_[0][0], base::fixed_extent<16>()});
         dst.copy_from(src);
+        */
     }
-    */
-    /*
-    void Matrix44::GetColMajorF(base::span<float, 16> dst) const
+
+    //public readonly void GetColMajorF(base::span<float, 16> dst)
+    public readonly void GetColMajorF(Span<float> dst)
     {
+        throw new NotImplementedException();
+        
+        /*
         base::span UNSAFE_TODO(src{&matrix_[0][0], base::fixed_extent<16>()});
 
         // TODO: It's surprising that this isn't flagged as unsafe.
         //       It'd be nice if copy_from() supported differing element types,
         //       then this would be statically safe.
         std::ranges::copy(src, dst.begin());
+        */
     }
-    */
     
     // this = this * translation.
     public void PreTranslate(double dx, double dy)
