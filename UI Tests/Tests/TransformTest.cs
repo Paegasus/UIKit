@@ -464,7 +464,7 @@ public static class TransformTest
             Point3F p1 = xform.MapPoint(new Point3F(x1, y1, 0));
             Point3F p2 = new(x2, y2, 0);
             //if (degrees == degrees)
-            if(!float.IsNaN(degrees))
+            if (!float.IsNaN(degrees))
             {
                 AssertPoint3FNear(p1, p2, 0.0001f);
             }
@@ -596,28 +596,81 @@ public static class TransformTest
         }
     }
 
+    [Fact]
     private static void TestSetRotate()
     {
-        
+        (int x, int y, float degree, int xprime, int yprime)[] set_rotate_cases =
+        [
+            (100, 0, 90.0f, 0, 100),
+            (0, 0, 90.0f, 0, 0),
+            (0, 100, 90.0f, -100, 0),
+            (0, 1, -90.0f, 1, 0),
+            (100, 0, 0.0f, 100, 0),
+            (0, 0, 0.0f, 0, 0),
+            (0, 0, float.NaN, 0, 0),
+            (100, 0, 360.0f, 100, 0)
+        ];
+
+        foreach (var (x, y, degree, xprime, yprime) in set_rotate_cases)
+        {
+            Point3F p0;
+            Point3F p1 = new(x, y, 0);
+            Point3F p2 = new(xprime, yprime, 0);
+            p0 = p1;
+            Transform xform = new();
+            xform.Rotate(degree);
+            // just want to make sure that we don't crash in the case of NaN.
+            //if (degree == degree)
+            if(!float.IsNaN(degree))
+            {
+                p1 = xform.MapPoint(p1);
+                Assert.True(PointsAreNearlyEqual(p1, p2));
+                Point3F? transformed_p1 = xform.InverseMapPoint(p1);
+                Assert.NotNull(transformed_p1);
+                Assert.True(PointsAreNearlyEqual(transformed_p1.Value, p0));
+            }
+        }
     }
 
+    [Fact]
     private static void TestConcatTranslate2D()
     {
-        
+        (int x1, int y1, float tx, float ty, int x2, int y2)[] test_cases =
+        [
+            (0, 0, 10.0f, 20.0f, 10, 20),
+            (0, 0, -10.0f, -20.0f, 0, 0),
+            (0, 0, -10.0f, -20.0f, -10, -20)
+        ];
+
+        Transform xform = new();
+        foreach (var (x1, y1, tx, ty, x2, y2) in test_cases)
+        {
+            Transform translation = new();
+            translation.Translate(tx, ty);
+            xform = translation * xform;
+            Point p1 = xform.MapPoint(new Point(x1, y1));
+            Point p2 = new(x2, y2);
+            //if (tx == tx && ty == ty)
+            if (!float.IsNaN(tx) && !float.IsNaN(ty))
+            {
+                Assert.Equal(p1.X, p2.X);
+                Assert.Equal(p1.Y, p2.Y);
+            }
+        }
     }
 
     private static void TestConcatScale2D()
     {
-        
+
     }
 
     private static void TestConcatRotate2D()
     {
-        
+
     }
 
     private static void TestSetTranslate2D()
     {
-        
+
     }
 }
