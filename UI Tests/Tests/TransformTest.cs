@@ -489,9 +489,56 @@ public static class TransformTest
         Assert.Equal(expected_a_times_a, a);
     }
 
+    [Fact]
     private static void TestTranslate()
     {
-        
+        (int x1, int y1, float tx, float ty, int x2, int y2)[] test_cases =
+        [
+            (0, 0, 10.0f, 20.0f, 10, 20),
+            (10, 20, 10.0f, 20.0f, 20, 40),
+            (10, 20, 0.0f, 0.0f, 10, 20),
+            (0, 0, float.NaN,
+            float.NaN, 0, 0)
+        ];
+
+        foreach (var (x1, y1, tx, ty, x2, y2) in test_cases)
+        {
+            for (int k = 0; k < 3; ++k)
+            {
+                Point3F p0;
+                Point3F p1 = new();
+                Point3F p2 = new();
+                Transform xform = new();
+                switch (k)
+                {
+                    case 0:
+                        p1.SetPoint(x1, 0, 0);
+                        p2.SetPoint(x2, 0, 0);
+                        xform.Translate(tx, 0.0f);
+                        break;
+                    case 1:
+                        p1.SetPoint(0, y1, 0);
+                        p2.SetPoint(0, y2, 0);
+                        xform.Translate(0.0f, ty);
+                        break;
+                    case 2:
+                        p1.SetPoint(x1, y1, 0);
+                        p2.SetPoint(x2, y2, 0);
+                        xform.Translate(tx, ty);
+                        break;
+                }
+                p0 = p1;
+                p1 = xform.MapPoint(p1);
+                //if (tx == tx && ty == ty)
+                if (!float.IsNaN(tx) && !float.IsNaN(ty))
+                {
+                    Assert.True(PointsAreNearlyEqual(p1, p2));
+                    Point3F? transformed_p1 = xform.InverseMapPoint(p1);
+                    Assert.NotNull(transformed_p1);
+                    Assert.True(PointsAreNearlyEqual(transformed_p1.Value, p0));
+                }
+            }
+        }
     }
 
     private static void TestScale()

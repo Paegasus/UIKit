@@ -307,6 +307,43 @@ public struct Transform
                  ClampFloatGeometry(p[2]));
     }
 
+    public readonly PointF? InverseMapPoint(in PointF point)
+    {
+        if (!full_matrix_)
+        {
+            if (!axis_2d_.IsInvertible())
+                return null;
+            return axis_2d_.InverseMapPoint(point);
+        }
+        Matrix44 inverse = new(Matrix44.UninitializedTag.kUninitialized);
+        if (!matrix_.GetInverse(out inverse))
+            return null;
+        return MapPointInternal(inverse, point);
+    }
+
+    public readonly Point3F? InverseMapPoint(in Point3F point)
+    {
+        if (!full_matrix_)
+        {
+            if (!axis_2d_.IsInvertible())
+                return null;
+            PointF result = axis_2d_.InverseMapPoint(point.AsPointF());
+            return new Point3F(result.X, result.Y, ClampFloatGeometry(point.Z));
+        }
+        Matrix44 inverse = new(Matrix44.UninitializedTag.kUninitialized);
+        if (!matrix_.GetInverse(out inverse))
+            return null;
+        return MapPointInternal(inverse, point);
+    }
+
+    public readonly Point? InverseMapPoint(in Point point)
+    {
+        PointF? point_f = InverseMapPoint(new PointF(point));
+        if (point_f.HasValue)
+            return ToRoundedPoint(point_f.Value);
+        return null;
+    }
+
     public readonly QuadF MapQuad(in QuadF quad) => new QuadF(MapPoint(quad.p1), MapPoint(quad.p2), MapPoint(quad.p3), MapPoint(quad.p4));
 
     public static Matrix44 AxisTransform2DToMatrix44(in AxisTransform2D axis_2d)
@@ -731,14 +768,18 @@ public struct Transform
 
     public readonly bool Equals(in Transform other)
     {
+        // If both use AxisTransform2D, compare by axis_2d_
         if (!full_matrix_ && !other.full_matrix_)
         {
             return axis_2d_ == other.axis_2d_;
         }
+        // If both use Matrix44, compare by matrix_
         if (full_matrix_ && other.full_matrix_)
         {
             return matrix_ == other.matrix_;
         }
+        // If one uses AxisTransform2D and the other Matrix44 or vice versa,
+        // compare by GetFullMatrix()
         return GetFullMatrix() == other.GetFullMatrix();
     }
 
