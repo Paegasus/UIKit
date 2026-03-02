@@ -412,9 +412,34 @@ public static class TransformTest
         }
     }
 
+    [Fact]
     private static void TestConcatScale()
     {
-        
+
+        (int before, float scale, int after)[] test_cases =
+        [
+            (1, 10.0f, 10),
+            (1, .1f, 1),
+            (1, 100.0f, 100),
+            (1, -1.0f, -100),
+            (1, float.NaN, 1)
+        ];
+
+        Transform xform = new();
+
+        foreach (var (before, scale, after) in test_cases)
+        {
+            Transform scale_transform = new();
+            scale_transform.Scale(scale, scale);
+            xform = scale_transform * xform;
+            Point3F p1 = xform.MapPoint(new Point3F(before, before, 0));
+            Point3F p2 = new(after, after, 0);
+            //if (scale == scale)
+            if (!float.IsNaN(scale))
+            {
+                Assert.True(PointsAreNearlyEqual(p1, p2));
+            }
+        }
     }
 
     private static void TestConcatRotate()
