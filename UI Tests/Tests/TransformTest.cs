@@ -906,8 +906,34 @@ public static class TransformTest
         }
     }
 
-    private static void Test5()
+    [Fact]
+    private static void TestBlendRotate()
     {
+        Vector3DF[] axes =
+        [
+            new(1, 0, 0),
+            new(0, 1, 0),
+            new(0, 0, 1),
+            new(1, 1, 1)
+        ];
+        
+        Transform from = new();
+        
+        foreach (var axis in axes)
+        {
+            for (int i = -5; i < 15; ++i)
+            {
+                Transform to = new();
+                to.RotateAbout(axis, 90);
+                double t = i / 9.0;
+                Assert.True(to.Blend(from, t));
+
+                Transform expected = new();
+                expected.RotateAbout(axis, 90 * t);
+
+                Assert.True(MatricesAreNearlyEqual(expected, to));
+            }
+        }
     }
 
     private static void Test7()
