@@ -1542,8 +1542,37 @@ public static class TransformTest
         AssertQuaternionFloatNear(decomp.Quaternion, new Quaternion(0, 0, 0, 1), 1e-6f);
     }
 
-    private static void Test7()
+    [Fact]
+    private static void TestQuaternionToRotationMatrix()
     {
+        // Test rotation about each axis.
+        Transform rotate_x_60deg = new();
+        rotate_x_60deg.RotateAboutXAxis(60);
+        AssertTransformFloatEqual(rotate_x_60deg, Transform.Compose(GetRotationDecomp(
+                                                kSin30deg, 0, 0, kCos30deg)));
+
+        Transform rotate_y_60deg = new();
+        rotate_y_60deg.RotateAboutYAxis(60);
+        AssertTransformFloatEqual(rotate_y_60deg, Transform.Compose(GetRotationDecomp(
+                                                0, kSin30deg, 0, kCos30deg)));
+
+        Transform rotate_z_60deg = new();
+        rotate_z_60deg.RotateAboutZAxis(60);
+        AssertTransformFloatEqual(rotate_z_60deg, Transform.Compose(GetRotationDecomp(
+                                                0, 0, kSin30deg, kCos30deg)));
+
+        // Test non-axis aligned rotation
+        Transform rotate_xy_60deg = new();
+        rotate_xy_60deg.RotateAbout(1, 1, 0, 60);
+        double sqrt2 = Math.Sqrt(2);
+        AssertTransformFloatEqual(rotate_xy_60deg,
+                            Transform.Compose(GetRotationDecomp(
+                                kSin30deg / sqrt2,
+                                kSin30deg / sqrt2, 0, kCos30deg)));
+
+        // Test 180deg rotation.
+        var rotate_z_180deg = Transform.Affine(-1, 0, 0, -1, 0, 0);
+        AssertTransformFloatEqual(rotate_z_180deg, Transform.Compose(GetRotationDecomp(0, 0, 1, 0)));
     }
 
     private static void Test8()
