@@ -1749,35 +1749,33 @@ public static class TransformTest
         expected.SetQuaternion(0, 0, 1.0 / sqrt2, 1.0 / sqrt2);
 
         AssertDecomposedTransformFloatEqual(expected, decomp_rotate_90);
-/*
-        auto translate_rotate_90 =
-            Transform::MakeTranslation(-1, 1) * Transform::Make90degRotation();
-        DecomposedTransform decomp_translate_rotate_90 =
-            *translate_rotate_90.Decompose();
-        EXPECT_DECOMPOSED_TRANSFORM_EQ(
-            (DecomposedTransform{
-            { -1, 1, 0},
-          { 1, 1, 1},
-          { 0, 0, 0},
-          { 0, 0, 0, 1},
-          { 0, 0, 1.0 / std::numbers::sqrt2, 1.0 / std::numbers::sqrt2}
-        }),
-      decomp_translate_rotate_90);
 
-        DecomposedTransform decomp_skew_rotate =
-            *Transform::Affine(1, 1, 1, 0, 0, 0).Decompose();
-        EXPECT_DECOMPOSED_TRANSFORM_EQ(
-            (DecomposedTransform{
-            { 0, 0, 0},
-                           { std::numbers::sqrt2, -1.0 / std::numbers::sqrt2, 1},
-                           { -1, 0, 0},
-                           { 0, 0, 0, 1},
-                           {
-                0, 0, std::sin(std::numbers::pi / 8),
-                            std::cos(std::numbers::pi / 8)}
-        }),
-      decomp_skew_rotate);
-      */
+        var translate_rotate_90 = Transform.MakeTranslation(-1, 1) * Transform.Make90degRotation();
+        DecomposedTransform decomp_translate_rotate_90;
+        translate_rotate_90.Decompose(out decomp_translate_rotate_90);
+
+        expected = new DecomposedTransform();
+
+        expected.SetTranslate(-1, 1, 0);
+        expected.SetScale(1, 1, 1);
+        expected.SetSkew(0, 0, 0);
+        expected.SetPerspective(0, 0, 0, 1);
+        expected.SetQuaternion(0, 0, 1.0 / sqrt2, 1.0 / sqrt2);
+
+        AssertDecomposedTransformFloatEqual(expected, decomp_translate_rotate_90);
+
+        DecomposedTransform decomp_skew_rotate;
+        Transform.Affine(1, 1, 1, 0, 0, 0).Decompose(out decomp_skew_rotate);
+
+        expected = new DecomposedTransform();
+
+        expected.SetTranslate(0, 0, 0);
+        expected.SetScale(sqrt2, -1.0 / sqrt2, 1);
+        expected.SetSkew(-1, 0, 0);
+        expected.SetPerspective(0, 0, 0, 1);
+        expected.SetQuaternion(0, 0, Math.Sin(Math.PI / 8), Math.Cos(Math.PI / 8));
+
+        AssertDecomposedTransformFloatEqual(expected, decomp_skew_rotate);
     }
 /*
     private static double ComputeDecompRecompError(in Transform transform)
