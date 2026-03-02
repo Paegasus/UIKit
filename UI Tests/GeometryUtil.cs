@@ -41,6 +41,14 @@ public static class GeometryUtil
         Assert.Equal(lhs.Z, rhs.Z, tolerance);
     }
 
+    public static void AssertQuaternionFloatEqual(in Quaternion lhs, in Quaternion rhs)
+    {
+        Assert.True(FloatAlmostEqual((float)lhs.X, (float)rhs.X));
+        Assert.True(FloatAlmostEqual((float)lhs.Y, (float)rhs.Y));
+        Assert.True(FloatAlmostEqual((float)lhs.Z, (float)rhs.Z));
+        Assert.True(FloatAlmostEqual((float)lhs.W, (float)rhs.W));
+    }
+
     public static void AssertQuaternionFloatNear(in Quaternion lhs, in Quaternion rhs, float abs_error)
     {
         Assert.Equal(lhs.X, rhs.X, abs_error);
@@ -69,5 +77,27 @@ public static class GeometryUtil
                 Assert.Equal(lhs.rc(row, col), rhs.rc(row, col), abs_error);
             }
         }
+    }
+
+    public static void AssertDecomposedTransformFloatEqual(in DecomposedTransform lhs, in DecomposedTransform rhs)
+    {
+        Assert.True(FloatAlmostEqual((float)lhs.Translate.X, (float)rhs.Translate.X), "Translate.X");
+        Assert.True(FloatAlmostEqual((float)lhs.Translate.Y, (float)rhs.Translate.Y), "Translate.Y");
+        Assert.True(FloatAlmostEqual((float)lhs.Translate.Z, (float)rhs.Translate.Z), "Translate.Z");
+
+        Assert.True(FloatAlmostEqual((float)lhs.Scale.X, (float)rhs.Scale.X), "Scale.X");
+        Assert.True(FloatAlmostEqual((float)lhs.Scale.Y, (float)rhs.Scale.Y), "Scale.Y");
+        Assert.True(FloatAlmostEqual((float)lhs.Scale.Z, (float)rhs.Scale.Z), "Scale.Z");
+
+        Assert.True(FloatAlmostEqual((float)lhs.Skew.X, (float)rhs.Skew.X), "Skew.X");
+        Assert.True(FloatAlmostEqual((float)lhs.Skew.Y, (float)rhs.Skew.Y), "Skew.Y");
+        Assert.True(FloatAlmostEqual((float)lhs.Skew.Z, (float)rhs.Skew.Z), "Skew.Z");
+
+        Assert.True(FloatAlmostEqual((float)lhs.Perspective.X, (float)rhs.Perspective.X), "Perspective.X");
+        Assert.True(FloatAlmostEqual((float)lhs.Perspective.Y, (float)rhs.Perspective.Y), "Perspective.Y");
+        Assert.True(FloatAlmostEqual((float)lhs.Perspective.Z, (float)rhs.Perspective.Z), "Perspective.Z");
+        Assert.True(FloatAlmostEqual((float)lhs.Perspective.W, (float)rhs.Perspective.W), "Perspective.W");
+
+        AssertQuaternionFloatEqual(lhs.Quaternion, rhs.Quaternion);
     }
 }

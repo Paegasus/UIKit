@@ -1676,33 +1676,39 @@ public static class TransformTest
             Assert.Equal(decomp.Scale.Y, 2 * degrees + 1, epsilon);
         }
     }
-/*
+
     [Fact]
     private static void TestDecomposeScaleTransform()
     {
         for (float scale = 0.001f; scale < 2.0f; scale += 0.001f)
         {
-            Transform transform = Transform::MakeScale(scale);
+            Transform transform = Transform.MakeScale(scale);
 
-            std::optional<DecomposedTransform> decomp = transform.Decompose();
-            EXPECT_TRUE(decomp);
+            DecomposedTransform decomp;
+            Assert.True(transform.Decompose(out decomp));
 
-            Transform compose_transform = Transform::Compose(*decomp);
-            EXPECT_TRUE(compose_transform.Preserves2dAxisAlignment());
-            EXPECT_EQ(transform, compose_transform);
+            Transform compose_transform = Transform.Compose(decomp);
+            Assert.True(compose_transform.Preserves2dAxisAlignment());
+            Assert.Equal(transform, compose_transform);
         }
     }
 
-    [Fact]
+    [Fact] 
     private static void TestDecompose2d()
     {
-        DecomposedTransform decomp_flip_x = *Transform::MakeScale(-2, 2).Decompose();
-        EXPECT_DECOMPOSED_TRANSFORM_EQ(
-            (DecomposedTransform{
-            { 0, 0, 0}, { -2, 2, 1}, { 0, 0, 0}, { 0, 0, 0, 1}, { 0, 0, 0, 1}
-        }),
-      decomp_flip_x);
+        DecomposedTransform decomp_flip_x;
+        Transform.MakeScale(-2, 2).Decompose(out decomp_flip_x);
 
+        var expected = new DecomposedTransform();
+
+        expected.SetTranslate(0, 0, 0);
+        expected.SetScale(-2, 2, 1);
+        expected.SetSkew(0, 0, 0);
+        expected.SetPerspective( 0, 0, 0, 1);
+        expected.SetQuaternion( 0, 0, 0, 1);
+
+        AssertDecomposedTransformFloatEqual(expected, decomp_flip_x);
+/*
         DecomposedTransform decomp_flip_y = *Transform::MakeScale(2, -2).Decompose();
         EXPECT_DECOMPOSED_TRANSFORM_EQ(
             (DecomposedTransform{
@@ -1757,8 +1763,9 @@ public static class TransformTest
                             std::cos(std::numbers::pi / 8)}
         }),
       decomp_skew_rotate);
+      */
     }
-
+/*
     private static double ComputeDecompRecompError(in Transform transform)
     {
         DecomposedTransform decomp = *transform.Decompose();
