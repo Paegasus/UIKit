@@ -1004,7 +1004,63 @@ public static class TransformTest
         }
     }
 
-    private static void Test1()
+    [Fact]
+    private static void TestExtrapolateSkew()
+    {
+        Transform from = new();
+        for (int i = -1; i < 2; ++i)
+        {
+            Transform to = new();
+            to.Skew(20, 0);
+            double t = i;
+            Transform expected = new();
+            expected.Skew(t * 20, t * 0);
+            Assert.True(to.Blend(from, t));
+            Assert.True(MatricesAreNearlyEqual(expected, to));
+        }
+    }
+
+    [Fact]
+    private static void TestBlendPerspective()
+    {
+        Transform from = new();
+        from.ApplyPerspectiveDepth(200);
+        for (int i = -1; i < 3; ++i)
+        {
+            Transform to = new();
+            to.ApplyPerspectiveDepth(800);
+            double t = i;
+            double depth = 1.0 / ((1.0 / 200) * (1.0 - t) + (1.0 / 800) * t);
+            Transform expected = new();
+            expected.ApplyPerspectiveDepth(depth);
+            Assert.True(to.Blend(from, t));
+            Assert.True(MatricesAreNearlyEqual(expected, to));
+        }
+    }
+
+    [Fact]
+    private static void TestBlendIdentity()
+    {
+        Transform from = new();
+        Transform to = new();
+        Assert.True(to.Blend(from, 0.5));
+        Assert.Equal(to, from);
+    }
+
+    [Fact]
+    private static void TestCannotBlendSingularMatrix()
+    {
+        Transform from = new();
+        Transform to = new();
+        to.set_rc(1, 1, 0);
+        Transform original_to = to;
+        Assert.False(to.Blend(from, 0.25)); //Fails, Expected: False, Actual:   True
+        Assert.Equal(original_to, to);
+        Assert.False(to.Blend(from, 0.75));
+        Assert.Equal(original_to, to);
+    }
+
+    private static void TestVerifyBlendForTranslation()
     {
     }
 

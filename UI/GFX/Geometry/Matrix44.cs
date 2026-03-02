@@ -757,9 +757,7 @@ public struct Matrix44
         // See documentation of Transform::Decompose() for why we need the 2d branch.
         if (Is2DTransform)
         {
-            Decompose2D(out result);
-
-            return true;
+            return Decompose2D(out result);
         }
 
         // https://www.w3.org/TR/css-transforms-2/#decomposing-a-3d-matrix.

@@ -791,19 +791,6 @@ public struct Transform
 
         return matrix_.Decompose(out result);
     }
-    /*
-    public readonly DecomposedTransform? Decompose()
-    {
-        if (!full_matrix_)
-        {
-            // Consider letting 2d decomposition always succeed.
-            if (!axis_2d_.IsInvertible())
-                return null;
-            return axis_2d_.Decompose();
-        }
-        return matrix_.Decompose();
-    }
-    */
 
     // Decomposes |this| and |from|, interpolates the decomposed values, and
     // sets |this| to the reconstituted result. Returns false and leaves |this|
