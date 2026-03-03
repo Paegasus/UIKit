@@ -867,6 +867,36 @@ public struct Transform
             !has_x_or_y_perspective;
     }
 
+    // Returns true if axis-aligned 2d rects will remain axis-aligned and not
+    // clipped by perspective (w > 0) after being transformed by this matrix,
+    // and distinct points in the x/y plane will remain distinct after being
+    // transformed by this matrix and mapped back to the x/y plane.
+    public readonly bool NonDegeneratePreserves2dAxisAlignment()
+    {
+        if (!full_matrix_)
+        {
+            return axis_2d_.Scale.X > kEpsilon && axis_2d_.Scale.Y > kEpsilon;
+        }
+
+        // See comments above for Preserves2dAxisAlignment.
+
+        // This function differs from it by requiring:
+        //  (1) that there are exactly two nonzero values on a diagonal in
+        //      the upper left 2x2 submatrix, and
+        //  (2) that the w perspective value is positive.
+
+        bool has_x_or_y_perspective = matrix_.rc(3, 0) != 0 || matrix_.rc(3, 1) != 0;
+        bool positive_w_perspective = matrix_.rc(3, 3) > kEpsilon;
+
+        bool have_0_0 = Math.Abs(matrix_.rc(0, 0)) > kEpsilon;
+        bool have_0_1 = Math.Abs(matrix_.rc(0, 1)) > kEpsilon;
+        bool have_1_0 = Math.Abs(matrix_.rc(1, 0)) > kEpsilon;
+        bool have_1_1 = Math.Abs(matrix_.rc(1, 1)) > kEpsilon;
+
+        return have_0_0 == have_1_1 && have_0_1 == have_1_0 && have_0_0 != have_0_1 &&
+            !has_x_or_y_perspective && positive_w_perspective;
+    }
+
     // Returns true if the matrix has any perspective component that would
     // change the w-component of a homogeneous point.
     public readonly bool HasPerspective => !full_matrix_ ? false : matrix_.HasPerspective;

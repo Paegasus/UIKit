@@ -3429,7 +3429,8 @@ public static class TransformTest
             // In an affine transform, parallel lines are preserved.
             return Vector3DF.CrossProduct(p2 - p1, p3 - p4).IsZero() &&
                    Vector3DF.CrossProduct(p4 - p1, p3 - p2).IsZero();
-        };
+        }
+        ;
 
         foreach (var (transform, expected) in test_cases)
         {
@@ -3449,10 +3450,285 @@ public static class TransformTest
         }
     }
 
-/*
-    [Fact]
-    private static void Test1()
+    // Another implementation of Preserves2dAxisAlignment that isn't as fast,
+    // good for testing the faster implementation.
+    private static bool EmpiricallyPreserves2dAxisAlignment(in Transform transform)
     {
-        
-    }*/
+        Point3F p1 = new(5.0f, 5.0f, 0.0f);
+        Point3F p2 = new(10.0f, 5.0f, 0.0f);
+        Point3F p3 = new(10.0f, 20.0f, 0.0f);
+        Point3F p4 = new(5.0f, 20.0f, 0.0f);
+
+        var test_quad = new QuadF(new PointF(p1.X, p1.Y), new PointF(p2.X, p2.Y),
+                  new PointF(p3.X, p3.Y), new PointF(p4.X, p4.Y));
+        Assert.True(test_quad.IsRectilinear());
+
+        p1 = transform.MapPoint(p1);
+        p2 = transform.MapPoint(p2);
+        p3 = transform.MapPoint(p3);
+        p4 = transform.MapPoint(p4);
+
+        QuadF transformedQuad = new(new PointF(p1.X, p1.Y), new PointF(p2.X, p2.Y),
+                        new PointF(p3.X, p3.Y), new PointF(p4.X, p4.Y));
+        return transformedQuad.IsRectilinear();
+    }
+
+    [Fact]
+    private static void TestPreserves2dAxisAlignment()
+    {
+        (
+        double a,  // row 1, column 1
+        double b,  // row 1, column 2
+        double c,  // row 2, column 1
+        double d,  // row 2, column 2
+        bool expected,
+        bool degenerate)[] test_cases =
+        [
+            ( 3.0, 0.0,
+            0.0, 4.0, true, false ),  // basic case
+			( 0.0, 4.0,
+            3.0, 0.0, true, false ),  // rotate by 90
+			( 0.0, 0.0,
+            0.0, 4.0, true, true ),   // degenerate x
+			( 3.0, 0.0,
+            0.0, 0.0, true, true ),   // degenerate y
+			( 0.0, 0.0,
+            3.0, 0.0, true, true ),   // degenerate x + rotate by 90
+			( 0.0, 4.0,
+            0.0, 0.0, true, true ),   // degenerate y + rotate by 90
+			( 3.0, 4.0,
+            0.0, 0.0, false, true ),
+            ( 0.0, 0.0,
+            3.0, 4.0, false, true ),
+            ( 0.0, 3.0,
+            0.0, 4.0, false, true ),
+            ( 3.0, 0.0,
+            4.0, 0.0, false, true ),
+            ( 3.0, 4.0,
+            5.0, 0.0, false, false ),
+            ( 3.0, 4.0,
+            0.0, 5.0, false, false ),
+            ( 3.0, 0.0,
+            4.0, 5.0, false, false ),
+            ( 0.0, 3.0,
+            4.0, 5.0, false, false ),
+            ( 2.0, 3.0,
+            4.0, 5.0, false, false )
+        ];
+
+        Transform transform = new();
+        foreach (var (a, b, c, d, expected, degenerate) in test_cases)
+        {
+            transform.MakeIdentity();
+            transform.set_rc(0, 0, a);
+            transform.set_rc(0, 1, b);
+            transform.set_rc(1, 0, c);
+            transform.set_rc(1, 1, d);
+
+            if (expected)
+            {
+                Assert.True(EmpiricallyPreserves2dAxisAlignment(transform));
+                Assert.True(transform.Preserves2dAxisAlignment());
+                if (degenerate)
+                {
+                    Assert.False(transform.NonDegeneratePreserves2dAxisAlignment());
+                }
+                else
+                {
+                    Assert.True(transform.NonDegeneratePreserves2dAxisAlignment());
+                }
+            }
+            else
+            {
+                Assert.False(EmpiricallyPreserves2dAxisAlignment(transform));
+                Assert.False(transform.Preserves2dAxisAlignment());
+                Assert.False(transform.NonDegeneratePreserves2dAxisAlignment());
+            }
+        }
+
+        // Try the same test cases again, but this time make sure that other matrix
+        // elements (except perspective) have entries, to test that they are ignored.
+        foreach (var (a, b, c, d, expected, degenerate) in test_cases)
+        {
+            transform.MakeIdentity();
+            transform.set_rc(0, 0, a);
+            transform.set_rc(0, 1, b);
+            transform.set_rc(1, 0, c);
+            transform.set_rc(1, 1, d);
+
+            transform.set_rc(0, 2, 1.0f);
+            transform.set_rc(0, 3, 2.0f);
+            transform.set_rc(1, 2, 3.0f);
+            transform.set_rc(1, 3, 4.0f);
+            transform.set_rc(2, 0, 5.0f);
+            transform.set_rc(2, 1, 6.0f);
+            transform.set_rc(2, 2, 7.0f);
+            transform.set_rc(2, 3, 8.0f);
+
+            if (expected)
+            {
+                Assert.True(EmpiricallyPreserves2dAxisAlignment(transform));
+                Assert.True(transform.Preserves2dAxisAlignment());
+                if (degenerate)
+                {
+                    Assert.False(transform.NonDegeneratePreserves2dAxisAlignment());
+                }
+                else
+                {
+                    Assert.True(transform.NonDegeneratePreserves2dAxisAlignment());
+                }
+            }
+            else
+            {
+                Assert.False(EmpiricallyPreserves2dAxisAlignment(transform));
+                Assert.False(transform.Preserves2dAxisAlignment());
+                Assert.False(transform.NonDegeneratePreserves2dAxisAlignment());
+            }
+        }
+
+        // Try the same test cases again, but this time add perspective which is
+        // always assumed to not-preserve axis alignment.
+        foreach (var (a, b, c, d, expected, degenerate) in test_cases)
+        {
+            transform.MakeIdentity();
+            transform.set_rc(0, 0, a);
+            transform.set_rc(0, 1, b);
+            transform.set_rc(1, 0, c);
+            transform.set_rc(1, 1, d);
+
+            transform.set_rc(0, 2, 1.0f);
+            transform.set_rc(0, 3, 2.0f);
+            transform.set_rc(1, 2, 3.0f);
+            transform.set_rc(1, 3, 4.0f);
+            transform.set_rc(2, 0, 5.0f);
+            transform.set_rc(2, 1, 6.0f);
+            transform.set_rc(2, 2, 7.0f);
+            transform.set_rc(2, 3, 8.0f);
+            transform.set_rc(3, 0, 9.0f);
+            transform.set_rc(3, 1, 10.0f);
+            transform.set_rc(3, 2, 11.0f);
+            transform.set_rc(3, 3, 12.0f);
+
+            Assert.False(EmpiricallyPreserves2dAxisAlignment(transform));
+            Assert.False(transform.Preserves2dAxisAlignment());
+            Assert.False(transform.NonDegeneratePreserves2dAxisAlignment());
+        }
+
+        // Try a few more practical situations to check precision
+        transform.MakeIdentity();
+        double kNear90Degrees = 90.0 + kErrorThreshold / 2;
+        transform.RotateAboutZAxis(kNear90Degrees);
+        Assert.True(EmpiricallyPreserves2dAxisAlignment(transform));
+        Assert.True(transform.Preserves2dAxisAlignment());
+        Assert.True(transform.NonDegeneratePreserves2dAxisAlignment());
+
+        transform.MakeIdentity();
+        transform.RotateAboutZAxis(kNear90Degrees * 2);
+        Assert.True(EmpiricallyPreserves2dAxisAlignment(transform));
+        Assert.True(transform.Preserves2dAxisAlignment());
+        Assert.True(transform.NonDegeneratePreserves2dAxisAlignment());
+
+        transform.MakeIdentity();
+        transform.RotateAboutZAxis(kNear90Degrees * 3);
+        Assert.True(EmpiricallyPreserves2dAxisAlignment(transform));
+        Assert.True(transform.Preserves2dAxisAlignment());
+        Assert.True(transform.NonDegeneratePreserves2dAxisAlignment());
+
+        transform.MakeIdentity();
+        transform.RotateAboutYAxis(kNear90Degrees);
+        Assert.True(EmpiricallyPreserves2dAxisAlignment(transform));
+        Assert.True(transform.Preserves2dAxisAlignment());
+        Assert.False(transform.NonDegeneratePreserves2dAxisAlignment());
+
+        transform.MakeIdentity();
+        transform.RotateAboutXAxis(kNear90Degrees);
+        Assert.True(EmpiricallyPreserves2dAxisAlignment(transform));
+        Assert.True(transform.Preserves2dAxisAlignment());
+        Assert.False(transform.NonDegeneratePreserves2dAxisAlignment());
+
+        transform.MakeIdentity();
+        transform.RotateAboutZAxis(kNear90Degrees);
+        transform.RotateAboutYAxis(kNear90Degrees);
+        Assert.True(EmpiricallyPreserves2dAxisAlignment(transform));
+        Assert.True(transform.Preserves2dAxisAlignment());
+        Assert.False(transform.NonDegeneratePreserves2dAxisAlignment());
+
+        transform.MakeIdentity();
+        transform.RotateAboutZAxis(kNear90Degrees);
+        transform.RotateAboutXAxis(kNear90Degrees);
+        Assert.True(EmpiricallyPreserves2dAxisAlignment(transform));
+        Assert.True(transform.Preserves2dAxisAlignment());
+        Assert.False(transform.NonDegeneratePreserves2dAxisAlignment());
+
+        transform.MakeIdentity();
+        transform.RotateAboutYAxis(kNear90Degrees);
+        transform.RotateAboutZAxis(kNear90Degrees);
+        Assert.True(EmpiricallyPreserves2dAxisAlignment(transform));
+        Assert.True(transform.Preserves2dAxisAlignment());
+        Assert.False(transform.NonDegeneratePreserves2dAxisAlignment());
+
+        transform.MakeIdentity();
+        transform.RotateAboutZAxis(45.0);
+        Assert.False(EmpiricallyPreserves2dAxisAlignment(transform));
+        Assert.False(transform.Preserves2dAxisAlignment());
+        Assert.False(transform.NonDegeneratePreserves2dAxisAlignment());
+
+        // 3-d case; In 2d after an orthographic projection, this case does
+        // preserve 2d axis alignment. But in 3d, it does not preserve axis
+        // alignment.
+        transform.MakeIdentity();
+        transform.RotateAboutYAxis(45.0);
+        Assert.True(EmpiricallyPreserves2dAxisAlignment(transform));
+        Assert.True(transform.Preserves2dAxisAlignment());
+        Assert.True(transform.NonDegeneratePreserves2dAxisAlignment());
+
+        transform.MakeIdentity();
+        transform.RotateAboutXAxis(45.0);
+        Assert.True(EmpiricallyPreserves2dAxisAlignment(transform));
+        Assert.True(transform.Preserves2dAxisAlignment());
+        Assert.True(transform.NonDegeneratePreserves2dAxisAlignment());
+
+        // Perspective cases.
+        transform.MakeIdentity();
+        transform.ApplyPerspectiveDepth(10.0);
+        transform.RotateAboutYAxis(45.0);
+        Assert.False(EmpiricallyPreserves2dAxisAlignment(transform));
+        Assert.False(transform.Preserves2dAxisAlignment());
+        Assert.False(transform.NonDegeneratePreserves2dAxisAlignment());
+
+        transform.MakeIdentity();
+        transform.ApplyPerspectiveDepth(10.0);
+        transform.RotateAboutZAxis(90.0);
+        Assert.True(EmpiricallyPreserves2dAxisAlignment(transform));
+        Assert.True(transform.Preserves2dAxisAlignment());
+        Assert.True(transform.NonDegeneratePreserves2dAxisAlignment());
+
+        transform.MakeIdentity();
+        transform.ApplyPerspectiveDepth(-10.0);
+        transform.RotateAboutZAxis(90.0);
+        Assert.True(EmpiricallyPreserves2dAxisAlignment(transform));
+        Assert.True(transform.Preserves2dAxisAlignment());
+        Assert.True(transform.NonDegeneratePreserves2dAxisAlignment());
+
+        // To be non-degenerate, the constant contribution to perspective must
+        // be positive.
+
+        transform = Transform.RowMajor(1.0, 0.0, 0.0, 0.0,
+                                        0.0, 1.0, 0.0, 0.0,
+                                        0.0, 0.0, 1.0, 0.0,
+                                        0.0, 0.0, 0.0, -1.0);
+
+        Assert.True(EmpiricallyPreserves2dAxisAlignment(transform));
+        Assert.True(transform.Preserves2dAxisAlignment());
+        Assert.False(transform.NonDegeneratePreserves2dAxisAlignment());
+
+        transform = Transform.RowMajor(2.0, 0.0, 0.0, 0.0,
+                                        0.0, 5.0, 0.0, 0.0,
+                                        0.0, 0.0, 1.0, 0.0,
+                                        0.0, 0.0, 0.0, 0.0);
+
+        Assert.True(EmpiricallyPreserves2dAxisAlignment(transform));
+        Assert.True(transform.Preserves2dAxisAlignment());
+        Assert.False(transform.NonDegeneratePreserves2dAxisAlignment());
+    }
 }
