@@ -1800,7 +1800,8 @@ public static class TransformTest
     [Fact]
     private static void TestDecomposeAndCompose()
     {
-        
+        // rotateZ(90deg)
+        Assert.Equal(0, ComputeDecompRecompError(Transform.Make90degRotation()), 1e-20);
     }
 
 /*
