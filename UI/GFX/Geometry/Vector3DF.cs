@@ -1,7 +1,5 @@
 using System.Runtime.CompilerServices;
 
-using static UI.Numerics.AngleConversions;
-
 namespace UI.GFX.Geometry;
 
 /// <summary>
@@ -222,7 +220,7 @@ public struct Vector3DF
     /// </summary>
     public static float AngleBetweenVectorsInDegrees(in Vector3DF baseVec, in Vector3DF other)
     {
-        float angle = RadToDeg(
+        float angle = float.RadiansToDegrees(
             MathF.Acos(
                 Math.Clamp(DotProduct(baseVec, other) / baseVec.Length() / other.Length(), -1.0f, 1.0f)
             )
