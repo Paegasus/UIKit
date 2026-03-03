@@ -2245,43 +2245,218 @@ public static class TransformTest
         EXPECT_ROW3_EQ(13.0f, 17.0f, 21.0f, 25.0f, C);
     }
 
-    private static void Test4()
+    [Fact]
+    private static void TestVerifyEqualsBooleanOperator()
     {
-        
+        Transform A = GetTestMatrix1();
+        Transform B = GetTestMatrix1();
+        Assert.True(A == B);
+
+        // Modifying multiple elements should cause equals operator to return false.
+        Transform C = GetTestMatrix2();
+        Assert.False(A == C);
+
+        // Modifying any one individual element should cause equals operator to
+        // return false.
+        Transform D;
+        D = A;
+        D.set_rc(0, 0, 0.0f);
+        Assert.False(A == D);
+
+        D = A;
+        D.set_rc(1, 0, 0.0f);
+        Assert.False(A == D);
+
+        D = A;
+        D.set_rc(2, 0, 0.0f);
+        Assert.False(A == D);
+
+        D = A;
+        D.set_rc(3, 0, 0.0f);
+        Assert.False(A == D);
+
+        D = A;
+        D.set_rc(0, 1, 0.0f);
+        Assert.False(A == D);
+
+        D = A;
+        D.set_rc(1, 1, 0.0f);
+        Assert.False(A == D);
+
+        D = A;
+        D.set_rc(2, 1, 0.0f);
+        Assert.False(A == D);
+
+        D = A;
+        D.set_rc(3, 1, 0.0f);
+        Assert.False(A == D);
+
+        D = A;
+        D.set_rc(0, 2, 0.0f);
+        Assert.False(A == D);
+
+        D = A;
+        D.set_rc(1, 2, 0.0f);
+        Assert.False(A == D);
+
+        D = A;
+        D.set_rc(2, 2, 0.0f);
+        Assert.False(A == D);
+
+        D = A;
+        D.set_rc(3, 2, 0.0f);
+        Assert.False(A == D);
+
+        D = A;
+        D.set_rc(0, 3, 0.0f);
+        Assert.False(A == D);
+
+        D = A;
+        D.set_rc(1, 3, 0.0f);
+        Assert.False(A == D);
+
+        D = A;
+        D.set_rc(2, 3, 0.0f);
+        Assert.False(A == D);
+
+        D = A;
+        D.set_rc(3, 3, 0.0f);
+        Assert.False(A == D);
     }
-    
-    private static void Test5()
+
+    [Fact]
+    private static void TestVerifyMultiplyOperator()
     {
-        
+        Transform A = GetTestMatrix1();
+        Transform B = GetTestMatrix2();
+
+        Transform C = A * B;
+        EXPECT_ROW0_EQ(2036.0f, 2292.0f, 2548.0f, 2804.0f, C);
+        EXPECT_ROW1_EQ(2162.0f, 2434.0f, 2706.0f, 2978.0f, C);
+        EXPECT_ROW2_EQ(2288.0f, 2576.0f, 2864.0f, 3152.0f, C);
+        EXPECT_ROW3_EQ(2414.0f, 2718.0f, 3022.0f, 3326.0f, C);
+
+        // Just an additional sanity check; matrix multiplication is not commutative.
+        Assert.False(A * B == B * A);
     }
-    
-    private static void Test6()
+
+    [Fact]
+    private static void TestVerifyMultiplyAndAssignOperator()
     {
-        
+        Transform A = GetTestMatrix1();
+        Transform B = GetTestMatrix2();
+
+        A *= B;
+        EXPECT_ROW0_EQ(2036.0f, 2292.0f, 2548.0f, 2804.0f, A);
+        EXPECT_ROW1_EQ(2162.0f, 2434.0f, 2706.0f, 2978.0f, A);
+        EXPECT_ROW2_EQ(2288.0f, 2576.0f, 2864.0f, 3152.0f, A);
+        EXPECT_ROW3_EQ(2414.0f, 2718.0f, 3022.0f, 3326.0f, A);
+
+        // Just an additional sanity check; matrix multiplication is not commutative.
+        Transform C = A;
+        C *= B;
+        Transform D = B;
+        D *= A;
+        Assert.False(C == D);
     }
-    
-    private static void Test7()
+
+    [Fact]
+    private static void TestPreConcat()
     {
-        
+        Transform A = GetTestMatrix1();
+        Transform B = GetTestMatrix2();
+
+        A.PreConcat(B);
+        EXPECT_ROW0_EQ(2036.0f, 2292.0f, 2548.0f, 2804.0f, A);
+        EXPECT_ROW1_EQ(2162.0f, 2434.0f, 2706.0f, 2978.0f, A);
+        EXPECT_ROW2_EQ(2288.0f, 2576.0f, 2864.0f, 3152.0f, A);
+        EXPECT_ROW3_EQ(2414.0f, 2718.0f, 3022.0f, 3326.0f, A);
     }
-    
-    private static void Test8()
+
+    [Fact]
+    private static void TestVerifyMakeIdentiy()
     {
-        
+        Transform A = GetTestMatrix1();
+        A.MakeIdentity();
+        EXPECT_ROW0_EQ(1.0f, 0.0f, 0.0f, 0.0f, A);
+        EXPECT_ROW1_EQ(0.0f, 1.0f, 0.0f, 0.0f, A);
+        EXPECT_ROW2_EQ(0.0f, 0.0f, 1.0f, 0.0f, A);
+        EXPECT_ROW3_EQ(0.0f, 0.0f, 0.0f, 1.0f, A);
+        Assert.True(A.IsIdentity);
     }
-    
-    private static void Test9()
+
+    [Fact]
+    private static void TestVerifyTranslate()
     {
-        
+        Transform A = new();
+        A.Translate(2.0f, 3.0f);
+        EXPECT_ROW0_EQ(1.0f, 0.0f, 0.0f, 2.0f, A);
+        EXPECT_ROW1_EQ(0.0f, 1.0f, 0.0f, 3.0f, A);
+        EXPECT_ROW2_EQ(0.0f, 0.0f, 1.0f, 0.0f, A);
+        EXPECT_ROW3_EQ(0.0f, 0.0f, 0.0f, 1.0f, A);
+
+        // Verify that Translate() post-multiplies the existing matrix.
+        A.MakeIdentity();
+        A.Scale(5.0f, 5.0f);
+        A.Translate(2.0f, 3.0f);
+        EXPECT_ROW0_EQ(5.0f, 0.0f, 0.0f, 10.0f, A);
+        EXPECT_ROW1_EQ(0.0f, 5.0f, 0.0f, 15.0f, A);
+        EXPECT_ROW2_EQ(0.0f, 0.0f, 1.0f, 0.0f, A);
+        EXPECT_ROW3_EQ(0.0f, 0.0f, 0.0f, 1.0f, A);
+
+        Transform B = new();
+        B.Scale(5.0f, 5.0f);
+        B.Translate(new Vector2DF(2.0f, 3.0f));
+        Assert.Equal(A, B);
     }
-    
-    private static void Test10()
+
+    [Fact]
+    private static void TestVerifyPostTranslate()
     {
-        
+        Transform A = new();
+        A.PostTranslate(2.0f, 3.0f);
+        EXPECT_ROW0_EQ(1.0f, 0.0f, 0.0f, 2.0f, A);
+        EXPECT_ROW1_EQ(0.0f, 1.0f, 0.0f, 3.0f, A);
+        EXPECT_ROW2_EQ(0.0f, 0.0f, 1.0f, 0.0f, A);
+        EXPECT_ROW3_EQ(0.0f, 0.0f, 0.0f, 1.0f, A);
+
+        // Verify that PostTranslate() pre-multiplies the existing matrix.
+        A.MakeIdentity();
+        A.Scale(5.0f, 5.0f);
+        A.PostTranslate(2.0f, 3.0f);
+        EXPECT_ROW0_EQ(5.0f, 0.0f, 0.0f, 2.0f, A);
+        EXPECT_ROW1_EQ(0.0f, 5.0f, 0.0f, 3.0f, A);
+        EXPECT_ROW2_EQ(0.0f, 0.0f, 1.0f, 0.0f, A);
+        EXPECT_ROW3_EQ(0.0f, 0.0f, 0.0f, 1.0f, A);
+
+        Transform B =new();
+        B.Scale(5.0f, 5.0f);
+        B.PostTranslate(new Vector2DF(2.0f, 3.0f));
+        Assert.Equal(A, B);
     }
-    
-    private static void Test11()
+
+    [Fact]
+    private static void TestVerifyTranslate3d()
     {
-        
+        Transform A = new();
+        A.Translate3D(2.0f, 3.0f, 4.0f);
+        EXPECT_ROW0_EQ(1.0f, 0.0f, 0.0f, 2.0f, A);
+        EXPECT_ROW1_EQ(0.0f, 1.0f, 0.0f, 3.0f, A);
+        EXPECT_ROW2_EQ(0.0f, 0.0f, 1.0f, 4.0f, A);
+        EXPECT_ROW3_EQ(0.0f, 0.0f, 0.0f, 1.0f, A);
+
+        // Verify that Translate3d() post-multiplies the existing matrix.
+        A.MakeIdentity();
+        A.Scale3D(6.0f, 7.0f, 8.0f);
+        A.Translate3D(2.0f, 3.0f, 4.0f);
+        EXPECT_ROW0_EQ(6.0f, 0.0f, 0.0f, 12.0f, A);
+        EXPECT_ROW1_EQ(0.0f, 7.0f, 0.0f, 21.0f, A);
+        EXPECT_ROW2_EQ(0.0f, 0.0f, 8.0f, 32.0f, A);
+        EXPECT_ROW3_EQ(0.0f, 0.0f, 0.0f, 1.0f, A);
+
+        Transform B = new();
+        B.Scale3D(6.0f, 7.0f, 8.0f);
+        B.Translate3D(new Vector3DF(2.0f, 3.0f, 4.0f));
+        Assert.Equal(A, B);
     }
 }
