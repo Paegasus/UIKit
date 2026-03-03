@@ -3738,24 +3738,24 @@ public static class TransformTest
         Vector2DF translation = new(3.0f, 7.0f);
         Transform transform = new();
         transform.Translate(translation.X, translation.Y + 1);
-        EXPECT_NE(translation, transform.To2dTranslation());
+        Assert.NotEqual(translation, transform.To2dTranslation());
         transform.MakeIdentity();
         transform.Translate(translation.X, translation.Y);
         transform.set_rc(1, 1, 100);
-        EXPECT_EQ(translation, transform.To2DTranslation());
+        Assert.Equal(translation, transform.To2DTranslation());
     }
 
     [Fact]
     private static void TestTo3dTranslation()
     {
         Transform transform;
-        EXPECT_EQ(new Vector3DF(), transform.To3dTranslation());
+        Assert.Equal(new Vector3DF(), transform.To3dTranslation());
         transform.Translate(10, 20);
-        EXPECT_EQ(new Vector3DF(10, 20, 0), transform.To3dTranslation());
+        Assert.Equal(new Vector3DF(10, 20, 0), transform.To3dTranslation());
         transform.Translate3D(20, -60, -10);
-        EXPECT_EQ(new Vector3DF(30, -40, -10), transform.To3dTranslation());
+        Assert.Equal(new Vector3DF(30, -40, -10), transform.To3dTranslation());
         transform.set_rc(1, 1, 100);
-        EXPECT_EQ(new Vector3DF(30, -40, -10), transform.To3dTranslation());
+        Assert.Equal(new Vector3DF(30, -40, -10), transform.To3dTranslation());
     }
 
     [Fact]
@@ -3764,30 +3764,30 @@ public static class TransformTest
         Transform translation = Transform.MakeTranslation(3.25f, 7.75f);
         RectF rect = new(1.25f, 2.5f, 3.75f, 4.0f);
         RectF expected = new(4.5f, 10.25f, 3.75f, 4.0f);
-        EXPECT_EQ(expected, translation.MapRect(rect));
+        Assert.Equal(expected, translation.MapRect(rect));
 
-        EXPECT_EQ(rect, new Transform().MapRect(rect));
+        Assert.Equal(rect, new Transform().MapRect(rect));
 
         var singular = Transform.MakeScale(0.0f);
-        EXPECT_EQ(new RectF(0, 0, 0, 0), singular.MapRect(rect));
+        Assert.Equal(new RectF(0, 0, 0, 0), singular.MapRect(rect));
 
         var negative_scale = Transform.MakeScale(-1, -2);
-        EXPECT_EQ(new RectF(-5.0f, -13.0f, 3.75f, 8.0f), negative_scale.MapRect(rect));
+        Assert.Equal(new RectF(-5.0f, -13.0f, 3.75f, 8.0f), negative_scale.MapRect(rect));
 
         var rotate = Transform.Make90degRotation();
-        EXPECT_EQ(new RectF(-6.5f, 1.25f, 4.0f, 3.75f), rotate.MapRect(rect));
+        Assert.Equal(new RectF(-6.5f, 1.25f, 4.0f, 3.75f), rotate.MapRect(rect));
     }
 
     [Fact]
     private static void TestMapIntRect()
     {
         var translation = Transform.MakeTranslation(3.25f, 7.75f);
-        EXPECT_EQ(new Rect(4, 9, 4, 5), translation.MapRect(new Rect(1, 2, 3, 4)));
+        Assert.Equal(new Rect(4, 9, 4, 5), translation.MapRect(new Rect(1, 2, 3, 4)));
 
-        EXPECT_EQ(new Rect(1, 2, 3, 4), new Transform().MapRect(new Rect(1, 2, 3, 4)));
+        Assert.Equal(new Rect(1, 2, 3, 4), new Transform().MapRect(new Rect(1, 2, 3, 4)));
 
         var singular = Transform.MakeScale(0.0f);
-        EXPECT_EQ(new Rect(0, 0, 0, 0), singular.MapRect(new Rect(1, 2, 3, 4)));
+        Assert.Equal(new Rect(0, 0, 0, 0), singular.MapRect(new Rect(1, 2, 3, 4)));
     }
 
     [Fact]
@@ -3796,18 +3796,18 @@ public static class TransformTest
         var translation = Transform.MakeTranslation(3.25f, 7.75f);
         RectF rect = new(1.25f, 2.5f, 3.75f, 4.0f);
         RectF expected = new(-2.0f, -5.25f, 3.75f, 4.0f);
-        EXPECT_EQ(expected, translation.InverseMapRect(rect));
+        Assert.Equal(expected, translation.InverseMapRect(rect));
 
-        EXPECT_EQ(rect, new Transform().InverseMapRect(rect));
+        Assert.Equal(rect, new Transform().InverseMapRect(rect));
 
         var singular = Transform.MakeScale(0.0f);
-        EXPECT_FALSE(singular.InverseMapRect(rect));
+        Assert.False(singular.InverseMapRect(rect));
 
         var negative_scale = Transform.MakeScale(-1, -2);
-        EXPECT_EQ(new RectF(-5.0f, -3.25f, 3.75f, 2.0f),
+        Assert.Equal(new RectF(-5.0f, -3.25f, 3.75f, 2.0f),
                   negative_scale.InverseMapRect(rect));
 
         var rotate = Transform.Make90degRotation();
-        EXPECT_EQ(new RectF(2.5f, -5.0f, 4.0f, 3.75f), rotate.InverseMapRect(rect));
+        Assert.Equal(new RectF(2.5f, -5.0f, 4.0f, 3.75f), rotate.InverseMapRect(rect));
     }
 }
