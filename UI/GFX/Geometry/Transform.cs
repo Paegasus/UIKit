@@ -130,6 +130,8 @@ public struct Transform
         a[10] = a[15] = 1;
     }
 
+    // Gets col-major data.
+
     public readonly void GetColMajor(Span<double> a)
     {
         if (!full_matrix_)
@@ -153,6 +155,8 @@ public struct Transform
             matrix_.GetColMajorF(a);
         }
     }
+
+    public readonly double ColMajorData(int index) => rc(index % 4, index / 4);
 
     // Used internally to construct Transform with parameters in col-major order.
     private Transform(double r0c0, double r1c0, double r2c0, double r3c0,

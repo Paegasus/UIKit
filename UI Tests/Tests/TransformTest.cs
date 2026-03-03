@@ -2128,14 +2128,23 @@ public static class TransformTest
         EXPECT_ROW3_EQ(13.0f, 17.0f, 21.0f, 25.0f, B);
     }
 
-    // ColMajor() and RowMajor() are tested in GetTestMatrix1() and
-    // GetTestTransform2().
-
-    private static void Test4()
-    {
-        
-    }
+    // ColMajor() and RowMajor() are tested in GetTestMatrix1() and GetTestTransform2().
     
+    [Fact]
+    private static void TestGetColMajor()
+    {
+        var transform = GetTestMatrix1();
+
+        Span<double> data = stackalloc double[16];
+        transform.GetColMajor(data);
+        for (int i = 0; i < 16; i++)
+        {
+            Assert.Equal(i + 10.0, data[i]);
+            Assert.Equal(data[i], transform.ColMajorData(i));
+        }
+        Assert.Equal(transform, Transform.ColMajor(data));
+    }
+
     private static void Test5()
     {
         
