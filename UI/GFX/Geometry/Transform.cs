@@ -1,7 +1,7 @@
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using UI.Extensions;
-
+using UI.Numerics;
 using static UI.GFX.Geometry.ClampFloatGeometryHelper;
 using static UI.GFX.Geometry.PointConversions;
 
@@ -290,6 +290,32 @@ public struct Transform
     // Returns true if the matrix is has only scaling and translation components,
     // including identity.
     public readonly bool IsScaleOrTranslation => !full_matrix_ ? true : matrix_.IsScaleOrTranslation;
+
+    // Returns true if the matrix is identity or, if the matrix consists only
+    // of a translation whose components can be represented as integers. Returns
+    // false if the translation contains a fractional component or is too large to
+    // fit in an integer.
+    public readonly bool IsIdentityOrIntegerTranslation()
+    {
+        if (!IsIdentityOrTranslation)
+            return false;
+
+        static bool IsIntegerTranslation(double t) => t >= int.MinValue &&
+                                                      t <= int.MaxValue &&
+                                                 (int)t == t;
+
+        if (!full_matrix_)
+        {
+            return IsIntegerTranslation(axis_2d_.Translation.X) &&
+                   IsIntegerTranslation(axis_2d_.Translation.Y);
+        }
+
+        return IsIntegerTranslation(matrix_.rc(0, 3)) &&
+               IsIntegerTranslation(matrix_.rc(1, 3)) &&
+               IsIntegerTranslation(matrix_.rc(2, 3));
+    }
+
+    public readonly bool IsIdentityOrInteger2dTranslation() => IsIdentityOrIntegerTranslation() && rc(2, 3) == 0;
 
     public readonly PointF MapPointInternal(in Matrix44 matrix, in PointF point)
     {

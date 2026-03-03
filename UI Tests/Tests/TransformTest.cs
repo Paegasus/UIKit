@@ -1864,60 +1864,65 @@ public static class TransformTest
         Assert.False(transform.IsIdentityOr2dTranslation);
     }
 
-/*
     [Fact]
     private static void TestIntegerTranslation()
     {
         Transform transform = new();
-        Assert.True(transform.IsIdentityOrIntegerTranslation);
+        Assert.True(transform.IsIdentityOrIntegerTranslation());
 
         transform.Translate3D(1, 2, 3);
-        Assert.True(transform.IsIdentityOrIntegerTranslation);
+        Assert.True(transform.IsIdentityOrIntegerTranslation());
 
         transform.MakeIdentity();
         transform.Translate3D(-1, -2, -3);
-        Assert.True(transform.IsIdentityOrIntegerTranslation);
+        Assert.True(transform.IsIdentityOrIntegerTranslation());
 
         transform.MakeIdentity();
         transform.Translate3D(4.5f, 0, 0);
-        Assert.False(transform.IsIdentityOrIntegerTranslation);
+        Assert.False(transform.IsIdentityOrIntegerTranslation());
 
         transform.MakeIdentity();
         transform.Translate3D(0, -6.7f, 0);
-        Assert.False(transform.IsIdentityOrIntegerTranslation);
+        Assert.False(transform.IsIdentityOrIntegerTranslation());
 
         transform.MakeIdentity();
         transform.Translate3D(0, 0, 8.9f);
-        Assert.False(transform.IsIdentityOrIntegerTranslation);
+        Assert.False(transform.IsIdentityOrIntegerTranslation());
 
         float max_int = (float)int.MaxValue;
         transform.MakeIdentity();
         transform.Translate3D(0, 0, max_int + 1000.5f);
-        Assert.False(transform.IsIdentityOrIntegerTranslation);
+        Assert.False(transform.IsIdentityOrIntegerTranslation());
 
         float max_float = float.MaxValue;
         transform.MakeIdentity();
         transform.Translate3D(0, 0, max_float - 0.5f);
-        Assert.False(transform.IsIdentityOrIntegerTranslation);
+        Assert.False(transform.IsIdentityOrIntegerTranslation());
     }
-    */
-    /*
-        [Fact]
-        private static void TestInteger2dTranslation()
-        {
 
-        }
+    [Fact]
+    private static void TestInteger2dTranslation()
+    {
+        Assert.True(new Transform().IsIdentityOrInteger2dTranslation());
+        Assert.True(Transform.MakeTranslation(1, 2).IsIdentityOrInteger2dTranslation());
+        Assert.False(Transform.MakeTranslation(1.00001f, 2f).IsIdentityOrInteger2dTranslation());
+        Assert.False(Transform.MakeTranslation(1f, 2.00002f).IsIdentityOrInteger2dTranslation());
+        Assert.False(Transform.Make90degRotation().IsIdentityOrInteger2dTranslation());
+        Transform transform = new();
+        transform.Translate3D(1, 2, 3);
+        Assert.False(transform.IsIdentityOrInteger2dTranslation());
+    }
+/*
+    [Fact]
+    private static void TestInverse()
+    {
 
-        [Fact]
-        private static void TestInverse()
-        {
+    }
 
-        }
+    [Fact]
+    private static void TestVerifyBackfaceVisibilityBasicCases()
+    {
 
-        [Fact]
-        private static void TestVerifyBackfaceVisibilityBasicCases()
-        {
-
-        }
-    */
+    }
+*/
 }

@@ -25,9 +25,9 @@ public static class MathExtras
         return (int)value;
     }
 
-    public static bool IsWithinIntRange(float x)
-    {
-        
-        return x > (float)int.MinValue && x < (float)int.MaxValue;
-    }
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static bool IsWithinIntRange(float x) => x > (float)int.MinValue && x < (float)int.MaxValue;
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static bool IsWithinIntRange(double x) => x > (double)int.MinValue && x < (double)int.MaxValue;
 }
