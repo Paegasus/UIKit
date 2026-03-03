@@ -3163,4 +3163,142 @@ public static class TransformTest
         Assert.False(a.IsApproximatelyIdentityOrIntegerTranslation(kBigError));
         Assert.False(a.IsApproximatelyIdentityOrIntegerTranslation(kSmallError));
     }
+
+    [Fact]
+    private static void TestRoundToIdentityOrIntegerTranslation()
+    {
+        Transform a = ApproxIdentityMatrix(0.1);
+        Assert.False(a.IsIdentityOrIntegerTranslation());
+        a.RoundToIdentityOrIntegerTranslation();
+        Assert.True(a.IsIdentity);
+        Assert.True(a.IsIdentityOrIntegerTranslation());
+
+        a.Translate3D(1.1f, 2.2f, 3.8f);
+        Assert.False(a.IsIdentityOrIntegerTranslation());
+        a.RoundToIdentityOrIntegerTranslation();
+        Assert.True(a.IsIdentityOrIntegerTranslation());
+        Assert.Equal(1.0, a.rc(0, 3));
+        Assert.Equal(2.0, a.rc(1, 3));
+        Assert.Equal(4.0, a.rc(2, 3));
+    }
+
+    [Fact]
+    private static void TestVerifyIsScaleOrTranslation()
+    {
+        Assert.True(new Transform().IsScaleOrTranslation);
+        Assert.True(Transform.MakeScale(2, 3).IsScaleOrTranslation);
+        Assert.True(Transform.MakeTranslation(4, 5).IsScaleOrTranslation);
+        Assert.True((Transform.MakeTranslation(4, 5) * Transform.MakeScale(2, 3))
+                        .IsScaleOrTranslation);
+
+        Transform A = GetTestMatrix1();
+        Assert.False(A.IsScaleOrTranslation);
+
+        // Modifying any non-scale or non-translation components should cause
+        // IsScaleOrTranslation() to return false. (0, 0), (1, 1), (2, 2), (0, 3),
+        // (1, 3), and (2, 3) are the scale and translation components, so
+        // modifying them should still return true.
+
+        // Note carefully - expecting true here.
+        A.MakeIdentity();
+        Assert.True(A.IsScaleOrTranslation);
+        A.set_rc(0, 0, 2.0f);
+        Assert.True(A.IsScaleOrTranslation);
+
+        A.MakeIdentity();
+        A.set_rc(1, 0, 2.0f);
+        Assert.False(A.IsScaleOrTranslation);
+
+        A.MakeIdentity();
+        A.set_rc(2, 0, 2.0f);
+        Assert.False(A.IsScaleOrTranslation);
+
+        A.MakeIdentity();
+        A.set_rc(3, 0, 2.0f);
+        Assert.False(A.IsScaleOrTranslation);
+
+        A.MakeIdentity();
+        A.set_rc(0, 1, 2.0f);
+        Assert.False(A.IsScaleOrTranslation);
+
+        // Note carefully - expecting true here.
+        A.MakeIdentity();
+        A.set_rc(1, 1, 2.0f);
+        Assert.True(A.IsScaleOrTranslation);
+
+        A.MakeIdentity();
+        A.set_rc(2, 1, 2.0f);
+        Assert.False(A.IsScaleOrTranslation);
+
+        A.MakeIdentity();
+        A.set_rc(3, 1, 2.0f);
+        Assert.False(A.IsScaleOrTranslation);
+
+        A.MakeIdentity();
+        A.set_rc(0, 2, 2.0f);
+        Assert.False(A.IsScaleOrTranslation);
+
+        A.MakeIdentity();
+        A.set_rc(1, 2, 2.0f);
+        Assert.False(A.IsScaleOrTranslation);
+
+        // Note carefully - expecting true here.
+        A.MakeIdentity();
+        A.set_rc(2, 2, 2.0f);
+        Assert.True(A.IsScaleOrTranslation);
+
+        A.MakeIdentity();
+        A.set_rc(3, 2, 2.0f);
+        Assert.False(A.IsScaleOrTranslation);
+
+        // Note carefully - expecting true here.
+        A.MakeIdentity();
+        A.set_rc(0, 3, 2.0f);
+        Assert.True(A.IsScaleOrTranslation);
+
+        // Note carefully - expecting true here.
+        A.MakeIdentity();
+        A.set_rc(1, 3, 2.0f);
+        Assert.True(A.IsScaleOrTranslation);
+
+        // Note carefully - expecting true here.
+        A.MakeIdentity();
+        A.set_rc(2, 3, 2.0f);
+        Assert.True(A.IsScaleOrTranslation);
+
+        A.MakeIdentity();
+        A.set_rc(3, 3, 2.0f);
+        Assert.False(A.IsScaleOrTranslation);
+    }
+
+    [Fact]
+    private static void TestTo2DScale()
+    {
+        Transform t = new();
+        Assert.True(t.IsScale2D);
+        Assert.Equal(new Vector2DF(1, 1), t.To2DScale());
+
+        t.Scale(2.5f, 3.75f);
+        Assert.True(t.IsScale2D);
+        Assert.Equal(new Vector2DF(2.5f, 3.75f), t.To2DScale());
+
+        t.EnsureFullMatrix();
+        Assert.True(t.IsScale2D);
+        Assert.Equal(new Vector2DF(2.5f, 3.75f), t.To2DScale());
+
+        t.Scale3D(3, 4, 5);
+        Assert.False(t.IsScale2D);
+        Assert.Equal(new Vector2DF(7.5f, 15.0f), t.To2DScale());
+
+        for (int row = 0; row < 4; row++)
+        {
+            for (int col = 0; col < 4; col++)
+            {
+                t.MakeIdentity();
+                t.set_rc(row, col, 100);
+                bool is_scale_2d = row == col && (row == 0 || row == 1);
+                Assert.Equal(is_scale_2d, t.IsScale2D);
+            }
+        }
+    }
 }

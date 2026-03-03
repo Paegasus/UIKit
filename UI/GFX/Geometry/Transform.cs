@@ -735,6 +735,25 @@ public struct Transform
 
     public readonly double Determinant => !full_matrix_ ? axis_2d_.Determinant() : matrix_.Determinant();
 
+    // Rounds translation components to integers, and all other components to
+    // identity. Normally this function is meaningful only if
+    // IsApproximatelyIdentityOrIntegerTranslation() is true.
+    public void RoundToIdentityOrIntegerTranslation()
+    {
+        if (!full_matrix_)
+        {
+            axis_2d_ = AxisTransform2D.FromScaleAndTranslation(new Vector2DF(1, 1),
+                                                               new Vector2DF(MathF.Round(axis_2d_.Translation.X, MidpointRounding.AwayFromZero),
+                                                                             MathF.Round(axis_2d_.Translation.Y, MidpointRounding.AwayFromZero)));
+        } else
+        {
+            matrix_ = new Matrix44(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0,          // col0-2
+                Math.Round(matrix_.rc(0, 3), MidpointRounding.AwayFromZero),    // col3
+                Math.Round(matrix_.rc(1, 3), MidpointRounding.AwayFromZero),
+                Math.Round(matrix_.rc(2, 3), MidpointRounding.AwayFromZero), 1);
+        }
+    }
+
     // Applies the current transformation on a 2d rotation and assigns the result
     // to |this|, i.e. this = this * rotation.
     public void Rotate(double degrees) => RotateAboutZAxis(degrees);
@@ -980,6 +999,17 @@ public struct Transform
     }
 
     public readonly bool IsFlat => !full_matrix_ ? true : matrix_.IsFlat;
+
+    // Returns the x and y scale components of the matrix, clamped with
+    // ClampFloatGeometry().
+    public readonly Vector2DF To2DScale()
+    {
+        if (!full_matrix_)
+        {
+            return new Vector2DF(ClampFloatGeometry(axis_2d_.Scale.X), ClampFloatGeometry(axis_2d_.Scale.Y));
+        }
+        return new Vector2DF(ClampFloatGeometry(matrix_.rc(0, 0)), ClampFloatGeometry(matrix_.rc(1, 1)));
+    }
 
     public readonly bool Is2dTransform => !full_matrix_ ? true : matrix_.Is2DTransform;
 
