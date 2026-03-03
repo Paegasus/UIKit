@@ -1,5 +1,4 @@
 using System.Runtime.InteropServices;
-using UI.Numerics;
 
 namespace UI.GFX.Geometry;
 

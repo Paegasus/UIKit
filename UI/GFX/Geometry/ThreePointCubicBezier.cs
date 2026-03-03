@@ -1,5 +1,3 @@
-using System.Diagnostics;
-
 namespace UI.GFX.Geometry;
 
 public struct ThreePointCubicBezier

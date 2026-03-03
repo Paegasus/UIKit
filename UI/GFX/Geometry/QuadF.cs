@@ -1,5 +1,4 @@
 using System.Diagnostics;
-using System.Runtime.CompilerServices;
 using UI.Extensions;
 
 using static UI.GFX.Geometry.Triangle;
