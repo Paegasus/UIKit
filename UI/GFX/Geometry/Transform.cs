@@ -859,13 +859,13 @@ public struct Transform
             matrix_.Flatten();
         }
 #if DEBUG
-        Debug.Assert(IsFlat());
+        Debug.Assert(IsFlat);
 #endif
     }
 
-    public readonly bool IsFlat() => !full_matrix_ ? true : matrix_.IsFlat;
+    public readonly bool IsFlat => !full_matrix_ ? true : matrix_.IsFlat;
 
-    public readonly bool Is2dTransform() => !full_matrix_ ? true : matrix_.Is2DTransform;
+    public readonly bool Is2dTransform => !full_matrix_ ? true : matrix_.Is2DTransform;
 
     // Composes a transform from the given |decomp|, following the routines
     // detailed in this specs:

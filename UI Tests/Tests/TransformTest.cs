@@ -485,7 +485,7 @@ public static class TransformTest
         a = Transform.Affine(2, 3, 4, 5, 6, 7);
         expected_a_times_a = Transform.Affine(16, 21, 28, 37, 46, 60);
         a.PreConcat(a);
-        Assert.True(a.Is2dTransform());
+        Assert.True(a.Is2dTransform);
         Assert.Equal(expected_a_times_a, a);
     }
 
@@ -1436,8 +1436,8 @@ public static class TransformTest
         var from = Transform.Affine(1, 0, 0, 1, 100, 150);
         var to = Transform.Affine(-1, 0, 0, 1, 400, 150);
 
-        Assert.True(from.Is2dTransform());
-        Assert.True(to.Is2dTransform());
+        Assert.True(from.Is2dTransform);
+        Assert.True(to.Is2dTransform);
 
         // OK for interpolated transform to be degenerate.
         Transform result = to;
@@ -1944,7 +1944,7 @@ public static class TransformTest
             Assert.True(translation.GetInverse(out translation));
             Assert.Equal(translation, inverse_translation);
         }
-/*
+
         {
             // Invert a non-uniform scale
             Transform scale = new();
@@ -1952,7 +1952,7 @@ public static class TransformTest
             Assert.True(scale.IsInvertible());
 
             Transform inverse_scale;
-            bool is_invertible = scale.GetInverse(&inverse_scale);
+            bool is_invertible = scale.GetInverse(out inverse_scale);
             Assert.True(is_invertible);
             EXPECT_ROW0_EQ(0.25f, 0.0f, 0.0f, 0.0f, inverse_scale);
             EXPECT_ROW1_EQ(0.0f, 0.1f, 0.0f, 0.0f, inverse_scale);
@@ -1970,10 +1970,10 @@ public static class TransformTest
             m2.Rotate(-30);
             m2.Translate(-10, -20);
             Transform inverse_m1, inverse_m2;
-            Assert.True(m1.GetInverse(&inverse_m1));
-            Assert.True(m2.GetInverse(&inverse_m2));
-            Assert.True(inverse_m1.Is2dTransform());
-            Assert.True(inverse_m2.Is2dTransform());
+            Assert.True(m1.GetInverse(out inverse_m1));
+            Assert.True(m2.GetInverse(out inverse_m2));
+            Assert.True(inverse_m1.Is2dTransform);
+            Assert.True(inverse_m2.Is2dTransform);
             AssertTransformFloatNear(m1, inverse_m2, 1e-6f);
             AssertTransformFloatNear(m2, inverse_m1, 1e-6f);
         }
@@ -1990,8 +1990,8 @@ public static class TransformTest
             m2.RotateAboutYAxis(-10);
             m2.RotateAboutZAxis(30);
             Transform inverse_m1, inverse_m2;
-            Assert.True(m1.GetInverse(&inverse_m1));
-            Assert.True(m2.GetInverse(&inverse_m2));
+            Assert.True(m1.GetInverse(out inverse_m1));
+            Assert.True(m2.GetInverse(out inverse_m2));
             AssertTransformFloatNear(m1, inverse_m2, 1e-6f);
             AssertTransformFloatNear(m2, inverse_m1, 1e-6f);
         }
@@ -2008,11 +2008,10 @@ public static class TransformTest
 
             Transform inverse_of_uninvertible = new();
 
-            // Add a scale just to more easily ensure that inverse_of_uninvertible is
-            // reset to identity.
+            // Add a scale just to more easily ensure that inverse_of_uninvertible is reset to identity.
             inverse_of_uninvertible.Scale3D(4.0f, 10.0f, 100.0f);
 
-            bool is_invertible = uninvertible.GetInverse(&inverse_of_uninvertible);
+            bool is_invertible = uninvertible.GetInverse(out inverse_of_uninvertible);
             Assert.False(is_invertible);
             Assert.True(inverse_of_uninvertible.IsIdentity);
             EXPECT_ROW0_EQ(1.0f, 0.0f, 0.0f, 0.0f, inverse_of_uninvertible);
@@ -2022,13 +2021,11 @@ public static class TransformTest
 
             Assert.Equal(inverse_of_uninvertible, uninvertible.InverseOrIdentity());
         }
-    */
     }
-    /*
-        [Fact]
-        private static void TestVerifyBackfaceVisibilityBasicCases()
-        {
 
-        }
-    */
+    //[Fact]
+    private static void TestVerifyBackfaceVisibilityBasicCases()
+    {
+        
+    }
 }
