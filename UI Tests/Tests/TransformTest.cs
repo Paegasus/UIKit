@@ -3301,4 +3301,56 @@ public static class TransformTest
             }
         }
     }
+
+    [Fact]
+    private static void TestFlatten()
+    {
+        Transform A = GetTestMatrix1();
+        Assert.False(A.IsFlat);
+
+        A.Flatten();
+        EXPECT_ROW0_EQ(10.0f, 14.0f, 0.0f, 22.0f, A);
+        EXPECT_ROW1_EQ(11.0f, 15.0f, 0.0f, 23.0f, A);
+        EXPECT_ROW2_EQ(0.0f, 0.0f, 1.0f, 0.0f, A);
+        EXPECT_ROW3_EQ(13.0f, 17.0f, 0.0f, 25.0f, A);
+
+        Assert.True(A.IsFlat);
+    }
+
+    [Fact]
+    private static void TestIsFlat()
+    {
+        Transform transform = GetTestMatrix1();
+
+        // A transform with all entries non-zero isn't flat.
+        Assert.False(transform.IsFlat);
+
+        transform.set_rc(0, 2, 0.0f);
+        transform.set_rc(1, 2, 0.0f);
+        transform.set_rc(2, 2, 1.0f);
+        transform.set_rc(3, 2, 0.0f);
+
+        Assert.False(transform.IsFlat);
+
+        transform.set_rc(2, 0, 0.0f);
+        transform.set_rc(2, 1, 0.0f);
+        transform.set_rc(2, 3, 0.0f);
+
+        // Since the third column and row are both (0, 0, 1, 0), the transform is flat.
+        Assert.True(transform.IsFlat);
+    }
+
+/*
+    [Fact]
+    private static void TestPreserves2dAffine()
+    {
+        
+    }
+
+    [Fact]
+    private static void Test1()
+    {
+        
+    }
+*/
 }
