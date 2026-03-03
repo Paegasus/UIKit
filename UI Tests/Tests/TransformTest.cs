@@ -3742,13 +3742,13 @@ public static class TransformTest
         transform.MakeIdentity();
         transform.Translate(translation.X, translation.Y);
         transform.set_rc(1, 1, 100);
-        Assert.Equal(translation, transform.To2DTranslation());
+        Assert.Equal(translation, transform.To2dTranslation());
     }
 
     [Fact]
     private static void TestTo3dTranslation()
     {
-        Transform transform;
+        Transform transform = new();
         Assert.Equal(new Vector3DF(), transform.To3dTranslation());
         transform.Translate(10, 20);
         Assert.Equal(new Vector3DF(10, 20, 0), transform.To3dTranslation());

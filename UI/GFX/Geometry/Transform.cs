@@ -469,6 +469,8 @@ public struct Transform
                  ClampFloatGeometry(p[2]));
     }
 
+    // Returns the point with reverse transformation applied to `point`, clamped
+    // with ClampFloatGeometry(), or `std::nullopt` if the transformation cannot be inverted.
     public readonly PointF? InverseMapPoint(in PointF point)
     {
         if (!full_matrix_)
@@ -498,12 +500,97 @@ public struct Transform
         return MapPointInternal(inverse, point);
     }
 
+    // Applies the reverse transformation on `point`. Returns `std::nullopt` if
+    // the transformation cannot be inverted. Rounds the result to the nearest  point.
     public readonly Point? InverseMapPoint(in Point point)
     {
         PointF? point_f = InverseMapPoint(new PointF(point));
         if (point_f.HasValue)
             return ToRoundedPoint(point_f.Value);
         return null;
+    }
+
+    // Returns the rect that is the smallest axis aligned bounding rect
+    // containing the transformed rect, clamped with ClampFloatGeometry().
+    public readonly RectF MapRect(in RectF rect)
+    {
+        if (IsIdentity)
+            return rect;
+
+        if (!full_matrix_)
+        {
+            if (axis_2d_.Scale.X >= 0 && axis_2d_.Scale.Y >= 0)
+            {
+                return axis_2d_.MapRect(rect);
+            }
+        }
+
+        return MapQuad(new QuadF(rect)).BoundingBox();
+    }
+
+    public readonly Rect MapRect(in Rect rect)
+    {
+        if (IsIdentity)
+            return rect;
+
+        return RectConversions.ToEnclosingRect(MapRect(new RectF(rect)));
+    }
+
+    // Applies the reverse transformation on the given rect. Returns
+    // `std::nullopt` if the transformation cannot be inverted, or the rect that
+    // is the smallest axis aligned bounding rect containing the transformed rect,
+    // clamped with ClampFloatGeometry().
+    public readonly bool InverseMapRect(in RectF rect, out RectF result)
+    {
+        result = default;
+
+        if (IsIdentity)
+        {
+            result = rect;
+            return true;
+        }
+
+        if (!full_matrix_)
+        {
+            if (!axis_2d_.IsInvertible())
+            {
+                return false;
+            }
+            if (axis_2d_.Scale.X > 0 && axis_2d_.Scale.Y > 0)
+            {
+                result = axis_2d_.InverseMapRect(rect);
+                return true;
+            }
+        }
+
+        Transform inverse;
+        if (!GetInverse(out inverse))
+        {
+            return false;
+        }
+
+        result = inverse.MapQuad(new QuadF(rect)).BoundingBox();
+        return true;
+    }
+
+    public readonly bool InverseMapRect(in Rect rect, out Rect result)
+    {
+        result = default;
+        
+        if (IsIdentity)
+        {
+            result = rect;
+            return true;
+        }
+
+        RectF mapped;
+        if (InverseMapRect(new RectF(rect), out mapped))
+        {
+            result = RectConversions.ToEnclosingRect(mapped);
+            return true;
+        }
+
+        return false;
     }
 
     public readonly QuadF MapQuad(in QuadF quad) => new QuadF(MapPoint(quad.p1), MapPoint(quad.p2), MapPoint(quad.p3), MapPoint(quad.p4));
@@ -1063,6 +1150,48 @@ public struct Transform
     }
 
     public readonly bool Is2dTransform => !full_matrix_ ? true : matrix_.Is2DTransform;
+
+    // Returns the x and y translation components of the matrix, clamped with
+    // ClampFloatGeometry().
+    public readonly Vector2DF To2dTranslation()
+    {
+        if (!full_matrix_)
+        {
+            return new Vector2DF(ClampFloatGeometry(axis_2d_.Translation.X), 
+                                 ClampFloatGeometry(axis_2d_.Translation.Y));
+        }
+
+        return new Vector2DF(ClampFloatGeometry(matrix_.rc(0, 3)),
+                             ClampFloatGeometry(matrix_.rc(1, 3)));
+    }
+
+    // Returns the x, y and z translation components of the matrix, clampe with
+    // ClampFloatGeometry().
+    public readonly Vector3DF To3dTranslation()
+    {
+        if (!full_matrix_)
+        {
+            return new Vector3DF(ClampFloatGeometry(axis_2d_.Translation.X),
+                                 ClampFloatGeometry(axis_2d_.Translation.Y), 0);
+        }
+
+        return new Vector3DF(ClampFloatGeometry(matrix_.rc(0, 3)),
+                             ClampFloatGeometry(matrix_.rc(1, 3)),
+                             ClampFloatGeometry(matrix_.rc(2, 3)));
+    }
+
+    // Returns the x and y scale components of the matrix, clamped with
+    // ClampFloatGeometry().
+    public readonly Vector2DF To2dScale()
+    {
+        if (!full_matrix_)
+        {
+            return new Vector2DF(ClampFloatGeometry(axis_2d_.Scale.X),
+                                 ClampFloatGeometry(axis_2d_.Scale.Y));
+        }
+        return new Vector2DF(ClampFloatGeometry(matrix_.rc(0, 0)),
+                             ClampFloatGeometry(matrix_.rc(1, 1)));
+    }
 
     // Composes a transform from the given |decomp|, following the routines
     // detailed in this specs:
