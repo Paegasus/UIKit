@@ -1912,17 +1912,123 @@ public static class TransformTest
         transform.Translate3D(1, 2, 3);
         Assert.False(transform.IsIdentityOrInteger2dTranslation());
     }
-/*
+
     [Fact]
     private static void TestInverse()
     {
+        {
+            Transform identity = new();
+            Transform inverse_identity;
+            Assert.True(identity.GetInverse(out inverse_identity));
+            Assert.Equal(identity, inverse_identity);
+            Assert.Equal(identity, identity.InverseOrIdentity());
+        }
+/*
+        {
+            // Invert a translation
+            Transform translation = new();
+            translation.Translate3D(2.0f, 3.0f, 4.0f);
+            Assert.True(translation.IsInvertible());
 
+            Transform inverse_translation;
+            bool is_invertible = translation.GetInverse(&inverse_translation);
+            Assert.True(is_invertible);
+            EXPECT_ROW0_EQ(1.0f, 0.0f, 0.0f, -2.0f, inverse_translation);
+            EXPECT_ROW1_EQ(0.0f, 1.0f, 0.0f, -3.0f, inverse_translation);
+            EXPECT_ROW2_EQ(0.0f, 0.0f, 1.0f, -4.0f, inverse_translation);
+            EXPECT_ROW3_EQ(0.0f, 0.0f, 0.0f, 1.0f, inverse_translation);
+
+            Assert.Equal(inverse_translation, translation.InverseOrIdentity());
+
+            // GetInverse with the parameter pointing to itself.
+            Assert.True(translation.GetInverse(&translation));
+            Assert.Equal(translation, inverse_translation);
+        }
+
+        {
+            // Invert a non-uniform scale
+            Transform scale = new();
+            scale.Scale3D(4.0f, 10.0f, 100.0f);
+            Assert.True(scale.IsInvertible());
+
+            Transform inverse_scale;
+            bool is_invertible = scale.GetInverse(&inverse_scale);
+            Assert.True(is_invertible);
+            EXPECT_ROW0_EQ(0.25f, 0.0f, 0.0f, 0.0f, inverse_scale);
+            EXPECT_ROW1_EQ(0.0f, 0.1f, 0.0f, 0.0f, inverse_scale);
+            EXPECT_ROW2_EQ(0.0f, 0.0f, 0.01f, 0.0f, inverse_scale);
+            EXPECT_ROW3_EQ(0.0f, 0.0f, 0.0f, 1.0f, inverse_scale);
+
+            Assert.Equal(inverse_scale, scale.InverseOrIdentity());
+        }
+
+        {
+            Transform m1 = new();
+            m1.Translate(10, 20);
+            m1.Rotate(30);
+            Transform m2 = new();
+            m2.Rotate(-30);
+            m2.Translate(-10, -20);
+            Transform inverse_m1, inverse_m2;
+            Assert.True(m1.GetInverse(&inverse_m1));
+            Assert.True(m2.GetInverse(&inverse_m2));
+            Assert.True(inverse_m1.Is2dTransform());
+            Assert.True(inverse_m2.Is2dTransform());
+            AssertTransformFloatNear(m1, inverse_m2, 1e-6f);
+            AssertTransformFloatNear(m2, inverse_m1, 1e-6f);
+        }
+
+        {
+            Transform m1 = new();
+            m1.RotateAboutZAxis(-30);
+            m1.RotateAboutYAxis(10);
+            m1.RotateAboutXAxis(20);
+            m1.ApplyPerspectiveDepth(100);
+            Transform m2 = new();
+            m2.ApplyPerspectiveDepth(-100);
+            m2.RotateAboutXAxis(-20);
+            m2.RotateAboutYAxis(-10);
+            m2.RotateAboutZAxis(30);
+            Transform inverse_m1, inverse_m2;
+            Assert.True(m1.GetInverse(&inverse_m1));
+            Assert.True(m2.GetInverse(&inverse_m2));
+            AssertTransformFloatNear(m1, inverse_m2, 1e-6f);
+            AssertTransformFloatNear(m2, inverse_m1, 1e-6f);
+        }
+
+        {
+            // Try to invert a matrix that is not invertible.
+            // The inverse() function should reset the output matrix to identity.
+            Transform uninvertible = new();
+            uninvertible.set_rc(0, 0, 0.0);
+            uninvertible.set_rc(1, 1, 0.0);
+            uninvertible.set_rc(2, 2, 0.0);
+            uninvertible.set_rc(3, 3, 0.0);
+            Assert.False(uninvertible.IsInvertible());
+
+            Transform inverse_of_uninvertible = new();
+
+            // Add a scale just to more easily ensure that inverse_of_uninvertible is
+            // reset to identity.
+            inverse_of_uninvertible.Scale3D(4.0f, 10.0f, 100.0f);
+
+            bool is_invertible = uninvertible.GetInverse(&inverse_of_uninvertible);
+            Assert.False(is_invertible);
+            Assert.True(inverse_of_uninvertible.IsIdentity);
+            EXPECT_ROW0_EQ(1.0f, 0.0f, 0.0f, 0.0f, inverse_of_uninvertible);
+            EXPECT_ROW1_EQ(0.0f, 1.0f, 0.0f, 0.0f, inverse_of_uninvertible);
+            EXPECT_ROW2_EQ(0.0f, 0.0f, 1.0f, 0.0f, inverse_of_uninvertible);
+            EXPECT_ROW3_EQ(0.0f, 0.0f, 0.0f, 1.0f, inverse_of_uninvertible);
+
+            Assert.Equal(inverse_of_uninvertible, uninvertible.InverseOrIdentity());
+        }
+    */
     }
+    /*
+        [Fact]
+        private static void TestVerifyBackfaceVisibilityBasicCases()
+        {
 
-    [Fact]
-    private static void TestVerifyBackfaceVisibilityBasicCases()
-    {
-
-    }
-*/
+        }
+    */
 }

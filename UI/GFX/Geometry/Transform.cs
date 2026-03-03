@@ -770,6 +770,60 @@ public struct Transform
             !has_x_or_y_perspective;
     }
 
+    // Returns true if the matrix has any perspective component that would
+    // change the w-component of a homogeneous point.
+    public readonly bool HasPerspective() => !full_matrix_ ? false : matrix_.HasPerspective;
+
+    // Returns true if this transform is non-singular.
+    public readonly bool IsInvertible() => !full_matrix_ ? axis_2d_.IsInvertible() : matrix_.IsInvertible();
+
+    // If |this| is invertible, inverts |this| and stores the result in
+    // |*transform|, and returns true. Otherwise sets |*transform| to identity and returns false.
+    public readonly bool GetInverse(out Transform transform)
+    {
+        if (!full_matrix_)
+        {
+            transform.full_matrix_ = false;
+            transform.matrix_ = default;
+
+            if (axis_2d_.IsInvertible())
+            {
+                transform.axis_2d_ = axis_2d_;
+                transform.axis_2d_.Invert();
+                return true;
+            }
+
+            transform.axis_2d_ = new AxisTransform2D();
+            return false;
+        }
+
+        transform.axis_2d_ = default;
+
+        if (matrix_.GetInverse(out transform.matrix_))
+        {
+            transform.full_matrix_ = true;
+            return true;
+        }
+
+        // Initialize the return value to identity if this matrix turned out to be un-invertible.
+        transform = new Transform();
+        transform.MakeIdentity();
+        return false;
+    }
+
+    // Same as GetInverse() except that it returns the the inverse of |this| or
+    // identity, instead of a bool. This is suitable when it's good to fallback
+    // to identity silently.
+    public readonly Transform InverseOrIdentity()
+    {
+        Transform inverse;
+        bool invertible = GetInverse(out inverse);
+#if DEBUG
+        Debug.Assert(invertible || inverse.IsIdentity);
+#endif
+        return inverse;
+    }
+
     public void Transpose()
     {
         if (!IsScale2D)
