@@ -593,6 +593,35 @@ public struct Transform
         return false;
     }
 
+    // Returns the box with transformation applied on the given box. The returned
+    // box will be the smallest axis aligned bounding box containing the
+    // transformed box, clamped with ClampFloatGeometry().
+    public readonly BoxF MapBox(in BoxF box)
+    {
+        BoxF bounds = new();
+        bool first_point = true;
+        for (int corner = 0; corner < 8; ++corner)
+        {
+            Point3F point = box.Origin;
+            point += new Vector3DF((corner & 1) != 0 ? box.Width : 0.0f,
+                                   (corner & 2) != 0 ? box.Height : 0.0f,
+                                   (corner & 4) != 0 ? box.Depth : 0.0f);
+            point = MapPoint(point);
+            if (first_point)
+            {
+                bounds.Origin = point;
+                first_point = false;
+            }
+            else
+            {
+                bounds.ExpandTo(point);
+            }
+        }
+        return bounds;
+    }
+
+    // Applies transformation on the given quad by applying the transformation
+    // on each point of the quad.
     public readonly QuadF MapQuad(in QuadF quad) => new QuadF(MapPoint(quad.p1), MapPoint(quad.p2), MapPoint(quad.p3), MapPoint(quad.p4));
 
     public static Matrix44 AxisTransform2DToMatrix44(in AxisTransform2D axis_2d)
