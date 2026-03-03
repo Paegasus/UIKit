@@ -2564,4 +2564,99 @@ public static class TransformTest
         EXPECT_ROW2_EQ(0.0f, 0.0f, 8.0f, 0.0f, A);
         EXPECT_ROW3_EQ(0.0f, 0.0f, 0.0f, 1.0f, A);
     }
+
+    [Fact]
+    private static void TestRotateAboutXAxis()
+    {
+        Transform A = new();
+        double sin45 = 0.5 * Math.Sqrt(2.0);
+        double cos45 = sin45;
+
+        A.MakeIdentity();
+        A.RotateAboutXAxis(90.0);
+        EXPECT_ROW0_EQ(1.0f, 0.0f, 0.0f, 0.0f, A);
+        EXPECT_ROW1_EQ(0.0f, 0.0f, -1.0f, 0.0f, A);
+        EXPECT_ROW2_EQ(0.0f, 1.0f, 0.0f, 0.0f, A);
+        EXPECT_ROW3_EQ(0.0f, 0.0f, 0.0f, 1.0f, A);
+
+        A.MakeIdentity();
+        A.RotateAboutXAxis(45.0);
+        EXPECT_ROW0_EQ(1.0f, 0.0f, 0.0f, 0.0f, A);
+        EXPECT_ROW1_NEAR(0.0, cos45, -sin45, 0.0, A, kErrorThreshold);
+        EXPECT_ROW2_NEAR(0.0, sin45, cos45, 0.0, A, kErrorThreshold);
+        EXPECT_ROW3_EQ(0.0f, 0.0f, 0.0f, 1.0f, A);
+
+        // Verify that RotateAboutXAxis(angle) post-multiplies the existing matrix.
+        A.MakeIdentity();
+        A.Scale3D(6.0f, 7.0f, 8.0f);
+        A.RotateAboutXAxis(90.0);
+        EXPECT_ROW0_EQ(6.0f, 0.0f, 0.0f, 0.0f, A);
+        EXPECT_ROW1_EQ(0.0f, 0.0f, -7.0f, 0.0f, A);
+        EXPECT_ROW2_EQ(0.0f, 8.0f, 0.0f, 0.0f, A);
+        EXPECT_ROW3_EQ(0.0f, 0.0f, 0.0f, 1.0f, A);
+    }
+
+    [Fact]
+    private static void TestRotateAboutYAxis()
+    {
+        Transform A = new();
+        double sin45 = 0.5 * Math.Sqrt(2.0);
+        double cos45 = sin45;
+
+        // Note carefully, the expected pattern is inverted compared to rotating
+        // about x axis or z axis.
+        A.MakeIdentity();
+        A.RotateAboutYAxis(90.0);
+        EXPECT_ROW0_EQ(0.0f, 0.0f, 1.0f, 0.0f, A);
+        EXPECT_ROW1_EQ(0.0f, 1.0f, 0.0f, 0.0f, A);
+        EXPECT_ROW2_EQ(-1.0f, 0.0f, 0.0f, 0.0f, A);
+        EXPECT_ROW3_EQ(0.0f, 0.0f, 0.0f, 1.0f, A);
+
+        A.MakeIdentity();
+        A.RotateAboutYAxis(45.0);
+        EXPECT_ROW0_NEAR(cos45, 0.0, sin45, 0.0, A, kErrorThreshold);
+        EXPECT_ROW1_EQ(0.0f, 1.0f, 0.0f, 0.0f, A);
+        EXPECT_ROW2_NEAR(-sin45, 0.0, cos45, 0.0, A, kErrorThreshold);
+        EXPECT_ROW3_EQ(0.0f, 0.0f, 0.0f, 1.0f, A);
+
+        // Verify that RotateAboutYAxis(angle) post-multiplies the existing matrix.
+        A.MakeIdentity();
+        A.Scale3D(6.0f, 7.0f, 8.0f);
+        A.RotateAboutYAxis(90.0);
+        EXPECT_ROW0_EQ(0.0f, 0.0f, 6.0f, 0.0f, A);
+        EXPECT_ROW1_EQ(0.0f, 7.0f, 0.0f, 0.0f, A);
+        EXPECT_ROW2_EQ(-8.0f, 0.0f, 0.0f, 0.0f, A);
+        EXPECT_ROW3_EQ(0.0f, 0.0f, 0.0f, 1.0f, A);
+    }
+
+    [Fact]
+    private static void TestRotateAboutZAxis()
+    {
+        Transform A = new();
+        double sin45 = 0.5 * Math.Sqrt(2.0);
+        double cos45 = sin45;
+
+        A.MakeIdentity();
+        A.RotateAboutZAxis(90.0);
+        EXPECT_ROW0_EQ(0.0f, -1.0f, 0.0f, 0.0f, A);
+        EXPECT_ROW1_EQ(1.0f, 0.0f, 0.0f, 0.0f, A);
+        EXPECT_ROW2_EQ(0.0f, 0.0f, 1.0f, 0.0f, A);
+        EXPECT_ROW3_EQ(0.0f, 0.0f, 0.0f, 1.0f, A);
+
+        A.MakeIdentity();
+        A.RotateAboutZAxis(45.0);
+        EXPECT_ROW0_NEAR(cos45, -sin45, 0.0, 0.0, A, kErrorThreshold);
+        EXPECT_ROW1_NEAR(sin45, cos45, 0.0, 0.0, A, kErrorThreshold);
+        EXPECT_ROW2_EQ(0.0f, 0.0f, 1.0f, 0.0f, A);
+        EXPECT_ROW3_EQ(0.0f, 0.0f, 0.0f, 1.0f, A);
+
+        // Verify that RotateAboutZAxis(angle) post-multiplies the existing matrix.
+        A.MakeIdentity();
+        A.Scale3D(6.0f, 7.0f, 8.0f);
+        A.RotateAboutZAxis(90.0);
+        EXPECT_ROW0_EQ(0.0f, -6.0f, 0.0f, 0.0f, A);
+        EXPECT_ROW1_EQ(7.0f, 0.0f, 0.0f, 0.0f, A);
+        EXPECT_ROW2_EQ(0.0f, 0.0f, 8.0f, 0.0f, A);
+        EXPECT_ROW3_EQ(0.0f, 0.0f, 0.0f, 1.0f, A);
+    }
 }
