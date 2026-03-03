@@ -3793,21 +3793,26 @@ public static class TransformTest
     [Fact]
     private static void TestTransformRectReverse()
     {
+        RectF result;
+
         var translation = Transform.MakeTranslation(3.25f, 7.75f);
         RectF rect = new(1.25f, 2.5f, 3.75f, 4.0f);
         RectF expected = new(-2.0f, -5.25f, 3.75f, 4.0f);
-        Assert.Equal(expected, translation.InverseMapRect(rect));
+        translation.InverseMapRect(rect, out result);
+        Assert.Equal(expected, result);
 
-        Assert.Equal(rect, new Transform().InverseMapRect(rect));
+        new Transform().InverseMapRect(rect, out result);
+        Assert.Equal(rect, result);
 
         var singular = Transform.MakeScale(0.0f);
-        Assert.False(singular.InverseMapRect(rect));
+        Assert.False(singular.InverseMapRect(rect, out result));
 
         var negative_scale = Transform.MakeScale(-1, -2);
-        Assert.Equal(new RectF(-5.0f, -3.25f, 3.75f, 2.0f),
-                  negative_scale.InverseMapRect(rect));
+        negative_scale.InverseMapRect(rect, out result);
+        Assert.Equal(new RectF(-5.0f, -3.25f, 3.75f, 2.0f), result);
 
         var rotate = Transform.Make90degRotation();
-        Assert.Equal(new RectF(2.5f, -5.0f, 4.0f, 3.75f), rotate.InverseMapRect(rect));
+        rotate.InverseMapRect(rect, out result);
+        Assert.Equal(new RectF(2.5f, -5.0f, 4.0f, 3.75f), result);
     }
 }
