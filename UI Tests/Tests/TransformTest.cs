@@ -2659,4 +2659,139 @@ public static class TransformTest
         EXPECT_ROW2_EQ(0.0f, 0.0f, 8.0f, 0.0f, A);
         EXPECT_ROW3_EQ(0.0f, 0.0f, 0.0f, 1.0f, A);
     }
+
+    [Fact]
+    private static void TestRotateAboutForAlignedAxes()
+    {
+        Transform A = new();
+
+        // Check rotation about z-axis
+        A.MakeIdentity();
+        A.RotateAbout(new Vector3DF(0.0f, 0.0f, 1.0f), 90.0);
+        EXPECT_ROW0_EQ(0.0f, -1.0f, 0.0f, 0.0f, A);
+        EXPECT_ROW1_EQ(1.0f, 0.0f, 0.0f, 0.0f, A);
+        EXPECT_ROW2_EQ(0.0f, 0.0f, 1.0f, 0.0f, A);
+        EXPECT_ROW3_EQ(0.0f, 0.0f, 0.0f, 1.0f, A);
+
+        // Check rotation about x-axis
+        A.MakeIdentity();
+        A.RotateAbout(new Vector3DF(1.0f, 0.0f, 0.0f), 90.0);
+        EXPECT_ROW0_EQ(1.0f, 0.0f, 0.0f, 0.0f, A);
+        EXPECT_ROW1_EQ(0.0f, 0.0f, -1.0f, 0.0f, A);
+        EXPECT_ROW2_EQ(0.0f, 1.0f, 0.0f, 0.0f, A);
+        EXPECT_ROW3_EQ(0.0f, 0.0f, 0.0f, 1.0f, A);
+
+        // Check rotation about y-axis. Note carefully, the expected pattern is
+        // inverted compared to rotating about x axis or z axis.
+        A.MakeIdentity();
+        A.RotateAbout(new Vector3DF(0.0f, 1.0f, 0.0f), 90.0);
+        EXPECT_ROW0_EQ(0.0f, 0.0f, 1.0f, 0.0f, A);
+        EXPECT_ROW1_EQ(0.0f, 1.0f, 0.0f, 0.0f, A);
+        EXPECT_ROW2_EQ(-1.0f, 0.0f, 0.0f, 0.0f, A);
+        EXPECT_ROW3_EQ(0.0f, 0.0f, 0.0f, 1.0f, A);
+
+        // Verify that rotate3d(axis, angle) post-multiplies the existing matrix.
+        A.MakeIdentity();
+        A.Scale3D(6.0f, 7.0f, 8.0f);
+        A.RotateAboutZAxis(90.0);
+        EXPECT_ROW0_EQ(0.0f, -6.0f, 0.0f, 0.0f, A);
+        EXPECT_ROW1_EQ(7.0f, 0.0f, 0.0f, 0.0f, A);
+        EXPECT_ROW2_EQ(0.0f, 0.0f, 8.0f, 0.0f, A);
+        EXPECT_ROW3_EQ(0.0f, 0.0f, 0.0f, 1.0f, A);
+    }
+
+    [Fact]
+    private static void TestVerifyRotateAboutForArbitraryAxis()
+    {
+        // Check rotation about an arbitrary non-axis-aligned vector.
+        Transform A = new();
+        A.RotateAbout(new Vector3DF(1.0f, 1.0f, 1.0f), 90.0);
+        EXPECT_ROW0_NEAR(0.3333333333333334258519187, -0.2440169358562924717404030,
+                         0.9106836025229592124219380, 0.0, A, kErrorThreshold);
+        EXPECT_ROW1_NEAR(0.9106836025229592124219380, 0.3333333333333334258519187,
+                         -0.2440169358562924717404030, 0.0, A, kErrorThreshold);
+        EXPECT_ROW2_NEAR(-0.2440169358562924717404030, 0.9106836025229592124219380,
+                         0.3333333333333334258519187, 0.0, A, kErrorThreshold);
+        EXPECT_ROW3_EQ(0.0f, 0.0f, 0.0f, 1.0f, A);
+    }
+
+    [Fact]
+    private static void TestVerifyRotateAboutForDegenerateAxis()
+    {
+        // Check rotation about a degenerate zero vector.
+        // It is expected to skip applying the rotation.
+        Transform A = new();
+
+        A.RotateAbout(new Vector3DF(0.0f, 0.0f, 0.0f), 45.0);
+        // Verify that A remains unchanged.
+        Assert.True(A.IsIdentity);
+
+        A = GetTestMatrix1();
+        A.RotateAbout(new Vector3DF(0.0f, 0.0f, 0.0f), 35.0);
+
+        // Verify that A remains unchanged.
+        EXPECT_ROW0_EQ(10.0f, 14.0f, 18.0f, 22.0f, A);
+        EXPECT_ROW1_EQ(11.0f, 15.0f, 19.0f, 23.0f, A);
+        EXPECT_ROW2_EQ(12.0f, 16.0f, 20.0f, 24.0f, A);
+        EXPECT_ROW3_EQ(13.0f, 17.0f, 21.0f, 25.0f, A);
+    }
+
+    [Fact]
+    private static void TestVerifySkew()
+    {
+        // Test a skew along X axis only
+        Transform A = new();
+        A.Skew(45.0, 0.0);
+        EXPECT_ROW0_EQ(1.0f, 1.0f, 0.0f, 0.0f, A);
+        EXPECT_ROW1_EQ(0.0f, 1.0f, 0.0f, 0.0f, A);
+        EXPECT_ROW2_EQ(0.0f, 0.0f, 1.0f, 0.0f, A);
+        EXPECT_ROW3_EQ(0.0f, 0.0f, 0.0f, 1.0f, A);
+
+        // Test a skew along Y axis only
+        A.MakeIdentity();
+        A.Skew(0.0, 45.0);
+        EXPECT_ROW0_EQ(1.0f, 0.0f, 0.0f, 0.0f, A);
+        EXPECT_ROW1_EQ(1.0f, 1.0f, 0.0f, 0.0f, A);
+        EXPECT_ROW2_EQ(0.0f, 0.0f, 1.0f, 0.0f, A);
+        EXPECT_ROW3_EQ(0.0f, 0.0f, 0.0f, 1.0f, A);
+
+        // Verify that skew() post-multiplies the existing matrix. Row 1, column 2,
+        // would incorrectly have value "7" if the matrix is pre-multiplied instead
+        // of post-multiplied.
+        A.MakeIdentity();
+        A.Scale3D(6.0f, 7.0f, 8.0f);
+        A.Skew(45.0, 0.0);
+        EXPECT_ROW0_EQ(6.0f, 6.0f, 0.0f, 0.0f, A);
+        EXPECT_ROW1_EQ(0.0f, 7.0f, 0.0f, 0.0f, A);
+        EXPECT_ROW2_EQ(0.0f, 0.0f, 8.0f, 0.0f, A);
+        EXPECT_ROW3_EQ(0.0f, 0.0f, 0.0f, 1.0f, A);
+
+        // Test a skew along X and Y axes both
+        A.MakeIdentity();
+        A.Skew(45.0, 45.0);
+        EXPECT_ROW0_EQ(1.0f, 1.0f, 0.0f, 0.0f, A);
+        EXPECT_ROW1_EQ(1.0f, 1.0f, 0.0f, 0.0f, A);
+        EXPECT_ROW2_EQ(0.0f, 0.0f, 1.0f, 0.0f, A);
+        EXPECT_ROW3_EQ(0.0f, 0.0f, 0.0f, 1.0f, A);
+    }
+
+    [Fact]
+    private static void TestVerifyPerspectiveDepth()
+    {
+        Transform A = new();
+        A.ApplyPerspectiveDepth(1.0);
+        EXPECT_ROW0_EQ(1.0f, 0.0f, 0.0f, 0.0f, A);
+        EXPECT_ROW1_EQ(0.0f, 1.0f, 0.0f, 0.0f, A);
+        EXPECT_ROW2_EQ(0.0f, 0.0f, 1.0f, 0.0f, A);
+        EXPECT_ROW3_EQ(0.0f, 0.0f, -1.0f, 1.0f, A);
+
+        // Verify that PerspectiveDepth() post-multiplies the existing matrix.
+        A.MakeIdentity();
+        A.Translate3D(2.0f, 3.0f, 4.0f);
+        A.ApplyPerspectiveDepth(1.0);
+        EXPECT_ROW0_EQ(1.0f, 0.0f, -2.0f, 2.0f, A);
+        EXPECT_ROW1_EQ(0.0f, 1.0f, -3.0f, 3.0f, A);
+        EXPECT_ROW2_EQ(0.0f, 0.0f, -3.0f, 4.0f, A);
+        EXPECT_ROW3_EQ(0.0f, 0.0f, -1.0f, 1.0f, A);
+    }
 }
