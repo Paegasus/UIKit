@@ -1802,6 +1802,45 @@ public static class TransformTest
     {
         // rotateZ(90deg)
         Assert.Equal(0, ComputeDecompRecompError(Transform.Make90degRotation()), 1e-20);
+
+        // rotateZ(180deg)
+        // Edge case where w = 0.
+        Assert.Equal(0, ComputeDecompRecompError(Transform.Make180degRotation()));
+
+        // rotateX(90deg) rotateY(90deg) rotateZ(90deg)
+        // [1  0   0][ 0 0 1][0 -1 0]   [0 0 1][0 -1 0]   [0  0 1]
+        // [0  0  -1][ 0 1 0][1  0 0] = [1 0 0][1  0 0] = [0 -1 0]
+        // [0  1   0][-1 0 0][0  0 1]   [0 1 0][0  0 1]   [1  0 0]
+        // This test case leads to Gimbal lock when using Euler angles.
+        Assert.Equal(0, ComputeDecompRecompError(Transform.RowMajor(0, 0, 1, 0, 0, -1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1)), 1e-20);
+
+        // Quaternion matrices with 0 off-diagonal elements, and negative trace.
+        // Stress tests handling of degenerate cases in computing quaternions.
+        // Validates fix for https://crbug.com/647554.
+        Assert.Equal(0, ComputeDecompRecompError(Transform.Affine(1, 1, 1, 0, 0, 0)));
+        Assert.Equal(0, ComputeDecompRecompError(Transform.MakeScale(-1, 1)));
+        Assert.Equal(0, ComputeDecompRecompError(Transform.MakeScale(1, -1)));
+        Transform flip_z = new();
+        flip_z.Scale3D(1, 1, -1);
+        Assert.Equal(0, ComputeDecompRecompError(flip_z));
+
+        // The following cases exercise the branches Q_xx/yy/zz for quaternion in
+        // Matrix44::Decompose().
+        static Transform transform(double sx, double sy, double sz, int skew_r, int skew_c)
+        {
+            Transform t = new();
+            t.Scale3D((float)sx, (float)sy, (float)sz);
+            t.set_rc(skew_r, skew_c, 1);
+            t.set_rc(skew_c, skew_r, 1);
+            return t;
+        }
+
+        Assert.Equal(0, ComputeDecompRecompError(transform(1, -1, -1, 0, 1)));
+        Assert.Equal(0, ComputeDecompRecompError(transform(1, -1, -1, 0, 2)));
+        Assert.Equal(0, ComputeDecompRecompError(transform(-1, 1, -1, 0, 1)));
+        Assert.Equal(0, ComputeDecompRecompError(transform(-1, 1, -1, 1, 2)));
+        Assert.Equal(0, ComputeDecompRecompError(transform(-1, -1, 1, 0, 2)));
+        Assert.Equal(0, ComputeDecompRecompError(transform(-1, -1, 1, 1, 2)));
     }
 
 /*
