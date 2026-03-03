@@ -2459,4 +2459,109 @@ public static class TransformTest
         B.Translate3D(new Vector3DF(2.0f, 3.0f, 4.0f));
         Assert.Equal(A, B);
     }
+
+    [Fact]
+    private static void TestVerifyPostTranslate3d()
+    {
+        Transform A = new();
+        A.PostTranslate3D(2.0f, 3.0f, 4.0f);
+        EXPECT_ROW0_EQ(1.0f, 0.0f, 0.0f, 2.0f, A);
+        EXPECT_ROW1_EQ(0.0f, 1.0f, 0.0f, 3.0f, A);
+        EXPECT_ROW2_EQ(0.0f, 0.0f, 1.0f, 4.0f, A);
+        EXPECT_ROW3_EQ(0.0f, 0.0f, 0.0f, 1.0f, A);
+
+        // Verify that PostTranslate3d() pre-multiplies the existing matrix.
+        A.MakeIdentity();
+        A.Scale3D(6.0f, 7.0f, 8.0f);
+        A.PostTranslate3D(2.0f, 3.0f, 4.0f);
+        EXPECT_ROW0_EQ(6.0f, 0.0f, 0.0f, 2.0f, A);
+        EXPECT_ROW1_EQ(0.0f, 7.0f, 0.0f, 3.0f, A);
+        EXPECT_ROW2_EQ(0.0f, 0.0f, 8.0f, 4.0f, A);
+        EXPECT_ROW3_EQ(0.0f, 0.0f, 0.0f, 1.0f, A);
+
+        Transform B = new();
+        B.Scale3D(6.0f, 7.0f, 8.0f);
+        B.PostTranslate3D(new Vector3DF(2.0f, 3.0f, 4.0f));
+        Assert.Equal(A, B);
+    }
+
+    [Fact]
+    private static void TestVerifyScale()
+    {
+        Transform A = new();
+        A.Scale(6.0f, 7.0f);
+        EXPECT_ROW0_EQ(6.0f, 0.0f, 0.0f, 0.0f, A);
+        EXPECT_ROW1_EQ(0.0f, 7.0f, 0.0f, 0.0f, A);
+        EXPECT_ROW2_EQ(0.0f, 0.0f, 1.0f, 0.0f, A);
+        EXPECT_ROW3_EQ(0.0f, 0.0f, 0.0f, 1.0f, A);
+
+        // Verify that Scale() post-multiplies the existing matrix.
+        A.MakeIdentity();
+        A.Translate3D(2.0f, 3.0f, 4.0f);
+        A.Scale(6.0f, 7.0f);
+        EXPECT_ROW0_EQ(6.0f, 0.0f, 0.0f, 2.0f, A);
+        EXPECT_ROW1_EQ(0.0f, 7.0f, 0.0f, 3.0f, A);
+        EXPECT_ROW2_EQ(0.0f, 0.0f, 1.0f, 4.0f, A);
+        EXPECT_ROW3_EQ(0.0f, 0.0f, 0.0f, 1.0f, A);
+    }
+
+    [Fact]
+    private static void TestVerifyScale3d()
+    {
+        Transform A = new();
+        A.Scale3D(6.0f, 7.0f, 8.0f);
+        EXPECT_ROW0_EQ(6.0f, 0.0f, 0.0f, 0.0f, A);
+        EXPECT_ROW1_EQ(0.0f, 7.0f, 0.0f, 0.0f, A);
+        EXPECT_ROW2_EQ(0.0f, 0.0f, 8.0f, 0.0f, A);
+        EXPECT_ROW3_EQ(0.0f, 0.0f, 0.0f, 1.0f, A);
+
+        // Verify that scale3d() post-multiplies the existing matrix.
+        A.MakeIdentity();
+        A.Translate3D(2.0f, 3.0f, 4.0f);
+        A.Scale3D(6.0f, 7.0f, 8.0f);
+        EXPECT_ROW0_EQ(6.0f, 0.0f, 0.0f, 2.0f, A);
+        EXPECT_ROW1_EQ(0.0f, 7.0f, 0.0f, 3.0f, A);
+        EXPECT_ROW2_EQ(0.0f, 0.0f, 8.0f, 4.0f, A);
+        EXPECT_ROW3_EQ(0.0f, 0.0f, 0.0f, 1.0f, A);
+    }
+
+    [Fact]
+    private static void TestVerifyPostScale3d()
+    {
+        Transform A = new();
+        A.PostScale3D(6.0f, 7.0f, 8.0f);
+        EXPECT_ROW0_EQ(6.0f, 0.0f, 0.0f, 0.0f, A);
+        EXPECT_ROW1_EQ(0.0f, 7.0f, 0.0f, 0.0f, A);
+        EXPECT_ROW2_EQ(0.0f, 0.0f, 8.0f, 0.0f, A);
+        EXPECT_ROW3_EQ(0.0f, 0.0f, 0.0f, 1.0f, A);
+
+        // Verify that PostScale3d() pre-multiplies the existing matrix.
+        A.MakeIdentity();
+        A.Translate3D(2.0f, 3.0f, 4.0f);
+        A.PostScale3D(6.0f, 7.0f, 8.0f);
+        EXPECT_ROW0_EQ(6.0f, 0.0f, 0.0f, 12.0f, A);
+        EXPECT_ROW1_EQ(0.0f, 7.0f, 0.0f, 21.0f, A);
+        EXPECT_ROW2_EQ(0.0f, 0.0f, 8.0f, 32.0f, A);
+        EXPECT_ROW3_EQ(0.0f, 0.0f, 0.0f, 1.0f, A);
+    }
+
+    [Fact]
+    private static void TestRotate()
+    {
+        Transform A = new();
+        A.Rotate(90.0);
+        EXPECT_ROW0_EQ(0.0f, -1.0f, 0.0f, 0.0f, A);
+        EXPECT_ROW1_EQ(1.0f, 0.0f, 0.0f, 0.0f, A);
+        EXPECT_ROW2_EQ(0.0f, 0.0f, 1.0f, 0.0f, A);
+        EXPECT_ROW3_EQ(0.0f, 0.0f, 0.0f, 1.0f, A);
+
+        // Verify that Rotate() post-multiplies the existing matrix.
+        A.MakeIdentity();
+        A.Scale3D(6.0f, 7.0f, 8.0f);
+        A.Rotate(90.0);
+        EXPECT_ROW0_EQ(0.0f, -6.0f, 0.0f, 0.0f, A);
+        EXPECT_ROW1_EQ(7.0f, 0.0f, 0.0f, 0.0f, A);
+        EXPECT_ROW2_EQ(0.0f, 0.0f, 8.0f, 0.0f, A);
+        EXPECT_ROW3_EQ(0.0f, 0.0f, 0.0f, 1.0f, A);
+    }
 }

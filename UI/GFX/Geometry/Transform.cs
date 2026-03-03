@@ -549,6 +549,9 @@ public struct Transform
         }
     }
 
+    // Applies a scale to the current transformation and assigns the result to
+    // |this|, i.e. this = scaling * this.
+
     public void PostScale(float x, float y)
     {
         if (!full_matrix_)
@@ -559,6 +562,15 @@ public struct Transform
         {
             matrix_.PostScale(x, y);
         }
+    }
+
+    public void PostScale3D(float x, float y, float z)
+    {
+        if (z == 1)
+            PostScale(x, y);
+        else
+            EnsureFullMatrix();
+            matrix_.PostScale3D(x, y, z);
     }
 
     public void PreConcat(in AxisTransform2D transform)
