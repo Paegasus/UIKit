@@ -2197,12 +2197,90 @@ public static class TransformTest
         STATIC_ROW3_EQ(0.0, 0.0, 0.0, 1.0, r3);
     }
 
+    [Fact]
+    private static void TestColMajorF()
+    {
+        float[] data = [ 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17 ];
+        var transform = Transform.ColMajorF(data);
+
+        EXPECT_ROW0_EQ(2.0f, 6.0f, 10.0f, 14.0f, transform);
+        EXPECT_ROW1_EQ(3.0f, 7.0f, 11.0f, 15.0f, transform);
+        EXPECT_ROW2_EQ(4.0f, 8.0f, 12.0f, 16.0f, transform);
+        EXPECT_ROW3_EQ(5.0f, 9.0f, 13.0f, 17.0f, transform);
+
+        Span<float> data1 = stackalloc float[16];
+        transform.GetColMajorF(data1);
+        for (int i = 0; i < 16; i++)
+            Assert.Equal(data1[i], data[i]);
+        Assert.Equal(transform, Transform.ColMajorF(data1));
+    }
+
+    [Fact]
+    private static void TestFromQuaternion()
+    {
+        var t = new Transform(new Quaternion(1, 2, 3, 4));
+        EXPECT_ROW0_EQ(-25.0f, -20.0f, 22.0f, 0.0f, t);
+        EXPECT_ROW1_EQ(28.0f, -19.0f, 4.0f, 0.0f, t);
+        EXPECT_ROW2_EQ(-10.0f, 20.0f, -9.0f, 0.0f, t);
+        EXPECT_ROW3_EQ(0.0f, 0.0f, 0.0f, 1.0f, t);
+    }
+
+    [Fact]
+    private static void TestVerifyAssignmentOperator()
+    {
+        Transform A = GetTestMatrix1();
+        Transform B = GetTestMatrix2();
+        Transform C = GetTestMatrix2();
+        C = B = A;
+
+        // Both B and C should now have been re-assigned to the value of A.
+        EXPECT_ROW0_EQ(10.0f, 14.0f, 18.0f, 22.0f, B);
+        EXPECT_ROW1_EQ(11.0f, 15.0f, 19.0f, 23.0f, B);
+        EXPECT_ROW2_EQ(12.0f, 16.0f, 20.0f, 24.0f, B);
+        EXPECT_ROW3_EQ(13.0f, 17.0f, 21.0f, 25.0f, B);
+
+        EXPECT_ROW0_EQ(10.0f, 14.0f, 18.0f, 22.0f, C);
+        EXPECT_ROW1_EQ(11.0f, 15.0f, 19.0f, 23.0f, C);
+        EXPECT_ROW2_EQ(12.0f, 16.0f, 20.0f, 24.0f, C);
+        EXPECT_ROW3_EQ(13.0f, 17.0f, 21.0f, 25.0f, C);
+    }
+
+    private static void Test4()
+    {
+        
+    }
+    
+    private static void Test5()
+    {
+        
+    }
+    
+    private static void Test6()
+    {
+        
+    }
+    
+    private static void Test7()
+    {
+        
+    }
+    
+    private static void Test8()
+    {
+        
+    }
+    
     private static void Test9()
     {
         
     }
     
     private static void Test10()
+    {
+        
+    }
+    
+    private static void Test11()
     {
         
     }
