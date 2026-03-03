@@ -1777,20 +1777,21 @@ public static class TransformTest
 
         AssertDecomposedTransformFloatEqual(expected, decomp_skew_rotate);
     }
-/*
+
     private static double ComputeDecompRecompError(in Transform transform)
     {
-        DecomposedTransform decomp = *transform.Decompose();
-        Transform composed = Transform::Compose(decomp);
+        DecomposedTransform decomp;
+        transform.Decompose(out decomp);
+        Transform composed = Transform.Compose(decomp);
 
-        float expected[16];
-        float actual[16];
+        Span<float> expected = stackalloc float[16];
+        Span<float> actual = stackalloc float[16];
         transform.GetColMajorF(expected);
         composed.GetColMajorF(actual);
         double sse = 0;
         for (int i = 0; i < 16; i++)
         {
-            double diff = UNSAFE_TODO(expected[i]) - UNSAFE_TODO(actual[i]);
+            double diff = expected[i] - actual[i];
             sse += diff * diff;
         }
         return sse;
@@ -1802,6 +1803,7 @@ public static class TransformTest
         
     }
 
+/*
     [Fact]
     private static void TestIsIdentityOr2dTranslation()
     {

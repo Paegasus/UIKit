@@ -128,32 +128,28 @@ public struct Matrix44
     // Set a value in the matrix at |row|, |col|.
     public void set_rc(int row, int col, double value) => this[row, col] = value;
 
-    //public readonly void GetColMajor(base::span<double, 16> dst)
     public readonly void GetColMajor(Span<double> dst)
     {
-        throw new NotImplementedException();
-
-        /*
-        base::span UNSAFE_TODO(src{&matrix_[0][0], base::fixed_extent<16>()});
-        dst.copy_from(src);
-        */
+#if DEBUG
+        Debug.Assert(dst.Length >= 16);
+#endif
+        dst[0] = _c0r0; dst[1] = _c0r1; dst[2] = _c0r2; dst[3] = _c0r3;
+        dst[4] = _c1r0; dst[5] = _c1r1; dst[6] = _c1r2; dst[7] = _c1r3;
+        dst[8] = _c2r0; dst[9] = _c2r1; dst[10] = _c2r2; dst[11] = _c2r3;
+        dst[12] = _c3r0; dst[13] = _c3r1; dst[14] = _c3r2; dst[15] = _c3r3;
     }
 
-    //public readonly void GetColMajorF(base::span<float, 16> dst)
     public readonly void GetColMajorF(Span<float> dst)
     {
-        throw new NotImplementedException();
-        
-        /*
-        base::span UNSAFE_TODO(src{&matrix_[0][0], base::fixed_extent<16>()});
-
-        // TODO: It's surprising that this isn't flagged as unsafe.
-        //       It'd be nice if copy_from() supported differing element types,
-        //       then this would be statically safe.
-        std::ranges::copy(src, dst.begin());
-        */
+#if DEBUG
+        Debug.Assert(dst.Length >= 16);
+#endif
+        dst[0] = (float)_c0r0; dst[1] = (float)_c0r1; dst[2] = (float)_c0r2; dst[3] = (float)_c0r3;
+        dst[4] = (float)_c1r0; dst[5] = (float)_c1r1; dst[6] = (float)_c1r2; dst[7] = (float)_c1r3;
+        dst[8] = (float)_c2r0; dst[9] = (float)_c2r1; dst[10] = (float)_c2r2; dst[11] = (float)_c2r3;
+        dst[12] = (float)_c3r0; dst[13] = (float)_c3r1; dst[14] = (float)_c3r2; dst[15] = (float)_c3r3;
     }
-    
+
     // this = this * translation.
     public void PreTranslate(double dx, double dy)
     {

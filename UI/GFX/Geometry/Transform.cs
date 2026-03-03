@@ -80,9 +80,9 @@ public struct Transform
                              r0c3, r1c3, r2c3, r3c3);  // col 3
     }
 
-    // Constructs Transform from a float col-major array. Creates an
-    // AxisTransform2d or a Matrix44 depending on the values. GetColMajorF() and
-    // ColMajorF() are used when passing a Transform through mojo.
+    // Constructs Transform from a float col-major array.
+    // Creates an AxisTransform2d or a Matrix44 depending on the values. 
+    // GetColMajorF() and ColMajorF() are used when passing a Transform through mojo.
     public static Transform ColMajor(ReadOnlySpan<double> a)
     {
         return new Transform(a[0], a[1], a[2], a[3], a[4], a[5], a[6], a[7], a[8], a[9],
@@ -108,6 +108,50 @@ public struct Transform
                              a[4],  a[5],  a[6],  a[7],
                              a[8],  a[9],  a[10], a[11],
                              a[12], a[13], a[14], a[15]);
+    }
+
+    public readonly void AxisTransform2dToColMajor(in AxisTransform2D axis_2d, Span<double> a)
+    {
+        a[0] = axis_2d.Scale.X;
+        a[5] = axis_2d.Scale.Y;
+        a[12] = axis_2d.Translation.X;
+        a[13] = axis_2d.Translation.Y;
+        a[1] = a[2] = a[3] = a[4] = a[6] = a[7] = a[8] = a[9] = a[11] = a[14] = 0;
+        a[10] = a[15] = 1;
+    }
+
+    public readonly void AxisTransform2dToColMajor(in AxisTransform2D axis_2d, Span<float> a)
+    {
+        a[0] = axis_2d.Scale.X;
+        a[5] = axis_2d.Scale.Y;
+        a[12] = axis_2d.Translation.X;
+        a[13] = axis_2d.Translation.Y;
+        a[1] = a[2] = a[3] = a[4] = a[6] = a[7] = a[8] = a[9] = a[11] = a[14] = 0;
+        a[10] = a[15] = 1;
+    }
+
+    public readonly void GetColMajor(Span<double> a)
+    {
+        if (!full_matrix_)
+        {
+            AxisTransform2dToColMajor(axis_2d_, a);
+        }
+        else
+        {
+            matrix_.GetColMajor(a);
+        }
+    }
+
+    public readonly void GetColMajorF(Span<float> a)
+    {
+        if (!full_matrix_)
+        {
+            AxisTransform2dToColMajor(axis_2d_, a);
+        }
+        else
+        {
+            matrix_.GetColMajorF(a);
+        }
     }
 
     // Used internally to construct Transform with parameters in col-major order.
