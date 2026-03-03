@@ -3340,17 +3340,119 @@ public static class TransformTest
         Assert.True(transform.IsFlat);
     }
 
-/*
     [Fact]
     private static void TestPreserves2dAffine()
     {
-        
+        (Transform transform, bool expected)[] test_cases =
+        [
+            // Skew z axis in x and y direction
+            (
+                Transform.ColMajor(1.0, 0.0, 0.0, 0.0,
+                                   0.0, 1.0, 0.0, 0.0,
+                                   0.1, 0.1, 1.0, 0.0,
+                                   0.0, 0.0, 0.0, 1.0),
+                true
+            ),
+            // Scale z axis
+            (
+                Transform.ColMajor(1.0, 0.0, 0.0, 0.0,
+                                   0.0, 1.0, 0.0, 0.0,
+                                   0.0, 0.0, 2.0, 0.0,
+                                   0.0, 0.0, 0.0, 1.0),
+                true
+            ),
+            // Perspective projection along the z axis
+            (
+                Transform.ColMajor(1.0, 0.0, 0.0, 0.0,
+                                   0.0, 1.0, 0.0, 0.0,
+                                   0.0, 0.0, 1.0, 0.1,
+                                   0.0, 0.0, 0.0, 1.0),
+                true
+            ),
+            // All together, including x and y axis skew and translation
+            (
+                Transform.ColMajor(1.0, 0.1, 0.0, 0.0,
+                                   0.1, 1.0, 0.0, 0.0,
+                                   0.1, 0.1, 2.0, 0.1,
+                                   0.1, 0.1, 0.0, 1.0),
+                true
+            ),
+            // Skew x axis in the z direction.
+           (
+                Transform.ColMajor(1.0, 0.0, 0.1, 0.0,
+                                   0.0, 1.0, 0.0, 0.0,
+                                   0.0, 0.0, 1.0, 0.0,
+                                   0.0, 0.0, 0.0, 1.0),
+                false
+           ),
+           // Add y perspective
+            (
+                Transform.ColMajor(1.0, 0.0, 0.0, 0.0,
+                                   0.0, 1.0, 0.0, 0.1,
+                                   0.0, 0.0, 1.0, 0.0,
+                                   0.0, 0.0, 0.0, 1.0),
+                false
+            ),
+            // Add z translation
+            (
+                Transform.ColMajor(1.0, 0.0, 0.0, 0.0,
+                                   0.0, 1.0, 0.0, 0.1,
+                                   0.0, 0.0, 1.0, 0.0,
+                                   0.0, 0.0, 0.1, 1.0),
+                false
+            )
+        ];
+
+        // Another implementation of Preserves2dAffine that isn't as fast, good for testing the faster implementation.
+        bool EmpiricallyPreserves2dAffine(in Transform transform)
+        {
+            Point3F p1 = new(5.0f, 5.0f, 0.0f);
+            Point3F p2 = new(10.0f, 5.0f, 0.0f);
+            Point3F p3 = new(10.0f, 20.0f, 0.0f);
+            Point3F p4 = new(5.0f, 20.0f, 0.0f);
+
+            var test_quad = new QuadF(new PointF(p1.X, p1.Y), new PointF(p2.X, p2.Y),
+                    new PointF(p3.X, p3.Y), new PointF(p4.X, p4.Y));
+            Assert.True(test_quad.IsRectilinear());
+
+            p1 = transform.MapPoint(p1);
+            p2 = transform.MapPoint(p2);
+            p3 = transform.MapPoint(p3);
+            p4 = transform.MapPoint(p4);
+
+            // We expect our quad on the x/y plane to remain so.
+            if (p1.Z != 0 || p2.Z != 0 || p3.Z != 0 || p4.Z != 0)
+            {
+                return false;
+            }
+
+            // In an affine transform, parallel lines are preserved.
+            return Vector3DF.CrossProduct(p2 - p1, p3 - p4).IsZero() &&
+                   Vector3DF.CrossProduct(p4 - p1, p3 - p2).IsZero();
+        };
+
+        foreach (var (transform, expected) in test_cases)
+        {
+#if DEBUG
+            Debug.WriteLine($"transform = {transform}, expected = {expected}");
+#endif
+            if (expected)
+            {
+                Assert.True(EmpiricallyPreserves2dAffine(transform));
+                Assert.True(transform.Preserves2dAffine());
+            }
+            else
+            {
+                Assert.False(EmpiricallyPreserves2dAffine(transform));
+                Assert.False(transform.Preserves2dAffine());
+            }
+        }
     }
 
+/*
     [Fact]
     private static void Test1()
     {
         
-    }
-*/
+    }*/
 }

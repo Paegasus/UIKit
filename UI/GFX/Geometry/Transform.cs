@@ -355,6 +355,27 @@ public struct Transform
     // including identity.
     public readonly bool IsScaleOrTranslation => !full_matrix_ ? true : matrix_.IsScaleOrTranslation;
 
+    // Returns true if, for 2d rects on the x/y plane, this matrix can be
+    // represented as a 2d affine transform on the x/y plane.
+    public readonly bool Preserves2dAffine()
+    {
+        if (!full_matrix_)
+        {
+            return true;
+        }
+
+        bool is_flat_ignore_z = matrix_.rc(2, 0) == 0 && matrix_.rc(2, 1) == 0 && matrix_.rc(2, 3) == 0;
+
+        bool has_no_perspective_ignore_z = matrix_.rc(3, 0) == 0 && matrix_.rc(3, 1) == 0 && matrix_.rc(3, 3) == 1;
+
+        if (is_flat_ignore_z && has_no_perspective_ignore_z)
+        {
+            return true;
+        }
+
+        return false;
+    }
+
     // Returns true if the matrix is identity or, if the matrix consists only
     // of a translation whose components can be represented as integers. Returns
     // false if the translation contains a fractional component or is too large to
