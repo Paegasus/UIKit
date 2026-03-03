@@ -2023,9 +2023,39 @@ public static class TransformTest
         }
     }
 
-    //[Fact]
+    [Fact]
     private static void TestVerifyBackfaceVisibilityBasicCases()
     {
+        Transform transform = new();
+
+        transform.MakeIdentity();
+        Assert.False(transform.IsBackFaceVisible());
+
+        transform.MakeIdentity();
+        transform.RotateAboutYAxis(80.0);
+        Assert.False(transform.IsBackFaceVisible());
+
+        transform.MakeIdentity();
+        transform.RotateAboutYAxis(100.0);
+        Assert.True(transform.IsBackFaceVisible());
+
+        // Edge case, 90 degree rotation should return false.
+        transform.MakeIdentity();
+        transform.RotateAboutYAxis(90.0);
+        Assert.False(transform.IsBackFaceVisible());
+
+        // 2d scale doesn't affect backface visibility.
+        void check_scale(float scale_x, float scale_y)
+        {
+            transform = Transform.MakeScale(scale_x, scale_y);
+            Assert.False(transform.IsBackFaceVisible());
+            transform.EnsureFullMatrix();
+            Assert.False(transform.IsBackFaceVisible());
+        }
         
+        check_scale(1, 2);
+        check_scale(-1, 2);
+        check_scale(1, -2);
+        check_scale(-1, -2);
     }
 }

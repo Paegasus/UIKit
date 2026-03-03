@@ -441,19 +441,6 @@ public struct Transform
         }
     }
 
-    /*
-    public Matrix44 EnsureFullMatrix()
-    {
-        if (!full_matrix_)
-        {
-            full_matrix_ = true;
-            matrix_ = AxisTransform2DToMatrix44(axis_2d_);
-        }
-        
-        return matrix_;
-    }
-    */
-
     public readonly Matrix44 GetFullMatrix()
     {
         if (!full_matrix_)
@@ -825,6 +812,65 @@ public struct Transform
         Debug.Assert(invertible || inverse.IsIdentity);
 #endif
         return inverse;
+    }
+
+    // Returns true if a layer with a forward-facing normal of (0, 0, 1)
+    // would have its back side facing frontwards after applying the transform.
+    public readonly bool IsBackFaceVisible()
+    {
+        if (!full_matrix_)
+        {
+            return false;
+        }
+
+        // Compute whether a layer with a forward-facing normal of (0, 0, 1, 0)
+        // would have its back face visible after applying the transform.
+        // This is done by transforming the normal and seeing if the resulting z
+        // value is positive or negative. However, note that transforming a normal
+        // actually requires using the inverse-transpose of the original transform.
+        //
+        // We can avoid inverting and transposing the matrix since we know we want
+        // to transform only the specific normal vector (0, 0, 1, 0). In this case,
+        // we only need the 3rd row, 3rd column of the inverse-transpose. We can
+        // calculate only the 3rd row 3rd column element of the inverse, skipping
+        // everything else.
+        //
+        // For more information, refer to:
+        //   http://en.wikipedia.org/wiki/Invertible_matrix#Analytic_solution
+        //
+
+        double determinant = matrix_.Determinant();
+
+        // If matrix was not invertible, then just assume back face is not visible.
+        if (determinant == 0)
+            return false;
+
+        // Compute the cofactor of the 3rd row, 3rd column.
+        double cofactor_part_1 =
+            matrix_.rc(0, 0) * matrix_.rc(1, 1) * matrix_.rc(3, 3);
+
+        double cofactor_part_2 =
+            matrix_.rc(0, 1) * matrix_.rc(1, 3) * matrix_.rc(3, 0);
+
+        double cofactor_part_3 =
+            matrix_.rc(0, 3) * matrix_.rc(1, 0) * matrix_.rc(3, 1);
+
+        double cofactor_part_4 =
+            matrix_.rc(0, 0) * matrix_.rc(1, 3) * matrix_.rc(3, 1);
+
+        double cofactor_part_5 =
+            matrix_.rc(0, 1) * matrix_.rc(1, 0) * matrix_.rc(3, 3);
+
+        double cofactor_part_6 =
+            matrix_.rc(0, 3) * matrix_.rc(1, 1) * matrix_.rc(3, 0);
+
+        double cofactor33 = cofactor_part_1 + cofactor_part_2 + cofactor_part_3 -
+                            cofactor_part_4 - cofactor_part_5 - cofactor_part_6;
+
+        // Technically the transformed z component is cofactor33 / determinant.  But
+        // we can avoid the costly division because we only care about the resulting
+        // +/- sign; we can check this equivalently by multiplication.
+        return cofactor33 * determinant < -kEpsilon;
     }
 
     public void Transpose()
