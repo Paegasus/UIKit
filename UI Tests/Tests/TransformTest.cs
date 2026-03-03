@@ -2103,16 +2103,34 @@ public static class TransformTest
         Assert.True(layer_space_to_projection_plane.IsBackFaceVisible());
     }
 
-    private static void Test2()
+    [Fact]
+    private static void TestverifyDefaultConstructorCreatesIdentityMatrix()
     {
-        
+        Transform A = new();
+        STATIC_ROW0_EQ(1.0, 0.0, 0.0, 0.0, A);
+        STATIC_ROW1_EQ(0.0, 1.0, 0.0, 0.0, A);
+        STATIC_ROW2_EQ(0.0, 0.0, 1.0, 0.0, A);
+        STATIC_ROW3_EQ(0.0, 0.0, 0.0, 1.0, A);
+        Assert.True(A.IsIdentity);
     }
-    
-    private static void Test3()
+
+    [Fact]
+    private static void TestVerifyCopyConstructor()
     {
-        
+        Transform A = GetTestMatrix1();
+
+        // Copy constructor should produce exact same elements as matrix A.
+        Transform B = A;
+        Assert.Equal(A, B);
+        EXPECT_ROW0_EQ(10.0f, 14.0f, 18.0f, 22.0f, B);
+        EXPECT_ROW1_EQ(11.0f, 15.0f, 19.0f, 23.0f, B);
+        EXPECT_ROW2_EQ(12.0f, 16.0f, 20.0f, 24.0f, B);
+        EXPECT_ROW3_EQ(13.0f, 17.0f, 21.0f, 25.0f, B);
     }
-    
+
+    // ColMajor() and RowMajor() are tested in GetTestMatrix1() and
+    // GetTestTransform2().
+
     private static void Test4()
     {
         
