@@ -266,36 +266,30 @@ public struct Transform
 
     // Returns true if this is the identity matrix.
     // This function modifies a mutable variable in |matrix_|.
-    public readonly bool IsIdentity()
-    {
-        if (!full_matrix_)
-        {
-            // Note: Consider creating a static AxisTransform2D.Identity to compare against
-            // instead of creating a new AxisTransform2D every time
-            return axis_2d_ == new AxisTransform2D();
-        }
-        return matrix_.IsIdentity;
-    }
+    // Note: Consider creating a static AxisTransform2D.Identity to compare against
+    // instead of creating a new AxisTransform2D every time
+    public readonly bool IsIdentity => !full_matrix_ ? (axis_2d_ == new AxisTransform2D()) : matrix_.IsIdentity;
 
     // Returns true if the matrix is either identity or pure translation.
     public readonly bool IsIdentityOrTranslation => !full_matrix_ ? axis_2d_.Scale == new Vector2DF(1, 1) : matrix_.IsIdentityOrTranslation;
 
+    // Returns true if the matrix is either the identity or a 2d translation.
+    public readonly bool IsIdentityOr2dTranslation =>
+    
+        !full_matrix_ ?
+        (axis_2d_.Scale == new Vector2DF(1, 1)) :
+        (matrix_.IsIdentityOrTranslation && matrix_.rc(2, 3) == 0);
+
+
     // Returns true if the matrix has only x and y scaling components, including
     // identity.
-    public readonly bool IsScale2D() => !full_matrix_ ?
+    public readonly bool IsScale2D => !full_matrix_ ?
                                        axis_2d_.Translation.IsZero() :
                                        matrix_.IsScale && matrix_.rc(2, 2) == 1;
 
     // Returns true if the matrix is has only scaling and translation components,
     // including identity.
-    public readonly bool IsScaleOrTranslation()
-    {
-        if (!full_matrix_)
-        {
-            return true;
-        }
-        return matrix_.IsScaleOrTranslation;
-    }
+    public readonly bool IsScaleOrTranslation => !full_matrix_ ? true : matrix_.IsScaleOrTranslation;
 
     public readonly PointF MapPointInternal(in Matrix44 matrix, in PointF point)
     {
@@ -752,7 +746,7 @@ public struct Transform
 
     public void Transpose()
     {
-        if (!IsScale2D())
+        if (!IsScale2D)
             EnsureFullMatrix();
         matrix_.Transpose();
     }
