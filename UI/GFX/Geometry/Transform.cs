@@ -1124,6 +1124,12 @@ public struct Transform
         return true;
     }
 
+    // Returns a string in the format of "[ row0\n, row1\n, row2\n, row3 ]\n".
+    public override readonly string ToString()
+    {
+        return $"[ {rc(0, 0)} {rc(0, 1)} {rc(0, 2)} {rc(0, 3)}\n  {rc(1, 0)} {rc(1, 1)} {rc(1, 2)} {rc(1, 3)}\n  {rc(2, 0)} {rc(2, 1)} {rc(2, 2)} {rc(2, 3)}\n  {rc(3, 0)} {rc(3, 1)} {rc(3, 2)} {rc(3, 3)} ]\n";
+    }
+
     // It's not easy to get a hash code
     // because a Transform either uses a AxisTransform2D or a Matrix44
     //public override int GetHashCode() => HashCode.Combine();
