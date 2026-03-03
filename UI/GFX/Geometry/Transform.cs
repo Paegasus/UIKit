@@ -781,14 +781,17 @@ public struct Transform
     // |*transform|, and returns true. Otherwise sets |*transform| to identity and returns false.
     public readonly bool GetInverse(out Transform transform)
     {
-        if (!full_matrix_)
+        // Snapshot this entirely first, since transform may alias this.
+        Transform self = this;
+
+        if (!self.full_matrix_)
         {
             transform.full_matrix_ = false;
             transform.matrix_ = default;
 
-            if (axis_2d_.IsInvertible())
+            if (self.axis_2d_.IsInvertible())
             {
-                transform.axis_2d_ = axis_2d_;
+                transform.axis_2d_ = self.axis_2d_;
                 transform.axis_2d_.Invert();
                 return true;
             }
@@ -799,7 +802,7 @@ public struct Transform
 
         transform.axis_2d_ = default;
 
-        if (matrix_.GetInverse(out transform.matrix_))
+        if (self.matrix_.GetInverse(out transform.matrix_))
         {
             transform.full_matrix_ = true;
             return true;

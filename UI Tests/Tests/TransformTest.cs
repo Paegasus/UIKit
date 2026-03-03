@@ -1942,7 +1942,7 @@ public static class TransformTest
 
             // GetInverse with the parameter pointing to itself.
             Assert.True(translation.GetInverse(out translation));
-            //Assert.Equal(translation, inverse_translation);
+            Assert.Equal(translation, inverse_translation);
         }
 /*
         {
