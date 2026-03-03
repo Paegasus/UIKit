@@ -4,6 +4,7 @@ using UI.GFX.Geometry;
 using System.Diagnostics;
 
 using static UI.Tests.GeometryUtil;
+using UI.Extensions;
 
 namespace UI.Tests;
 
@@ -1928,7 +1929,7 @@ public static class TransformTest
             // Invert a translation
             Transform translation = new();
             translation.Translate3D(2.0f, 3.0f, 4.0f);
-            Assert.True(translation.IsInvertible());
+            Assert.True(translation.IsInvertible);
 
             Transform inverse_translation;
             bool is_invertible = translation.GetInverse(out inverse_translation);
@@ -1949,7 +1950,7 @@ public static class TransformTest
             // Invert a non-uniform scale
             Transform scale = new();
             scale.Scale3D(4.0f, 10.0f, 100.0f);
-            Assert.True(scale.IsInvertible());
+            Assert.True(scale.IsInvertible);
 
             Transform inverse_scale;
             bool is_invertible = scale.GetInverse(out inverse_scale);
@@ -2004,7 +2005,7 @@ public static class TransformTest
             uninvertible.set_rc(1, 1, 0.0);
             uninvertible.set_rc(2, 2, 0.0);
             uninvertible.set_rc(3, 3, 0.0);
-            Assert.False(uninvertible.IsInvertible());
+            Assert.False(uninvertible.IsInvertible);
 
             Transform inverse_of_uninvertible = new();
 
@@ -2793,5 +2794,373 @@ public static class TransformTest
         EXPECT_ROW1_EQ(0.0f, 1.0f, -3.0f, 3.0f, A);
         EXPECT_ROW2_EQ(0.0f, 0.0f, -3.0f, 4.0f, A);
         EXPECT_ROW3_EQ(0.0f, 0.0f, -1.0f, 1.0f, A);
+    }
+
+    [Fact]
+    private static void TestVerifyHasPerspective()
+    {
+        Transform A = new();
+        A.ApplyPerspectiveDepth(1.0);
+        Assert.True(A.HasPerspective);
+
+        A.MakeIdentity();
+        A.ApplyPerspectiveDepth(0.0);
+        Assert.False(A.HasPerspective);
+
+        A.MakeIdentity();
+        A.set_rc(3, 0, -1.0f);
+        Assert.True(A.HasPerspective);
+
+        A.MakeIdentity();
+        A.set_rc(3, 1, -1.0f);
+        Assert.True(A.HasPerspective);
+
+        A.MakeIdentity();
+        A.set_rc(3, 2, -0.3f);
+        Assert.True(A.HasPerspective);
+
+        A.MakeIdentity();
+        A.set_rc(3, 3, 0.5f);
+        Assert.True(A.HasPerspective);
+
+        A.MakeIdentity();
+        A.set_rc(3, 3, 0.0f);
+        Assert.True(A.HasPerspective);
+    }
+
+    [Fact]
+    private static void TestVerifyIsInvertible()
+    {
+        Transform A = new();
+
+        // Translations, rotations, scales, skews and arbitrary combinations of them
+        // are invertible.
+        A.MakeIdentity();
+        Assert.True(A.IsInvertible);
+
+        A.MakeIdentity();
+        A.Translate3D(2.0f, 3.0f, 4.0f);
+        Assert.True(A.IsInvertible);
+
+        A.MakeIdentity();
+        A.Scale3D(6.0f, 7.0f, 8.0f);
+        Assert.True(A.IsInvertible);
+
+        A.MakeIdentity();
+        A.RotateAboutXAxis(10.0);
+        A.RotateAboutYAxis(20.0);
+        A.RotateAboutZAxis(30.0);
+        Assert.True(A.IsInvertible);
+
+        A.MakeIdentity();
+        A.Skew(45.0, 0.0);
+        Assert.True(A.IsInvertible);
+
+        // A perspective matrix (projection plane at z=0) is invertible. The
+        // intuitive explanation is that perspective is equivalent to a skew of the
+        // w-axis; skews are invertible.
+        A.MakeIdentity();
+        A.ApplyPerspectiveDepth(1.0);
+        Assert.True(A.IsInvertible);
+
+        // A "pure" perspective matrix derived by similar triangles, with rc(3, 3) set
+        // to zero (i.e. camera positioned at the origin), is not invertible.
+        A.MakeIdentity();
+        A.ApplyPerspectiveDepth(1.0);
+        A.set_rc(3, 3, 0.0f);
+        Assert.False(A.IsInvertible);
+
+        // Adding more to a non-invertible matrix will not make it invertible in the
+        // general case.
+        A.MakeIdentity();
+        A.ApplyPerspectiveDepth(1.0);
+        A.set_rc(3, 3, 0.0f);
+        Assert.False(A.IsInvertible);
+        A.Scale3D(6.0f, 7.0f, 8.0f);
+        Assert.False(A.IsInvertible);
+        A.RotateAboutXAxis(10.0);
+        Assert.False(A.IsInvertible);
+        A.RotateAboutYAxis(20.0);
+        Assert.False(A.IsInvertible);
+        A.RotateAboutZAxis(30.0);
+        Assert.False(A.IsInvertible);
+        A.Translate3D(6.0f, 7.0f, 8.0f);
+        if (A.IsInvertible)
+        {
+            // Due to some computation errors, now A may become invertible with a tiny determinant.
+            Assert.Equal(0.0, A.Determinant, 1e-12);
+        }
+
+        // A degenerate matrix of all zeros is not invertible.
+        A.MakeIdentity();
+        A.set_rc(0, 0, 0.0f);
+        A.set_rc(1, 1, 0.0f);
+        A.set_rc(2, 2, 0.0f);
+        A.set_rc(3, 3, 0.0f);
+        Assert.False(A.IsInvertible);
+    }
+
+    [Fact]
+    private static void TestVerifyIsIdentity()
+    {
+        Transform A = GetTestMatrix1();
+        Assert.False(A.IsIdentity);
+
+        A.MakeIdentity();
+        Assert.True(A.IsIdentity);
+
+        // Modifying any one individual element should cause the matrix to no longer
+        // be identity.
+        A.MakeIdentity();
+        A.set_rc(0, 0, 2.0f);
+        Assert.False(A.IsIdentity);
+
+        A.MakeIdentity();
+        A.set_rc(1, 0, 2.0f);
+        Assert.False(A.IsIdentity);
+
+        A.MakeIdentity();
+        A.set_rc(2, 0, 2.0f);
+        Assert.False(A.IsIdentity);
+
+        A.MakeIdentity();
+        A.set_rc(3, 0, 2.0f);
+        Assert.False(A.IsIdentity);
+
+        A.MakeIdentity();
+        A.set_rc(0, 1, 2.0f);
+        Assert.False(A.IsIdentity);
+
+        A.MakeIdentity();
+        A.set_rc(1, 1, 2.0f);
+        Assert.False(A.IsIdentity);
+
+        A.MakeIdentity();
+        A.set_rc(2, 1, 2.0f);
+        Assert.False(A.IsIdentity);
+
+        A.MakeIdentity();
+        A.set_rc(3, 1, 2.0f);
+        Assert.False(A.IsIdentity);
+
+        A.MakeIdentity();
+        A.set_rc(0, 2, 2.0f);
+        Assert.False(A.IsIdentity);
+
+        A.MakeIdentity();
+        A.set_rc(1, 2, 2.0f);
+        Assert.False(A.IsIdentity);
+
+        A.MakeIdentity();
+        A.set_rc(2, 2, 2.0f);
+        Assert.False(A.IsIdentity);
+
+        A.MakeIdentity();
+        A.set_rc(3, 2, 2.0f);
+        Assert.False(A.IsIdentity);
+
+        A.MakeIdentity();
+        A.set_rc(0, 3, 2.0f);
+        Assert.False(A.IsIdentity);
+
+        A.MakeIdentity();
+        A.set_rc(1, 3, 2.0f);
+        Assert.False(A.IsIdentity);
+
+        A.MakeIdentity();
+        A.set_rc(2, 3, 2.0f);
+        Assert.False(A.IsIdentity);
+
+        A.MakeIdentity();
+        A.set_rc(3, 3, 2.0f);
+        Assert.False(A.IsIdentity);
+    }
+
+    [Fact]
+    private static void TestVerifyIsIdentityOrTranslation()
+    {
+        Transform A = GetTestMatrix1();
+        Assert.False(A.IsIdentityOrTranslation);
+
+        A.MakeIdentity();
+        Assert.True(A.IsIdentityOrTranslation);
+
+        // Modifying any non-translation components should cause
+        // IsIdentityOrTranslation() to return false. NOTE: (0, 3), (1, 3), and
+        // (2, 3) are the translation components, so modifying them should still
+        // return true.
+        A.MakeIdentity();
+        A.set_rc(0, 0, 2.0f);
+        Assert.False(A.IsIdentityOrTranslation);
+
+        A.MakeIdentity();
+        A.set_rc(1, 0, 2.0f);
+        Assert.False(A.IsIdentityOrTranslation);
+
+        A.MakeIdentity();
+        A.set_rc(2, 0, 2.0f);
+        Assert.False(A.IsIdentityOrTranslation);
+
+        A.MakeIdentity();
+        A.set_rc(3, 0, 2.0f);
+        Assert.False(A.IsIdentityOrTranslation);
+
+        A.MakeIdentity();
+        A.set_rc(0, 1, 2.0f);
+        Assert.False(A.IsIdentityOrTranslation);
+
+        A.MakeIdentity();
+        A.set_rc(1, 1, 2.0f);
+        Assert.False(A.IsIdentityOrTranslation);
+
+        A.MakeIdentity();
+        A.set_rc(2, 1, 2.0f);
+        Assert.False(A.IsIdentityOrTranslation);
+
+        A.MakeIdentity();
+        A.set_rc(3, 1, 2.0f);
+        Assert.False(A.IsIdentityOrTranslation);
+
+        A.MakeIdentity();
+        A.set_rc(0, 2, 2.0f);
+        Assert.False(A.IsIdentityOrTranslation);
+
+        A.MakeIdentity();
+        A.set_rc(1, 2, 2.0f);
+        Assert.False(A.IsIdentityOrTranslation);
+
+        A.MakeIdentity();
+        A.set_rc(2, 2, 2.0f);
+        Assert.False(A.IsIdentityOrTranslation);
+
+        A.MakeIdentity();
+        A.set_rc(3, 2, 2.0f);
+        Assert.False(A.IsIdentityOrTranslation);
+
+        // Note carefully - expecting true here.
+        A.MakeIdentity();
+        A.set_rc(0, 3, 2.0f);
+        Assert.True(A.IsIdentityOrTranslation);
+
+        // Note carefully - expecting true here.
+        A.MakeIdentity();
+        A.set_rc(1, 3, 2.0f);
+        Assert.True(A.IsIdentityOrTranslation);
+
+        // Note carefully - expecting true here.
+        A.MakeIdentity();
+        A.set_rc(2, 3, 2.0f);
+        Assert.True(A.IsIdentityOrTranslation);
+
+        A.MakeIdentity();
+        A.set_rc(3, 3, 2.0f);
+        Assert.False(A.IsIdentityOrTranslation);
+    }
+
+    [Fact]
+    private static void TestApproximatelyIdentityOrTranslation()
+    {
+        double kBigError = 1e-4;
+        double kSmallError = float.MachineEpsilon / 2.0;
+
+        // Exact pure translation.
+        Transform a = new();
+        Assert.True(a.IsApproximatelyIdentityOrTranslation(0));
+        Assert.True(a.IsApproximatelyIdentityOrTranslation(kBigError));
+        Assert.True(a.IsApproximatelyIdentityOrIntegerTranslation(0));
+        Assert.True(a.IsApproximatelyIdentityOrIntegerTranslation(kBigError));
+
+        // Set translate values to integer values other than 0 or 1.
+        a.set_rc(0, 3, 3);
+        a.set_rc(1, 3, 4);
+        a.set_rc(2, 3, 5);
+
+        Assert.True(a.IsApproximatelyIdentityOrTranslation(0));
+        Assert.True(a.IsApproximatelyIdentityOrTranslation(kBigError));
+        Assert.True(a.IsApproximatelyIdentityOrIntegerTranslation(0));
+        Assert.True(a.IsApproximatelyIdentityOrIntegerTranslation(kBigError));
+
+        // Set translate values to values other than 0 or 1.
+        a.set_rc(0, 3, 3.4f);
+        a.set_rc(1, 3, 4.4f);
+        a.set_rc(2, 3, 5.6f);
+
+        Assert.True(a.IsApproximatelyIdentityOrTranslation(0));
+        Assert.True(a.IsApproximatelyIdentityOrTranslation(kBigError));
+        Assert.False(a.IsApproximatelyIdentityOrIntegerTranslation(0));
+        Assert.False(a.IsApproximatelyIdentityOrIntegerTranslation(kBigError));
+
+        // Approximately pure translation.
+        a = ApproxIdentityMatrix(kBigError);
+
+        // All these are false because the perspective error is bigger than the
+        // allowed std::min(float_epsilon, tolerance);
+        Assert.False(a.IsApproximatelyIdentityOrTranslation(0));
+        Assert.False(a.IsApproximatelyIdentityOrTranslation(kBigError));
+        Assert.False(a.IsApproximatelyIdentityOrTranslation(kSmallError));
+        Assert.False(a.IsApproximatelyIdentityOrIntegerTranslation(0));
+        Assert.False(a.IsApproximatelyIdentityOrTranslation(kBigError));
+        Assert.False(a.IsApproximatelyIdentityOrIntegerTranslation(kSmallError));
+
+        // Set perspective components to be exact identity.
+        a.set_rc(3, 0, 0);
+        a.set_rc(3, 1, 0);
+        a.set_rc(3, 2, 0);
+        a.set_rc(3, 3, 1);
+
+        Assert.False(a.IsApproximatelyIdentityOrTranslation(0));
+        Assert.True(a.IsApproximatelyIdentityOrTranslation(kBigError));
+        Assert.False(a.IsApproximatelyIdentityOrTranslation(kSmallError));
+        Assert.False(a.IsApproximatelyIdentityOrIntegerTranslation(0));
+        Assert.True(a.IsApproximatelyIdentityOrIntegerTranslation(kBigError));
+        Assert.False(a.IsApproximatelyIdentityOrIntegerTranslation(kSmallError));
+
+        // Set translate values to values other than 0 or 1.
+        // The error is set to kBigError / 2 instead of kBigError because the
+        // arithmetic may make the error bigger.
+        a.set_rc(0, 3, 3.0 + kBigError / 2);
+        a.set_rc(1, 3, 4.0 + kBigError / 2);
+        a.set_rc(2, 3, 5.0 + kBigError / 2);
+
+        Assert.False(a.IsApproximatelyIdentityOrTranslation(0));
+        Assert.True(a.IsApproximatelyIdentityOrTranslation(kBigError));
+        Assert.False(a.IsApproximatelyIdentityOrTranslation(kSmallError));
+        Assert.False(a.IsApproximatelyIdentityOrIntegerTranslation(0));
+        Assert.True(a.IsApproximatelyIdentityOrIntegerTranslation(kBigError));
+        Assert.False(a.IsApproximatelyIdentityOrIntegerTranslation(kSmallError));
+
+        // Set translate values to values other than 0 or 1.
+        a.set_rc(0, 3, 3.4f);
+        a.set_rc(1, 3, 4.4f);
+        a.set_rc(2, 3, 5.6f);
+
+        Assert.False(a.IsApproximatelyIdentityOrTranslation(0));
+        Assert.True(a.IsApproximatelyIdentityOrTranslation(kBigError));
+        Assert.False(a.IsApproximatelyIdentityOrTranslation(kSmallError));
+        Assert.False(a.IsApproximatelyIdentityOrIntegerTranslation(0));
+        Assert.False(a.IsApproximatelyIdentityOrIntegerTranslation(kBigError));
+        Assert.False(a.IsApproximatelyIdentityOrIntegerTranslation(kSmallError));
+
+        // Test with kSmallError in the matrix.
+        a = ApproxIdentityMatrix(kSmallError);
+
+        Assert.False(a.IsApproximatelyIdentityOrTranslation(0));
+        Assert.True(a.IsApproximatelyIdentityOrTranslation(kBigError));
+        Assert.True(a.IsApproximatelyIdentityOrTranslation(kSmallError));
+        Assert.False(a.IsApproximatelyIdentityOrIntegerTranslation(0));
+        Assert.True(a.IsApproximatelyIdentityOrTranslation(kBigError));
+        Assert.True(a.IsApproximatelyIdentityOrIntegerTranslation(kSmallError));
+
+        // Set some values (not translate values) to values other than 0 or 1.
+        a.set_rc(0, 1, 3.4f);
+        a.set_rc(3, 2, 4.4f);
+        a.set_rc(2, 0, 5.6f);
+
+        Assert.False(a.IsApproximatelyIdentityOrTranslation(0));
+        Assert.False(a.IsApproximatelyIdentityOrTranslation(kBigError));
+        Assert.False(a.IsApproximatelyIdentityOrTranslation(kSmallError));
+        Assert.False(a.IsApproximatelyIdentityOrIntegerTranslation(0));
+        Assert.False(a.IsApproximatelyIdentityOrIntegerTranslation(kBigError));
+        Assert.False(a.IsApproximatelyIdentityOrIntegerTranslation(kSmallError));
     }
 }

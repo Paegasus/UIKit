@@ -1,7 +1,7 @@
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using UI.Extensions;
-using UI.Numerics;
+
 using static UI.GFX.Geometry.ClampFloatGeometryHelper;
 using static UI.GFX.Geometry.PointConversions;
 
@@ -33,6 +33,12 @@ public struct Transform
     Matrix44 matrix_;
 
     public static double kEpsilon = float.MachineEpsilon;
+
+    private static double TanDegrees(double degrees) => Math.Tan(double.DegreesToRadians(degrees));
+
+    public static bool ApproximatelyZero(double x, double tolerance) => Math.Abs(x) <= tolerance;
+
+    public static bool ApproximatelyOne(double x, double tolerance) => Math.Abs(x - 1) <= tolerance;
 
     public Transform()
     {
@@ -285,6 +291,59 @@ public struct Transform
         (axis_2d_.Scale == new Vector2DF(1, 1)) :
         (matrix_.IsIdentityOrTranslation && matrix_.rc(2, 3) == 0);
 
+    // Returns true if the matrix is either identity or pure translation,
+    // allowing for an amount of inaccuracy as specified by the parameter.
+    public readonly bool IsApproximatelyIdentityOrTranslation(double tolerance)
+    {
+#if DEBUG
+        Debug.Assert(tolerance >= 0);
+#endif
+  if (!full_matrix_)
+  {
+    return ApproximatelyOne(axis_2d_.Scale.X, tolerance) &&
+           ApproximatelyOne(axis_2d_.Scale.Y, tolerance);
+  }
+
+  if (!ApproximatelyOne(matrix_.rc(0, 0), tolerance) ||
+      !ApproximatelyZero(matrix_.rc(1, 0), tolerance) ||
+      !ApproximatelyZero(matrix_.rc(2, 0), tolerance) ||
+      !ApproximatelyZero(matrix_.rc(0, 1), tolerance) ||
+      !ApproximatelyOne(matrix_.rc(1, 1), tolerance) ||
+      !ApproximatelyZero(matrix_.rc(2, 1), tolerance) ||
+      !ApproximatelyZero(matrix_.rc(0, 2), tolerance) ||
+      !ApproximatelyZero(matrix_.rc(1, 2), tolerance) ||
+      !ApproximatelyOne(matrix_.rc(2, 2), tolerance)) {
+    return false;
+  }
+
+    // Check perspective components more strictly by using the smaller of float
+    // epsilon and |tolerance|.
+    double perspective_tolerance = Math.Min(kEpsilon, tolerance);
+    return ApproximatelyZero(matrix_.rc(3, 0), perspective_tolerance) &&
+           ApproximatelyZero(matrix_.rc(3, 1), perspective_tolerance) &&
+           ApproximatelyZero(matrix_.rc(3, 2), perspective_tolerance) &&
+           ApproximatelyOne(matrix_.rc(3, 3), perspective_tolerance);
+    }
+
+    public readonly bool IsApproximatelyIdentityOrIntegerTranslation(double tolerance = 0)
+    {
+        if (!IsApproximatelyIdentityOrTranslation(tolerance))
+            return false;
+
+        static bool IsApproximateIntegerTranslation(double t, double tolerance) =>
+            t >= int.MinValue && t <= int.MaxValue &&
+            Math.Abs(Math.Round(t, MidpointRounding.AwayFromZero) - t) <= tolerance;
+        
+        if (!full_matrix_)
+        {
+            return IsApproximateIntegerTranslation(axis_2d_.Translation.X, tolerance) &&
+                   IsApproximateIntegerTranslation(axis_2d_.Translation.Y, tolerance);
+        }
+
+        return IsApproximateIntegerTranslation(matrix_.rc(0, 3), tolerance) &&
+               IsApproximateIntegerTranslation(matrix_.rc(1, 3), tolerance) &&
+               IsApproximateIntegerTranslation(matrix_.rc(2, 3), tolerance);
+    }
 
     // Returns true if the matrix has only x and y scaling components, including
     // identity.
@@ -674,17 +733,11 @@ public struct Transform
 
     public void RotateAbout(in Vector3DF axis, double degrees) => RotateAbout(axis.X, axis.Y, axis.Z, degrees);
 
+    public readonly double Determinant => !full_matrix_ ? axis_2d_.Determinant() : matrix_.Determinant();
+
     // Applies the current transformation on a 2d rotation and assigns the result
     // to |this|, i.e. this = this * rotation.
-    public void Rotate(double degrees)
-    {
-        RotateAboutZAxis(degrees);
-    }
-
-    private static double TanDegrees(double degrees)
-    {
-        return Math.Tan(double.DegreesToRadians(degrees));
-    }
+    public void Rotate(double degrees) => RotateAboutZAxis(degrees);
 
     // Applies the current transformation on a skew and assigns the result
     // to |this|, i.e. this = this * skew.
@@ -776,10 +829,10 @@ public struct Transform
 
     // Returns true if the matrix has any perspective component that would
     // change the w-component of a homogeneous point.
-    public readonly bool HasPerspective() => !full_matrix_ ? false : matrix_.HasPerspective;
+    public readonly bool HasPerspective => !full_matrix_ ? false : matrix_.HasPerspective;
 
     // Returns true if this transform is non-singular.
-    public readonly bool IsInvertible() => !full_matrix_ ? axis_2d_.IsInvertible() : matrix_.IsInvertible();
+    public readonly bool IsInvertible => !full_matrix_ ? axis_2d_.IsInvertible() : matrix_.IsInvertible();
 
     // If |this| is invertible, inverts |this| and stores the result in
     // |*transform|, and returns true. Otherwise sets |*transform| to identity and returns false.
