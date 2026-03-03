@@ -2058,4 +2058,93 @@ public static class TransformTest
         check_scale(1, -2);
         check_scale(-1, -2);
     }
+
+    [Fact]
+    private static void TestverifyBackfaceVisibilityForPerspective()
+    {
+        Transform layer_space_to_projection_plane = new();
+
+        // This tests if IsBackFaceVisible works properly under perspective transforms.
+        // Specifically, layers that may have their back face visible in orthographic projection,
+        // may not actually have back face visible under perspective projection.
+
+        // Case 1: Layer is rotated by slightly more than 90 degrees,
+        //         at the center of the perspective projection.
+        //         In this case, the layer's back-side is visible to the camera.
+        layer_space_to_projection_plane.MakeIdentity();
+        layer_space_to_projection_plane.ApplyPerspectiveDepth(1.0);
+        layer_space_to_projection_plane.Translate3D(0.0f, 0.0f, 0.0f);
+        layer_space_to_projection_plane.RotateAboutYAxis(100.0);
+        Assert.True(layer_space_to_projection_plane.IsBackFaceVisible());
+
+        // Case 2: Layer is rotated by slightly more than 90 degrees, 
+        //         but shifted off to the side of the camera. 
+        //         Because of the wide field-of-view, the layer's front side is still visible.
+        //
+        //                       |<-- front side of layer is visible to camera
+        //                    \  |            /
+        //                     \ |           /
+        //                      \|          /
+        //                       |         /
+        //                       |\       /<-- camera field of view
+        //                       | \     /
+        // back side of layer -->|  \   /
+        //                           \./ <-- camera origin
+        //
+        layer_space_to_projection_plane.MakeIdentity();
+        layer_space_to_projection_plane.ApplyPerspectiveDepth(1.0);
+        layer_space_to_projection_plane.Translate3D(-10.0f, 0.0f, 0.0f);
+        layer_space_to_projection_plane.RotateAboutYAxis(100.0);
+        Assert.False(layer_space_to_projection_plane.IsBackFaceVisible());
+
+        // Case 3: Additionally rotating the layer by 180 degrees should of course
+        //         show the opposite result of case 2.
+        layer_space_to_projection_plane.RotateAboutYAxis(180.0);
+        Assert.True(layer_space_to_projection_plane.IsBackFaceVisible());
+    }
+
+    private static void Test2()
+    {
+        
+    }
+    
+    private static void Test3()
+    {
+        
+    }
+    
+    private static void Test4()
+    {
+        
+    }
+    
+    private static void Test5()
+    {
+        
+    }
+    
+    private static void Test6()
+    {
+        
+    }
+    
+    private static void Test7()
+    {
+        
+    }
+    
+    private static void Test8()
+    {
+        
+    }
+    
+    private static void Test9()
+    {
+        
+    }
+    
+    private static void Test10()
+    {
+        
+    }
 }
