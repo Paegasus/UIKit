@@ -2145,26 +2145,58 @@ public static class TransformTest
         Assert.Equal(transform, Transform.ColMajor(data));
     }
 
-    private static void Test5()
+    [Fact]
+    private static void TestAffine()
     {
-        
+        var transform = Transform.Affine(2.0, 3.0, 4.0, 5.0, 6.0, 7.0);
+        STATIC_ROW0_EQ(2.0, 4.0, 0.0, 6.0, transform);
+        STATIC_ROW1_EQ(3.0, 5.0, 0.0, 7.0, transform);
+        STATIC_ROW2_EQ(0.0, 0.0, 1.0, 0.0, transform);
+        STATIC_ROW3_EQ(0.0, 0.0, 0.0, 1.0, transform);
     }
-    
-    private static void Test6()
+
+    [Fact]
+    private static void TestMakeTranslation()
     {
-        
+        var t = Transform.MakeTranslation(3.5f, 4.75f);
+        STATIC_ROW0_EQ(1.0, 0.0, 0.0, 3.5, t);
+        STATIC_ROW1_EQ(0.0, 1.0, 0.0, 4.75, t);
+        STATIC_ROW2_EQ(0.0, 0.0, 1.0, 0.0, t);
+        STATIC_ROW3_EQ(0.0, 0.0, 0.0, 1.0, t);
     }
-    
-    private static void Test7()
+
+    [Fact]
+    private static void TestMakeScale()
     {
-        
+        var s = Transform.MakeScale(3.5f, 4.75f);
+        STATIC_ROW0_EQ(3.5, 0.0, 0.0, 0, s);
+        STATIC_ROW1_EQ(0.0, 4.75, 0.0, 0, s);
+        STATIC_ROW2_EQ(0.0, 0.0, 1.0, 0.0, s);
+        STATIC_ROW3_EQ(0.0, 0.0, 0.0, 1.0, s);
     }
-    
-    private static void Test8()
+
+    [Fact]
+    private static void TestMakeRotation()
     {
-        
+        var r1 = Transform.Make90degRotation();
+        STATIC_ROW0_EQ(0.0, -1.0, 0.0, 0, r1);
+        STATIC_ROW1_EQ(1.0, 0.0, 0.0, 0, r1);
+        STATIC_ROW2_EQ(0.0, 0.0, 1.0, 0.0, r1);
+        STATIC_ROW3_EQ(0.0, 0.0, 0.0, 1.0, r1);
+
+        var r2 = Transform.Make180degRotation();
+        STATIC_ROW0_EQ(-1.0, 0.0, 0.0, 0, r2);
+        STATIC_ROW1_EQ(0.0, -1.0, 0.0, 0, r2);
+        STATIC_ROW2_EQ(0.0, 0.0, 1.0, 0.0, r2);
+        STATIC_ROW3_EQ(0.0, 0.0, 0.0, 1.0, r2);
+
+        var r3 = Transform.Make270degRotation();
+        STATIC_ROW0_EQ(0.0, 1.0, 0.0, 0, r3);
+        STATIC_ROW1_EQ(-1.0, 0.0, 0.0, 0, r3);
+        STATIC_ROW2_EQ(0.0, 0.0, 1.0, 0.0, r3);
+        STATIC_ROW3_EQ(0.0, 0.0, 0.0, 1.0, r3);
     }
-    
+
     private static void Test9()
     {
         

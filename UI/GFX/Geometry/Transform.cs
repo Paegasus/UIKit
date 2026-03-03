@@ -156,6 +156,7 @@ public struct Transform
         }
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public readonly double ColMajorData(int index) => rc(index % 4, index / 4);
 
     // Used internally to construct Transform with parameters in col-major order.
