@@ -424,10 +424,7 @@ public struct Transform
 
     // Maps [point.x(), point.y(), 0] to [result.x(), result.y(), discarded_z].
 
-    public readonly Point MapPoint(in Point point)
-    {
-        return ToRoundedPoint(MapPoint(new PointF(point)));
-    }
+    public readonly Point MapPoint(in Point point) => ToRoundedPoint(MapPoint(new PointF(point)));
 
     public readonly PointF MapPoint(in PointF point)
     {
@@ -489,7 +486,7 @@ public struct Transform
             Span<double> v = [vector[0], vector[1], vector[2], vector[3]];
             
             matrix_.MapVector4(v);
-            
+
             for (int i = 0; i < 4; i++)
                 vector[i] = ClampFloatGeometry(v[i]);
         }
@@ -518,43 +515,67 @@ public struct Transform
 
     // Returns the point with reverse transformation applied to `point`, clamped
     // with ClampFloatGeometry(), or `std::nullopt` if the transformation cannot be inverted.
-    public readonly PointF? InverseMapPoint(in PointF point)
+    public readonly bool InverseMapPoint(in PointF point, out PointF result)
     {
+        result = default;
+
         if (!full_matrix_)
         {
-            if (!axis_2d_.IsInvertible())
-                return null;
-            return axis_2d_.InverseMapPoint(point);
+            if (!axis_2d_.IsInvertible)
+                return false;
+            
+            result = axis_2d_.InverseMapPoint(point);
+
+            return true;
         }
-        Matrix44 inverse = new(Matrix44.UninitializedTag.kUninitialized);
+
+        Matrix44 inverse;
+
         if (!matrix_.GetInverse(out inverse))
-            return null;
-        return MapPointInternal(inverse, point);
+            return false;
+
+        result = MapPointInternal(inverse, point);
+        return true;
     }
 
-    public readonly Point3F? InverseMapPoint(in Point3F point)
+    public readonly bool InverseMapPoint(in Point3F point, out Point3F result)
     {
+        result = default;
+        
         if (!full_matrix_)
         {
-            if (!axis_2d_.IsInvertible())
-                return null;
-            PointF result = axis_2d_.InverseMapPoint(point.AsPointF());
-            return new Point3F(result.X, result.Y, ClampFloatGeometry(point.Z));
+            if (!axis_2d_.IsInvertible)
+                return false;
+
+            PointF p = axis_2d_.InverseMapPoint(point.AsPointF());
+            result = new Point3F(p.X, p.Y, ClampFloatGeometry(point.Z));
+            return true;
         }
-        Matrix44 inverse = new(Matrix44.UninitializedTag.kUninitialized);
+
+        Matrix44 inverse;
+
         if (!matrix_.GetInverse(out inverse))
-            return null;
-        return MapPointInternal(inverse, point);
+            return false;
+
+        result = MapPointInternal(inverse, point);
+        return true;
     }
 
     // Applies the reverse transformation on `point`. Returns `std::nullopt` if
     // the transformation cannot be inverted. Rounds the result to the nearest  point.
-    public readonly Point? InverseMapPoint(in Point point)
+    public readonly bool InverseMapPoint(in Point point, out Point result)
     {
-        PointF? point_f = InverseMapPoint(new PointF(point));
-        if (point_f.HasValue)
-            return ToRoundedPoint(point_f.Value);
-        return null;
+        result = default;
+
+        PointF point_f;
+        
+        if (InverseMapPoint(new PointF(point), out point_f))
+        {
+            result = ToRoundedPoint(point_f);
+            return true;
+        }
+
+        return false;
     }
 
     // Returns the rect that is the smallest axis aligned bounding rect
@@ -599,7 +620,7 @@ public struct Transform
 
         if (!full_matrix_)
         {
-            if (!axis_2d_.IsInvertible())
+            if (!axis_2d_.IsInvertible)
             {
                 return false;
             }
@@ -917,7 +938,7 @@ public struct Transform
 
     public void RotateAbout(in Vector3DF axis, double degrees) => RotateAbout(axis.X, axis.Y, axis.Z, degrees);
 
-    public readonly double Determinant => !full_matrix_ ? axis_2d_.Determinant() : matrix_.Determinant();
+    public readonly double Determinant => !full_matrix_ ? axis_2d_.Determinant : matrix_.Determinant();
 
     // Rounds 2d translation components rc(0, 3), rc(1, 3) to integers.
     public void Round2dTranslationComponents()
@@ -1097,7 +1118,7 @@ public struct Transform
     public readonly bool HasPerspective => !full_matrix_ ? false : matrix_.HasPerspective;
 
     // Returns true if this transform is non-singular.
-    public readonly bool IsInvertible => !full_matrix_ ? axis_2d_.IsInvertible() : matrix_.IsInvertible();
+    public readonly bool IsInvertible => !full_matrix_ ? axis_2d_.IsInvertible : matrix_.IsInvertible();
 
     // If |this| is invertible, inverts |this| and stores the result in
     // |*transform|, and returns true. Otherwise sets |*transform| to identity and returns false.
@@ -1111,7 +1132,7 @@ public struct Transform
             transform.full_matrix_ = false;
             transform.matrix_ = default;
 
-            if (self.axis_2d_.IsInvertible())
+            if (self.axis_2d_.IsInvertible)
             {
                 transform.axis_2d_ = self.axis_2d_;
                 transform.axis_2d_.Invert();
@@ -1352,7 +1373,7 @@ public struct Transform
     {
         if (!full_matrix_)
         {
-            if (!axis_2d_.IsInvertible())
+            if (!axis_2d_.IsInvertible)
             {
                 result = default;
                 return false;

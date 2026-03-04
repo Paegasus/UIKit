@@ -72,18 +72,18 @@ public struct AxisTransform2D
         PostTranslate(post.m_Translation);
     }
 
-    public readonly double Determinant() => (double)m_Scale.X * m_Scale.Y;
+    public readonly double Determinant => (double)m_Scale.X * m_Scale.Y;
 
     // Check float determinant (stricter than checking each component or double
     // determinant) to keep consistency with Matrix44.
     // TODO(crbug.com/40237414): This may be stricter than necessary. Revisit
     // this after combination of gfx::Transform and blink::TransformationMatrix.
-    public readonly bool IsInvertible() => float.IsNormal(m_Scale.X * m_Scale.Y);
+    public readonly bool IsInvertible => float.IsNormal(m_Scale.X * m_Scale.Y);
 
     public void Invert()
     {
 #if DEBUG
-        Debug.Assert(IsInvertible());
+        Debug.Assert(IsInvertible);
 #endif
         m_Scale = new Vector2DF(1.0f / m_Scale.X, 1.0f / m_Scale.Y);
         m_Translation.Scale(-m_Scale.X, -m_Scale.Y);

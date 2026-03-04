@@ -534,9 +534,9 @@ public static class TransformTest
                 if (!float.IsNaN(tx) && !float.IsNaN(ty))
                 {
                     Assert.True(PointsAreNearlyEqual(p1, p2));
-                    Point3F? transformed_p1 = xform.InverseMapPoint(p1);
-                    Assert.NotNull(transformed_p1);
-                    Assert.True(PointsAreNearlyEqual(transformed_p1.Value, p0));
+                    Point3F transformed_p1;
+                    Assert.True(xform.InverseMapPoint(p1, out transformed_p1));
+                    Assert.True(PointsAreNearlyEqual(transformed_p1, p0));
                 }
             }
         }
@@ -588,9 +588,9 @@ public static class TransformTest
                     Assert.True(PointsAreNearlyEqual(p1, p2));
                     if (s != 0.0f)
                     {
-                        Point3F? transformed_p1 = xform.InverseMapPoint(p1);
-                        Assert.NotNull(transformed_p1);
-                        Assert.True(PointsAreNearlyEqual(transformed_p1.Value, p0));
+                        Point3F transformed_p1;
+                        Assert.True(xform.InverseMapPoint(p1, out transformed_p1));
+                        Assert.True(PointsAreNearlyEqual(transformed_p1, p0));
                     }
                 }
             }
@@ -626,9 +626,9 @@ public static class TransformTest
             {
                 p1 = xform.MapPoint(p1);
                 Assert.True(PointsAreNearlyEqual(p1, p2));
-                Point3F? transformed_p1 = xform.InverseMapPoint(p1);
-                Assert.NotNull(transformed_p1);
-                Assert.True(PointsAreNearlyEqual(transformed_p1.Value, p0));
+                Point3F transformed_p1;
+                Assert.True(xform.InverseMapPoint(p1, out transformed_p1));
+                Assert.True(PointsAreNearlyEqual(transformed_p1, p0));
             }
         }
     }
@@ -763,10 +763,10 @@ public static class TransformTest
                     {
                         Assert.Equal(p1.X, p2.X);
                         Assert.Equal(p1.Y, p2.Y);
-                        Point? transformed_p1 = xform.InverseMapPoint(p1);
-                        Assert.NotNull(transformed_p1);
-                        Assert.Equal(transformed_p1.Value.X, p0.X);
-                        Assert.Equal(transformed_p1.Value.Y, p0.Y);
+                        Point transformed_p1;
+                        Assert.True(xform.InverseMapPoint(p1, out transformed_p1));
+                        Assert.Equal(transformed_p1.X, p0.X);
+                        Assert.Equal(transformed_p1.Y, p0.Y);
                     }
                 }
             }
@@ -822,10 +822,10 @@ public static class TransformTest
                         Assert.Equal(p1.Y, p2.Y);
                         if (s != 0.0f)
                         {
-                            Point? transformed_p1 = xform.InverseMapPoint(p1);
-                            Assert.NotNull(transformed_p1);
-                            Assert.Equal(transformed_p1.Value.X, p0.X);
-                            Assert.Equal(transformed_p1.Value.Y, p0.Y);
+                            Point transformed_p1;
+                            Assert.True(xform.InverseMapPoint(p1, out transformed_p1));
+                            Assert.Equal(transformed_p1.X, p0.X);
+                            Assert.Equal(transformed_p1.Y, p0.Y);
                         }
                     }
                 }
@@ -864,10 +864,10 @@ public static class TransformTest
                     pt = xform.MapPoint(pt);
                     Assert.Equal(xprime, pt.X);
                     Assert.Equal(yprime, pt.Y);
-                    Point? transformed_pt = xform.InverseMapPoint(pt);
-                    Assert.NotNull(transformed_pt);
-                    Assert.Equal(transformed_pt.Value.X, x);
-                    Assert.Equal(transformed_pt.Value.Y, y);
+                    Point transformed_pt;
+                    Assert.True(xform.InverseMapPoint(pt, out transformed_pt));
+                    Assert.Equal(transformed_pt.X, x);
+                    Assert.Equal(transformed_pt.Y, y);
                 }
             }
         }
@@ -4101,9 +4101,50 @@ public static class TransformTest
         Assert.Equal(new Point3F(47.5f, 158.0f, 56.5f), transform.MapPoint(new Point3F(12.5f, 34.5f, 56.5f)));
     }
 
-    private static void Test2()
+    [Fact]
+    private static void TestInverseMapPoint()
     {
-        
+        Point result;
+
+        Transform transform = new();
+        transform.Translate(1, 2);
+        transform.Rotate(70);
+        transform.Scale(3, 4);
+        transform.Skew(30, 70);
+
+        PointF point_f = new(12.34f, 56.78f);
+        PointF transformed_point_f = transform.MapPoint(point_f);
+        PointF reverted_point_f;
+        Assert.True(transform.InverseMapPoint(transformed_point_f, out reverted_point_f));
+        Assert.True(PointsAreNearlyEqual(reverted_point_f, point_f));
+
+        Point point = new(12, 13);
+        Point transformed_point = transform.MapPoint(point);
+        transform.InverseMapPoint(transformed_point, out result);
+        Assert.Equal(point, result);
+
+        Transform transform3d = new();
+        transform3d.Translate3D(1, 2, 3);
+        transform3d.RotateAbout(new Vector3DF(4, 5, 6), 70);
+        transform3d.Scale3D(7, 8, 9);
+        transform3d.Skew(30, 70);
+
+        Point3F point_3f = new(14, 15, 16);
+        Point3F transformed_point_3f = transform3d.MapPoint(point_3f);
+        Point3F reverted_point_3f;
+        Assert.True(transform3d.InverseMapPoint(transformed_point_3f, out reverted_point_3f));
+        Assert.True(PointsAreNearlyEqual(reverted_point_3f, point_3f));
+
+        // MapPoint with simple 2d transform.
+        transform = Transform.MakeTranslation(10, 20) * Transform.MakeScale(3, 4);
+        Assert.Equal(new PointF(47.5f, 158.0f), transform.MapPoint(new PointF(12.5f, 34.5f)));
+        Assert.Equal(new Point3F(47.5f, 158.0f, 56.5f),
+                  transform.MapPoint(new Point3F(12.5f, 34.5f, 56.5f)));
+
+        transform.EnsureFullMatrix();
+        Assert.Equal(new PointF(47.5f, 158.0f), transform.MapPoint(new PointF(12.5f, 34.5f)));
+        Assert.Equal(new Point3F(47.5f, 158.0f, 56.5f),
+                  transform.MapPoint(new Point3F(12.5f, 34.5f, 56.5f)));
     }
 
     private static void Test3()
