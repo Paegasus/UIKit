@@ -4,7 +4,7 @@ using UI.GFX.Geometry;
 
 namespace UI.Tests;
 
-public static class TransformOperationTest
+public static class TransformOperationsTest
 {
     [Fact]
     private static void Test()
