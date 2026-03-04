@@ -4147,6 +4147,67 @@ public static class TransformTest
                   transform.MapPoint(new Point3F(12.5f, 34.5f, 56.5f)));
     }
 
+    [Fact]
+    private static void TestMapVector()
+    {
+        Transform transform = new();
+        transform.Scale3D(3, 4, 5);
+        Vector3DF vector = new(12.5f, 34.5f, 56.5f);
+        Vector3DF expected = new(37.5f, 138.0f, 282.5f);
+        Assert.Equal(expected, transform.MapVector(vector));
+
+        // The translation components should be ignored.
+        transform.Translate3D(1.25f, 2.75f, 3.875f);
+        Assert.Equal(expected, transform.MapVector(vector));
+
+        // The perspective components should be ignored.
+        transform.set_rc(3, 0, 0.5f);
+        transform.set_rc(3, 1, 2.5f);
+        transform.set_rc(3, 2, 4.5f);
+        transform.set_rc(3, 3, 8.5f);
+        Assert.Equal(expected, transform.MapVector(vector));
+
+        // MapVector with a simple 2d transform.
+        transform = Transform.MakeTranslation(10, 20) * Transform.MakeScale(3, 4);
+        expected.Z = vector.Z;
+        Assert.Equal(expected, transform.MapVector(vector));
+
+        transform.EnsureFullMatrix();
+        Assert.Equal(expected, transform.MapVector(vector));
+    }
+
+    [Fact]
+    private static void TestPreConcatAxisTransform2d()
+    {
+        var t = Transform.RowMajor(2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17);
+        var axis = AxisTransform2D.FromScaleAndTranslation(new Vector2DF(10, 20),
+                                                           new Vector2DF(100, 200));
+        var axis_full = Transform.MakeTranslation(100, 200) * Transform.MakeScale(10, 20);
+        var t1 = t;
+        t.PreConcat(axis);
+        t1.PreConcat(axis_full);
+        Assert.Equal(t, t1);
+    }
+
+    [Fact]
+    private static void TestPostConcatAxisTransform2d()
+    {
+        var t = Transform.RowMajor(2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17);
+        var axis = AxisTransform2D.FromScaleAndTranslation(new Vector2DF(10, 20),
+                                                           new Vector2DF(100, 200));
+        var axis_full =
+            Transform.MakeTranslation(100, 200) * Transform.MakeScale(10, 20);
+        var t1 = t;
+        t.PostConcat(axis);
+        t1.PostConcat(axis_full);
+        Assert.Equal(t, t1);
+    }
+
+    private static void Test2()
+    {
+        
+    }
+
     private static void Test3()
     {
         
