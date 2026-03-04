@@ -96,4 +96,37 @@ public static class TransformUtilTest
 
         AssertDecomposedTransformEqual(expected, AccumulateDecomposedTransforms(a, b));
     }
+
+    [Fact]
+    private static void TestTransformBetweenRects()
+    {
+        void verify(in RectF src_rect, in RectF dst_rect)
+        {
+            Transform transform = TransformBetweenRects(src_rect, dst_rect);
+
+            // Applies |transform| to calculate the target rectangle from |src_rect|.
+            // Notes that |transform| is in |src_rect|'s local coordinates.
+            RectF dst_in_parent_coordinates = transform.MapRect(new RectF(src_rect.Size));
+            dst_in_parent_coordinates.Offset(src_rect.OffsetFromOrigin());
+
+            // Verifies that the target rectangle is expected.
+            Assert.Equal(dst_rect, dst_in_parent_coordinates);
+        }
+
+        (RectF first, RectF second)[] test_cases =
+        [
+            (new RectF(0.0f, 0.0f, 2.0f, 3.0f), new RectF(3.0f, 5.0f, 4.0f, 9.0f)),
+            (new RectF(10.0f, 7.0f, 2.0f, 6.0f), new RectF(4.0f, 2.0f, 1.0f, 12.0f)),
+            (new RectF(0.0f, 0.0f, 3.0f, 5.0f), new RectF(0.0f, 0.0f, 6.0f, 2.5f))
+        ];
+
+        foreach (var (first, second) in test_cases)
+        {
+            verify(first, second);
+            verify(second, first);
+        }
+
+        // Tests the case where the destination is an empty rectangle.
+        verify(new RectF(0.0f, 0.0f, 3.0f, 5.0f), new RectF());
+    }
 }
