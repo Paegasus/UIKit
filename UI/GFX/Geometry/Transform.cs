@@ -32,7 +32,11 @@ public struct Transform
     AxisTransform2D axis_2d_;
     Matrix44 matrix_;
 
-    public static double kEpsilon = float.MachineEpsilon;
+    //public static  double kEpsilon = float.MachineEpsilon;
+    public const double kEpsilon = 1.1920929E-07;
+
+    //private static double kBigNumber = 1 << (float.Digits - 1);
+    private const double kBigNumber = 1 << 23; // 23 = float.Digits - 1
 
     private static double TanDegrees(double degrees) => Math.Tan(double.DegreesToRadians(degrees));
 
@@ -692,6 +696,94 @@ public struct Transform
     // on each point of the quad.
     public readonly QuadF MapQuad(in QuadF quad) => new QuadF(MapPoint(quad.p1), MapPoint(quad.p2), MapPoint(quad.p3), MapPoint(quad.p4));
 
+    // Maps a point on the z=0 plane into a point on the plane with which the
+    // transform applied, by extending a ray perpendicular to the source plane and
+    // computing the local x,y position of the point where that ray intersects
+    // with the destination plane. If such a point exists, sets |*clamped| (if
+    // provided) to false and returns the point. Otherwise sets |*clamped| (if
+    // provided) to true and:
+    // - If the ray is parallel with the destination plane, returns PointF().
+    // - If the opposite ray intersects with the destination plane, returns
+    //   a point containing signed big values (simulating infinities).
+    //
+    // See https://bit.ly/perspective-projection-clamping for an illustration of
+    // clamping with perspective.
+    //
+    // When |this| is invertible and the result |*clamped| is false, this
+    // function is equivalent to:
+    //   inverse(flatten(inverse(this))).MapPoint(point)
+    // and
+    //   MapPoint(Point3F(point.x(), point.y(), unknown_z)) to
+    //   Point3F(result.x(), result.y(), 0).
+    public readonly PointF ProjectPoint(in PointF point, ref bool clamped)
+    {
+        // This is basically ray-tracing. We have a point in the destination plane
+        // with z=0, and we cast a ray parallel to the z-axis from that point to find
+        // the z-position at which it intersects the z=0 plane with the transform
+        // applied. Once we have that point we apply the inverse transform to find
+        // the corresponding point in the source space.
+        //
+        // Given a plane with normal Pn, and a ray starting at point R0 and with
+        // direction defined by the vector Rd, we can find the intersection point as
+        // a distance d from R0 in units of Rd by:
+        //
+        // d = -dot (Pn', R0) / dot (Pn', Rd)
+
+        clamped = false;
+
+        if (!full_matrix_)
+        {
+            return axis_2d_.MapPoint(point);
+        }
+
+        if (!double.IsNormal(matrix_.rc(2, 2)))
+        {
+            // In this case, the projection plane is parallel to the ray we are trying
+            // to trace, and there is no well-defined value for the projection.
+            clamped = true;
+            return new PointF();
+        }
+
+        double x = point.X;
+        double y = point.Y;
+        double z = -(matrix_.rc(2, 0) * x + matrix_.rc(2, 1) * y + matrix_.rc(2, 3)) / matrix_.rc(2, 2);
+        
+        if (!double.IsFinite(z))
+        {
+            // Same as the previous condition.
+            clamped = true;
+            return new PointF();
+        }
+
+        Span<double> v = [x, y, z, 1];
+        matrix_.MapVector4(v);
+
+        if (v[3] <= 0)
+        {
+            clamped = true;
+
+            // To represent infinity and ensure the bounding box of ProjectQuad() is
+            // accurate in both float, int and blink::LayoutUnit, we use a large but
+            // not-too-large number here when clamping.
+                
+            return new PointF((float)Math.CopySign(kBigNumber, v[0]), (float) Math.CopySign(kBigNumber, v[1]));
+        }
+
+        if (v[3] != 1)
+        {
+            v[0] /= v[3];
+            v[1] /= v[3];
+        }
+
+        return new PointF(ClampFloatGeometry(v[0]), ClampFloatGeometry(v[1]));
+    }
+
+    public readonly PointF ProjectPoint(in PointF point)
+    {
+        bool clamped = false;
+        return ProjectPoint(point, ref clamped);
+    }
+
     public static Matrix44 AxisTransform2DToMatrix44(in AxisTransform2D axis_2d)
     {
         return new Matrix44(axis_2d.Scale.X, 0, 0, 0,  // col 0
@@ -1155,6 +1247,22 @@ public struct Transform
         transform = new Transform();
         transform.MakeIdentity();
         return false;
+    }
+
+    // Same as above except that it assumes success, otherwise DCHECK fails.
+    // This is suitable when the transform is known to be invertible.
+    public readonly Transform GetCheckedInverse()
+    {
+        Transform inverse;
+
+        if (!GetInverse(out inverse))
+        {
+#if DEBUG
+            Debug.WriteLine($"{ToString()} is not invertible");
+#endif
+        }
+
+        return inverse;
     }
 
     // Same as GetInverse() except that it returns the the inverse of |this| or

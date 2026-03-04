@@ -4270,9 +4270,88 @@ public static class TransformTest
         }
     }
 
-    private static void Test3()
+    private static float kProjectionClampedBigNumber = 1 << (float.Digits - 1);
+
+    // This test also demonstrates the relationship between ProjectPoint() and MapPoint().
+    [Fact]
+    private static void TestProjectPoint()
     {
-        
+        Transform transform = new();
+        PointF p = new(1.25f, -3.5f);
+        bool clamped = true;
+        Assert.Equal(p, transform.ProjectPoint(p));
+        Assert.Equal(p, transform.ProjectPoint(p, ref clamped));
+        Assert.False(clamped);
+        // MapPoint() and ProjectPoint() are the same with a flat transform.
+        Assert.Equal(p, transform.MapPoint(p));
+
+        // ProjectPoint with simple 2d transform.
+        transform = Transform.MakeTranslation(10, 20) * Transform.MakeScale(3, 4);
+        clamped = true;
+        PointF projected = transform.ProjectPoint(p, ref clamped);
+        Assert.Equal(new PointF(13.75f, 6.0f), projected);
+        Assert.False(clamped);
+        // MapPoint() and ProjectPoint() are the same with a flat transform.
+        Assert.Equal(projected, transform.MapPoint(p));
+
+        clamped = true;
+        transform.EnsureFullMatrix();
+        Assert.Equal(projected, transform.ProjectPoint(p, ref clamped));
+        Assert.False(clamped);
+        Assert.Equal(projected, transform.MapPoint(p));
+
+        // Set scale z to 0.
+        transform.set_rc(2, 2, 0);
+        clamped = true;
+        projected = transform.ProjectPoint(p, ref clamped);
+        Assert.Equal(new PointF(), projected);
+        Assert.True(clamped);
+        // MapPoint() still produces the original result.
+        Assert.Equal(new PointF(13.75f, 6.0f), transform.MapPoint(p));
+
+        // Normally (except the last case below),
+        // t.ProjectPoint() is equivalent to
+        // inverse(flatten(inverse(t))).MapPoint().
+        Transform projection_transform(in Transform t)
+        {
+            var flat = t.GetCheckedInverse();
+            flat.Flatten();
+            return flat.GetCheckedInverse();
+        }
+/*
+        transform.MakeIdentity();
+        transform.RotateAboutYAxis(60);
+        clamped = true;
+        projected = transform.ProjectPoint(p, &clamped);
+        Assert.Equal(new PointF(2.5f, -3.5f), projected);
+        Assert.False(clamped);
+        Assert.Equal(new PointF(0.625f, -3.5f), transform.MapPoint(p));
+
+        Assert.Equal(projected, projection_transform(transform).MapPoint(p));
+        Assert.Equal(projected, projection_transform(transform).ProjectPoint(p));
+
+        transform.ApplyPerspectiveDepth(10);
+        clamped = true;
+        projected = transform.ProjectPoint(p, &clamped);
+        EXPECT_POINTF_NEAR(new PointF(3.19f, -4.47f), projected, 0.01f);
+        Assert.False(clamped);
+        Assert.Equal(new PointF(0.625f, -3.5f), transform.MapPoint(p));
+
+        EXPECT_POINTF_NEAR(projected, projection_transform(transform).MapPoint(p), 1e-5f);
+        EXPECT_POINTF_NEAR(projected, projection_transform(transform).ProjectPoint(p), 1e-5f);
+
+        // With a small perspective, the ray doesn't intersect the destination plane.
+        transform.ApplyPerspectiveDepth(2);
+        clamped = false;
+        projected = transform.ProjectPoint(p, &clamped);
+        Assert.True(clamped);
+        Assert.Equal(projected.x(), kProjectionClampedBigNumber);
+        Assert.Equal(projected.y(), -kProjectionClampedBigNumber);
+        Assert.Equal(new PointF(0.625f, -3.5f), transform.MapPoint(p));
+        // In this case, MapPoint() returns a point behind the eye.
+        EXPECT_POINTF_NEAR(new PointF(-8.36014f, 11.7042f), projection_transform(transform).MapPoint(p), 1e-5f);
+        EXPECT_POINTF_NEAR(projected, projection_transform(transform).ProjectPoint(p), 1e-5f);
+    */
     }
 
     private static void Test4()

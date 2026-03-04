@@ -15,5 +15,11 @@ public static class DoubleExtensions
         /// Equivalent to C++ std::numeric_limits<double>::min().
         /// </summary>
         public static double MinNormal => BitConverter.Int64BitsToDouble(0x0010_0000_0000_0000);
+
+        /// <summary>
+        /// Number of significant binary digits (mantissa bits + 1).
+        /// Equivalent to C++ std::numeric_limits<float>::digits.
+        /// </summary>
+        public static int Digits => 53;
     }
 }
