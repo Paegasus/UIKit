@@ -694,7 +694,7 @@ public struct Transform
 
     // Applies transformation on the given quad by applying the transformation
     // on each point of the quad.
-    public readonly QuadF MapQuad(in QuadF quad) => new QuadF(MapPoint(quad.p1), MapPoint(quad.p2), MapPoint(quad.p3), MapPoint(quad.p4));
+    public readonly QuadF MapQuad(in QuadF quad) => new QuadF(MapPoint(quad.P1), MapPoint(quad.P2), MapPoint(quad.P3), MapPoint(quad.P4));
 
     // Maps a point on the z=0 plane into a point on the plane with which the
     // transform applied, by extending a ray perpendicular to the source plane and

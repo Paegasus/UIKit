@@ -4318,11 +4318,11 @@ public static class TransformTest
             flat.Flatten();
             return flat.GetCheckedInverse();
         }
-/*
+
         transform.MakeIdentity();
         transform.RotateAboutYAxis(60);
         clamped = true;
-        projected = transform.ProjectPoint(p, &clamped);
+        projected = transform.ProjectPoint(p, ref clamped);
         Assert.Equal(new PointF(2.5f, -3.5f), projected);
         Assert.False(clamped);
         Assert.Equal(new PointF(0.625f, -3.5f), transform.MapPoint(p));
@@ -4332,31 +4332,59 @@ public static class TransformTest
 
         transform.ApplyPerspectiveDepth(10);
         clamped = true;
-        projected = transform.ProjectPoint(p, &clamped);
-        EXPECT_POINTF_NEAR(new PointF(3.19f, -4.47f), projected, 0.01f);
+        projected = transform.ProjectPoint(p, ref clamped);
+        AssertPointFNear(new PointF(3.19f, -4.47f), projected, 0.01f);
         Assert.False(clamped);
         Assert.Equal(new PointF(0.625f, -3.5f), transform.MapPoint(p));
 
-        EXPECT_POINTF_NEAR(projected, projection_transform(transform).MapPoint(p), 1e-5f);
-        EXPECT_POINTF_NEAR(projected, projection_transform(transform).ProjectPoint(p), 1e-5f);
+        AssertPointFNear(projected, projection_transform(transform).MapPoint(p), 1e-5f);
+        AssertPointFNear(projected, projection_transform(transform).ProjectPoint(p), 1e-5f);
 
         // With a small perspective, the ray doesn't intersect the destination plane.
         transform.ApplyPerspectiveDepth(2);
         clamped = false;
-        projected = transform.ProjectPoint(p, &clamped);
+        projected = transform.ProjectPoint(p, ref clamped);
         Assert.True(clamped);
-        Assert.Equal(projected.x(), kProjectionClampedBigNumber);
-        Assert.Equal(projected.y(), -kProjectionClampedBigNumber);
+        Assert.Equal(projected.X, kProjectionClampedBigNumber);
+        Assert.Equal(projected.Y, -kProjectionClampedBigNumber);
         Assert.Equal(new PointF(0.625f, -3.5f), transform.MapPoint(p));
         // In this case, MapPoint() returns a point behind the eye.
-        EXPECT_POINTF_NEAR(new PointF(-8.36014f, 11.7042f), projection_transform(transform).MapPoint(p), 1e-5f);
-        EXPECT_POINTF_NEAR(projected, projection_transform(transform).ProjectPoint(p), 1e-5f);
-    */
+        AssertPointFNear(new PointF(-8.36014f, 11.7042f), projection_transform(transform).MapPoint(p), 1e-5f);
+        AssertPointFNear(projected, projection_transform(transform).ProjectPoint(p), 1e-5f);
     }
 
-    private static void Test4()
+    [Fact]
+    private static void TestProjectQuad()
     {
-        
+        var transform = Transform.MakeTranslation(3.25f, 7.75f);
+        var q = new QuadF(new PointF(1.25f, 2.5f), new PointF(3.75f, 4.0f), new PointF(23.0f, 45.0f), new PointF(12.0f, 67.0f));
+        Assert.Equal(new QuadF(new PointF(4.5f, 10.25f), new PointF(7.0f, 11.75f), new PointF(26.25f, 52.75f), new PointF(15.25f, 74.75f)),
+            transform.ProjectQuad(q));
+
+        transform.set_rc(2, 2, 0);
+        Assert.Equal(new QuadF(), transform.ProjectQuad(q));
+
+        transform.MakeIdentity();
+        transform.RotateAboutYAxis(60);
+        Assert.Equal(new QuadF(new PointF(2.5f, 2.5f), new PointF(7.5f, 4.0f), new PointF(46.0f, 45.0f), new PointF(24.0f, 67.0f)),
+            transform.ProjectQuad(q));
+
+        // With a small perspective, all points of |q| are clamped, and the
+        // projected result is an empty quad.
+        transform.ApplyPerspectiveDepth(2);
+        Assert.Equal(new QuadF(), transform.ProjectQuad(q));
+
+        // Change the quad so that 2 points are clamped.
+        q.P1 = new PointF(-1.25f, -2.5f);
+        q.P2 = new PointF(-3.75f, 4.0f);
+        q.P3 = new PointF(23.0f, -45.0f);
+        QuadF q1 = transform.ProjectQuad(q);
+        AssertPointFNear(new PointF(-1.2f, -1.2f), q1.P1, 0.01f);
+        AssertPointFNear(new PointF(-1.77f, 0.94f), q1.P2, 0.01f);
+        Assert.Equal(q1.P3.X, kProjectionClampedBigNumber);
+        Assert.Equal(q1.P3.Y, -kProjectionClampedBigNumber);
+        Assert.Equal(q1.P4.X, kProjectionClampedBigNumber);
+        Assert.Equal(q1.P4.Y, kProjectionClampedBigNumber);
     }
 
     private static void Test5()

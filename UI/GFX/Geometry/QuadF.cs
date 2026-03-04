@@ -8,24 +8,19 @@ namespace UI.GFX.Geometry;
 // A Quad is defined by four corners, allowing it to have edges that are not axis-aligned, unlike a Rect.
 public struct QuadF
 {
-    private PointF p1_;
-    private PointF p2_;
-    private PointF p3_;
-    private PointF p4_;
-
-    public PointF p1 { readonly get => p1_; set => p1_ = value; }
-    public PointF p2 { readonly get => p2_; set => p2_ = value; }
-    public PointF p3 { readonly get => p3_; set => p3_ = value; }
-    public PointF p4 { readonly get => p4_; set => p4_ = value; }
+    public PointF P1;
+    public PointF P2;
+    public PointF P3;
+    public PointF P4;
     
-    public QuadF(in PointF p1, in PointF p2, in PointF p3, in PointF p4) => (p1_, p2_, p3_, p4_) = (p1, p2, p3, p4);
+    public QuadF(in PointF p1, in PointF p2, in PointF p3, in PointF p4) => (P1, P2, P3, P4) = (p1, p2, p3, p4);
 
     public QuadF(in RectF rect)
     {
-        p1_ = new(rect.X, rect.Y);
-        p2_ = new(rect.Right, rect.Y);
-        p3_ = new(rect.Right, rect.Bottom);
-        p4_ = new(rect.X, rect.Bottom);
+        P1 = new(rect.X, rect.Y);
+        P2 = new(rect.Right, rect.Y);
+        P3 = new(rect.Right, rect.Bottom);
+        P4 = new(rect.X, rect.Bottom);
     }
 
     // Returns true if the quad is an axis-aligned rectangle.
@@ -34,10 +29,10 @@ public struct QuadF
         static bool WithinEpsilon(float a, float b) => MathF.Abs(a - b) < float.MachineEpsilon;
 
         return
-            (WithinEpsilon(p1_.X, p2_.X) && WithinEpsilon(p2_.Y, p3_.Y) &&
-            WithinEpsilon(p3_.X, p4_.X) && WithinEpsilon(p4_.Y, p1_.Y)) ||
-            (WithinEpsilon(p1_.Y, p2_.Y) && WithinEpsilon(p2_.X, p3_.X) &&
-            WithinEpsilon(p3_.Y, p4_.Y) && WithinEpsilon(p4_.X, p1_.X));
+            (WithinEpsilon(P1.X, P2.X) && WithinEpsilon(P2.Y, P3.Y) &&
+            WithinEpsilon(P3.X, P4.X) && WithinEpsilon(P4.Y, P1.Y)) ||
+            (WithinEpsilon(P1.Y, P2.Y) && WithinEpsilon(P2.X, P3.X) &&
+            WithinEpsilon(P3.Y, P4.Y) && WithinEpsilon(P4.X, P1.X));
     }
 
     // Returns true if the points of the quad are in counter-clockwise order. This
@@ -56,14 +51,14 @@ public struct QuadF
         // reducing the number of operations. The equation is:
         // Signed area = element1 + element2 - element3 - element4
 
-        float p24 = p2_.Y - p4_.Y;
-        float p31 = p3_.Y - p1_.Y;
+        float p24 = P2.Y - P4.Y;
+        float p31 = P3.Y - P1.Y;
 
         // Up-cast to double so this cannot overflow.
-        double element1 = (double)p1_.X * p24;
-        double element2 = (double)p2_.X * p31;
-        double element3 = (double)p3_.X * p24;
-        double element4 = (double)p4_.X * p31;
+        double element1 = (double)P1.X * p24;
+        double element2 = (double)P2.X * p31;
+        double element3 = (double)P3.X * p24;
+        double element4 = (double)P4.X * p31;
 
         return element1 + element2 < element3 + element4;
     }
@@ -72,45 +67,45 @@ public struct QuadF
     // edge of the quad. This assumes that the quad is convex.
     public readonly bool Contains(in PointF point) =>
  
-        PointIsInTriangle(point, p1_, p2_, p3_) ||
-        PointIsInTriangle(point, p1_, p3_, p4_);
+        PointIsInTriangle(point, P1, P2, P3) ||
+        PointIsInTriangle(point, P1, P3, P4);
 
     // Returns true if the |quad| parameter is contained within |this| quad.
     // This method assumes |this| quad is convex. The |quad| parameter has no
     // restrictions.
     public readonly bool ContainsQuad(in QuadF other) =>
     
-        Contains(other.p1) &&
-        Contains(other.p2) &&
-        Contains(other.p3) &&
-        Contains(other.p4);
+        Contains(other.P1) &&
+        Contains(other.P2) &&
+        Contains(other.P3) &&
+        Contains(other.P4);
 
     // Returns two points (forming an axis-aligned bounding box)
     // that bounds the four points of the quad.
     readonly (PointF, PointF) Extents()
     {
-        float rl = p1.X;
-        float rr = p1.X;
-        float rt = p1.Y;
-        float rb = p1.Y;
+        float rl = P1.X;
+        float rr = P1.X;
+        float rt = P1.Y;
+        float rb = P1.Y;
 
         // Check p2
-        rl = MathF.Min(rl, p2.X);
-        rr = MathF.Max(rr, p2.X);
-        rt = MathF.Min(rt, p2.Y);
-        rb = MathF.Max(rb, p2.Y);
+        rl = MathF.Min(rl, P2.X);
+        rr = MathF.Max(rr, P2.X);
+        rt = MathF.Min(rt, P2.Y);
+        rb = MathF.Max(rb, P2.Y);
 
         // Check p3
-        rl = MathF.Min(rl, p3.X);
-        rr = MathF.Max(rr, p3.X);
-        rt = MathF.Min(rt, p3.Y);
-        rb = MathF.Max(rb, p3.Y);
+        rl = MathF.Min(rl, P3.X);
+        rr = MathF.Max(rr, P3.X);
+        rt = MathF.Min(rt, P3.Y);
+        rb = MathF.Max(rb, P3.Y);
 
         // Check p4
-        rl = MathF.Min(rl, p4.X);
-        rr = MathF.Max(rr, p4.X);
-        rt = MathF.Min(rt, p4.Y);
-        rb = MathF.Max(rb, p4.Y);
+        rl = MathF.Min(rl, P4.X);
+        rr = MathF.Max(rr, P4.X);
+        rt = MathF.Min(rt, P4.Y);
+        rb = MathF.Max(rb, P4.Y);
 
         return (new PointF(rl, rt), new PointF(rr, rb));
     }
@@ -133,11 +128,11 @@ public struct QuadF
 #endif
         for (int i = 0; i < times; ++i)
         {
-            PointF temp = p1_;
-            p1_ = p2_;
-            p2_ = p3_;
-            p3_ = p4_;
-            p4_ = temp;
+            PointF temp = P1;
+            P1 = P2;
+            P2 = P3;
+            P3 = P4;
+            P4 = temp;
         }
     }
 
@@ -147,10 +142,10 @@ public struct QuadF
     // Scale each point in the quad by the scale factors along each axis.
     public void Scale(float x_scale, float y_scale)
     {
-        p1_.Scale(x_scale, y_scale);
-        p2_.Scale(x_scale, y_scale);
-        p3_.Scale(x_scale, y_scale);
-        p4_.Scale(x_scale, y_scale);
+        P1.Scale(x_scale, y_scale);
+        P2.Scale(x_scale, y_scale);
+        P3.Scale(x_scale, y_scale);
+        P4.Scale(x_scale, y_scale);
     }
 
     // Tests whether any part of the rectangle intersects with this quad.
@@ -244,33 +239,33 @@ public struct QuadF
         // Ensure we use clockwise vectors.
         if (IsCounterClockwise())
         {
-            v1 = p4_ - p1_;
-            v2 = p1_ - p2_;
-            v3 = p2_ - p3_;
-            v4 = p3_ - p4_;
+            v1 = P4 - P1;
+            v2 = P1 - P2;
+            v3 = P2 - P3;
+            v4 = P3 - P4;
         }
         else
         {
-            v1 = p2_ - p1_;
-            v2 = p3_ - p2_;
-            v3 = p4_ - p3_;
-            v4 = p1_ - p4_;
+            v1 = P2 - P1;
+            v2 = P3 - P2;
+            v3 = P4 - P3;
+            v4 = P1 - P4;
         }
 
         PointF p = RightMostCornerToVector(rect, v1);
-        if (Vector2DF.CrossProduct(v1, p - p1_) < 0)
+        if (Vector2DF.CrossProduct(v1, p - P1) < 0)
             return false;
 
         p = RightMostCornerToVector(rect, v2);
-        if (Vector2DF.CrossProduct(v2, p - p2_) < 0)
+        if (Vector2DF.CrossProduct(v2, p - P2) < 0)
             return false;
 
         p = RightMostCornerToVector(rect, v3);
-        if (Vector2DF.CrossProduct(v3, p - p3_) < 0)
+        if (Vector2DF.CrossProduct(v3, p - P3) < 0)
             return false;
 
         p = RightMostCornerToVector(rect, v4);
-        if (Vector2DF.CrossProduct(v4, p - p4_) < 0)
+        if (Vector2DF.CrossProduct(v4, p - P4) < 0)
             return false;
 
         // If not all of the rectangle is outside one of the quad's four sides, then
@@ -280,19 +275,19 @@ public struct QuadF
 
     private readonly bool IsToTheLeftOfOrTouchingLine(in PointF p, in Vector2DF vector)
     {
-        if (Vector2DF.CrossProduct(vector, p1_ - p) >= 0)
+        if (Vector2DF.CrossProduct(vector, P1 - p) >= 0)
         {
             return false;
         }
-        if (Vector2DF.CrossProduct(vector, p2_ - p) >= 0)
+        if (Vector2DF.CrossProduct(vector, P2 - p) >= 0)
         {
             return false;
         }
-        if (Vector2DF.CrossProduct(vector, p3_ - p) >= 0)
+        if (Vector2DF.CrossProduct(vector, P3 - p) >= 0)
         {
             return false;
         }
-        if (Vector2DF.CrossProduct(vector, p4_ - p) >= 0)
+        if (Vector2DF.CrossProduct(vector, P4 - p) >= 0)
         {
             return false;
         }
@@ -309,32 +304,32 @@ public struct QuadF
         // Ensure we use clockwise vectors.
         if (IsCounterClockwise())
         {
-            v1 = p4_ - p1_;
-            v2 = p1_ - p2_;
-            v3 = p2_ - p3_;
-            v4 = p3_ - p4_;
+            v1 = P4 - P1;
+            v2 = P1 - P2;
+            v3 = P2 - P3;
+            v4 = P3 - P4;
         }
         else
         {
-            v1 = p2_ - p1_;
-            v2 = p3_ - p2_;
-            v3 = p4_ - p3_;
-            v4 = p1_ - p4_;
+            v1 = P2 - P1;
+            v2 = P3 - P2;
+            v3 = P4 - P3;
+            v4 = P1 - P4;
         }
 
-        if (quad.IsToTheLeftOfOrTouchingLine(p1_, v1))
+        if (quad.IsToTheLeftOfOrTouchingLine(P1, v1))
         {
             return true;
         }
-        if (quad.IsToTheLeftOfOrTouchingLine(p2_, v2))
+        if (quad.IsToTheLeftOfOrTouchingLine(P2, v2))
         {
             return true;
         }
-        if (quad.IsToTheLeftOfOrTouchingLine(p3_, v3))
+        if (quad.IsToTheLeftOfOrTouchingLine(P3, v3))
         {
             return true;
         }
-        if (quad.IsToTheLeftOfOrTouchingLine(p4_, v4))
+        if (quad.IsToTheLeftOfOrTouchingLine(P4, v4))
         {
             return true;
         }
@@ -356,10 +351,10 @@ public struct QuadF
     // intersecting area is empty (i.e., the intersection is a line or a point).
     public readonly bool IntersectsCircle(in PointF center, float radius)
     {
-        return Contains(center) || LineIntersectsCircle(center, radius, p1_, p2_) ||
-         LineIntersectsCircle(center, radius, p2_, p3_) ||
-         LineIntersectsCircle(center, radius, p3_, p4_) ||
-         LineIntersectsCircle(center, radius, p4_, p1_);
+        return Contains(center) || LineIntersectsCircle(center, radius, P1, P2) ||
+         LineIntersectsCircle(center, radius, P2, P3) ||
+         LineIntersectsCircle(center, radius, P3, P4) ||
+         LineIntersectsCircle(center, radius, P4, P1);
     }
 
     public readonly bool IntersectsEllipse(in PointF center, in SizeF radii)
@@ -379,16 +374,16 @@ public struct QuadF
     // rectangle this is the same as the original center transformed.
     public readonly PointF CenterPoint()
     {
-        return new PointF((p1_.X + p2_.X + p3_.X + p4_.X) / 4.0f,
-                          (p1_.Y + p2_.Y + p3_.Y + p4_.Y) / 4.0f);
+        return new PointF((P1.X + P2.X + P3.X + P4.X) / 4.0f,
+                          (P1.Y + P2.Y + P3.Y + P4.Y) / 4.0f);
     }
 
     // Returns a string representation of quad.
-    public override readonly string ToString() => $"{p1_};{p2_};{p3_};{p4_}";
+    public override readonly string ToString() => $"{P1};{P2};{P3};{P4}";
 
-    public override readonly int GetHashCode() => HashCode.Combine(p1_, p2_, p3_, p4_);
+    public override readonly int GetHashCode() => HashCode.Combine(P1, P2, P3, P4);
 
-    public readonly bool Equals(in QuadF other) => p1_ == other.p1_ && p2_ == other.p2_ && p3_ == other.p3_ && p4_ == other.p4_;
+    public readonly bool Equals(in QuadF other) => P1 == other.P1 && P2 == other.P2 && P3 == other.P3 && P4 == other.P4;
 
     public override readonly bool Equals(object? obj) => obj is QuadF other && Equals(other);
 
@@ -398,18 +393,18 @@ public struct QuadF
 
     public void operator +=(in Vector2DF rhs)
     {
-        p1_ += rhs;
-        p2_ += rhs;
-        p3_ += rhs;
-        p4_ += rhs;
+        P1 += rhs;
+        P2 += rhs;
+        P3 += rhs;
+        P4 += rhs;
     }
 
     public void operator -=(in Vector2DF rhs)
     {
-        p1_ -= rhs;
-        p2_ -= rhs;
-        p3_ -= rhs;
-        p4_ -= rhs;
+        P1 -= rhs;
+        P2 -= rhs;
+        P3 -= rhs;
+        P4 -= rhs;
     }
 
     // Add a vector to a quad, offseting each point in the quad by the vector.

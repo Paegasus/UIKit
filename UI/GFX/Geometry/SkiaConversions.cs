@@ -83,10 +83,10 @@ public static class SkiaConversions
 #if DEBUG
         Debug.Assert(points.Length >= 4);
 #endif
-        points[0] = PointFToSkPoint(quad.p1);
-        points[1] = PointFToSkPoint(quad.p2);
-        points[2] = PointFToSkPoint(quad.p3);
-        points[3] = PointFToSkPoint(quad.p4);
+        points[0] = PointFToSkPoint(quad.P1);
+        points[1] = PointFToSkPoint(quad.P2);
+        points[2] = PointFToSkPoint(quad.P3);
+        points[3] = PointFToSkPoint(quad.P4);
     }
 
     public static SKMatrix AxisTransform2dToSkMatrix(in AxisTransform2D transform)

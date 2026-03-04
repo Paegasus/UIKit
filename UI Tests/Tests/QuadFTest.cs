@@ -26,20 +26,20 @@ public static class QuadFTest
         Assert.Equal(q3, q4);
 
         // Verify getters.
-        Assert.Equal(q3.p1, a);
-        Assert.Equal(q3.p2, b);
-        Assert.Equal(q3.p3, c);
-        Assert.Equal(q3.p4, d);
+        Assert.Equal(q3.P1, a);
+        Assert.Equal(q3.P2, b);
+        Assert.Equal(q3.P3, c);
+        Assert.Equal(q3.P4, d);
 
         // Verify setters.
-        q3.p1 = b;
-        q3.p2 = c;
-        q3.p3 = d;
-        q3.p4 = a;
-        Assert.Equal(q3.p1, b);
-        Assert.Equal(q3.p2, c);
-        Assert.Equal(q3.p3, d);
-        Assert.Equal(q3.p4, a);
+        q3.P1 = b;
+        q3.P2 = c;
+        q3.P3 = d;
+        q3.P4 = a;
+        Assert.Equal(q3.P1, b);
+        Assert.Equal(q3.P2, c);
+        Assert.Equal(q3.P3, d);
+        Assert.Equal(q3.P4, a);
 
         // Verify operator=(Rect)
         Assert.NotEqual(q1, q4);
