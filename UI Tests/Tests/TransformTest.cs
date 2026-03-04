@@ -4203,9 +4203,71 @@ public static class TransformTest
         Assert.Equal(t, t1);
     }
 
-    private static void Test2()
+    [Fact]
+    private static void TestClampOutput()
     {
+        // The first entry is used to initialize the transform.
+        // The second entry is used to initialize the object to be mapped.
+        (double, double)[] entries =
+        [
+            (float.MaxValue, float.PositiveInfinity),
+            (1, float.PositiveInfinity),
+            (-1, float.PositiveInfinity),
+            (1, float.NegativeInfinity),
+            (float.MaxValue, float.MaxValue),
+            (float.MinValue, float.NegativeInfinity)
+        ];
         
+        foreach (var (mv, factor) in entries)
+        {
+
+            bool is_valid_point(in PointF p) => float.IsFinite(p.X) && float.IsFinite(p.Y);
+            bool is_valid_point3(in Point3F p) => float.IsFinite(p.X) && float.IsFinite(p.Y) && float.IsFinite(p.Z);
+            bool is_valid_vector2(in Vector2DF v) => float.IsFinite(v.X) && float.IsFinite(v.Y);
+            bool is_valid_vector3(in Vector3DF v) => float.IsFinite(v.X) && float.IsFinite(v.Y) && float.IsFinite(v.Z);
+            bool is_valid_rect(in RectF r) => is_valid_point(r.Origin) && float.IsFinite(r.Width) && float.IsFinite(r.Height);
+
+            bool is_valid_array(Span<float> a)
+            {
+                foreach (float val in a)
+                {
+                    if (!float.IsFinite(val))
+                        return false;
+                }
+
+                return true;
+            }
+
+            void test(in Transform m)
+            {
+                var p = m.MapPoint(new PointF((float)factor, (float)factor));
+                Assert.True(is_valid_point(p));
+
+                var p3 = m.MapPoint(new Point3F((float)factor, (float)factor, (float)factor));
+                Assert.True(is_valid_point3(p3));
+
+                var r = m.MapRect(new RectF((float)factor, (float)factor, (float)factor, (float)factor));
+                Assert.True(is_valid_rect(r));
+
+                var v3 = m.MapVector(new Vector3DF((float)factor, (float)factor, (float)factor));
+                Assert.True(is_valid_vector3(v3));
+
+                Span<float> v4 = [(float)factor, (float)factor, (float)factor, (float)factor];
+                m.TransformVector4(v4);
+                Assert.True(is_valid_array(v4));
+
+                var v2 = m.To2dTranslation();
+                Assert.True(is_valid_vector2(v2));
+                v2 = m.To2dScale();
+                Assert.True(is_valid_vector2(v2));
+
+                v3 = m.To3dTranslation();
+                Assert.True(is_valid_vector3(v3));
+            }
+
+            test(Transform.ColMajor(mv, mv, mv, mv, mv, mv, mv, mv, mv, mv, mv, mv, mv, mv, mv, mv));
+            test(Transform.MakeTranslation((float)mv, (float)mv));
+        }
     }
 
     private static void Test3()
