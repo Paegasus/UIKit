@@ -3815,4 +3815,86 @@ public static class TransformTest
         rotate.InverseMapRect(rect, out result);
         Assert.Equal(new RectF(2.5f, -5.0f, 4.0f, 3.75f), result);
     }
+
+    [Fact]
+    private static void TestInverseMapIntRect()
+    {
+        Rect result;
+
+        var translation = Transform.MakeTranslation(3.25f, 7.75f);
+        translation.InverseMapRect(new Rect(1, 2, 3, 4), out result);
+        Assert.Equal(new Rect(-3, -6, 4, 5), result);
+
+        new Transform().InverseMapRect(new Rect(1, 2, 3, 4), out result);
+        Assert.Equal(new Rect(1, 2, 3, 4), result);
+        
+        var singular = Transform.MakeScale(0.0f);
+        Assert.False(singular.InverseMapRect(new Rect(1, 2, 3, 4), out result));
+    }
+
+    [Fact]
+    private static void TestMapQuad()
+    {
+        var translation = Transform.MakeTranslation(3.25f, 7.75f);
+        QuadF q = new QuadF(new PointF(1.25f, 2.5f), new PointF(3.75f, 4.0f), new PointF(23.0f, 45.0f),
+          new PointF(12.0f, 67.0f));
+        Assert.Equal(new QuadF(new PointF(4.5f, 10.25f), new PointF(7.0f, 11.75f),
+                        new PointF(26.25f, 52.75f), new PointF(15.25f, 74.75f)),
+                  translation.MapQuad(q));
+
+        Assert.Equal(q, new Transform().MapQuad(q));
+
+        var singular = Transform.MakeScale(0.0f);
+        Assert.Equal(new QuadF(), singular.MapQuad(q));
+
+        var negative_scale = Transform.MakeScale(-1, -2);
+        Assert.Equal(new QuadF(new PointF(-1.25f, -5.0f), new PointF(-3.75f, -8.0f),
+                        new PointF(-23.0f, -90.0f), new PointF(-12.0f, -134.0f)),
+                  negative_scale.MapQuad(q));
+
+        var rotate = Transform.Make90degRotation();
+        Assert.Equal(new QuadF(new PointF(-2.5f, 1.25f), new PointF(-4.0f, 3.75f),
+                        new PointF(-45.0f, 23.0f), new PointF(-67.0f, 12.0f)),
+                  rotate.MapQuad(q));
+    }
+
+    private static void Test3()
+    {
+        
+    }
+
+    private static void Test4()
+    {
+        
+    }
+
+    private static void Test5()
+    {
+        
+    }
+
+    private static void Test6()
+    {
+        
+    }
+
+    private static void Test7()
+    {
+        
+    }
+
+    private static void Test8()
+    {
+        
+    }
+
+    private static void Test9()
+    {
+        
+    }
+
+    private static void Test10()
+    {
+        
+    }
 }
