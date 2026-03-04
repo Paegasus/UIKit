@@ -34,6 +34,18 @@ public static class GeometryUtil
         Assert.True(FloatAlmostEqual(lhs.Height, rhs.Height), $"Height: {lhs.Height} != {rhs.Height}");
     }
 
+    public static void AssertPointNear(in Point lhs, in Point rhs, float tolerance)
+    {
+        Assert.Equal(lhs.X, rhs.X, tolerance);
+        Assert.Equal(lhs.Y, rhs.Y, tolerance);
+    }
+
+    public static void AssertPointFNear(in PointF lhs, in PointF rhs, float tolerance)
+    {
+        Assert.Equal(lhs.X, rhs.X, tolerance);
+        Assert.Equal(lhs.Y, rhs.Y, tolerance);
+    }
+
     public static void AssertPoint3FNear(in Point3F lhs, in Point3F rhs, float tolerance)
     {
         Assert.Equal(lhs.X, rhs.X, tolerance);
@@ -41,7 +53,26 @@ public static class GeometryUtil
         Assert.Equal(lhs.Z, rhs.Z, tolerance);
     }
 
-    public static void AssertQuaternionFloatEqual(in Quaternion lhs, in Quaternion rhs)
+    public static void AssertPointEqual(in Point lhs, in Point rhs)
+    {
+        Assert.True(FloatAlmostEqual(lhs.X, rhs.X));
+        Assert.True(FloatAlmostEqual(lhs.Y, rhs.Y));
+    }
+
+    public static void AssertPointFEqual(in PointF lhs, in PointF rhs)
+    {
+        Assert.True(FloatAlmostEqual(lhs.X, rhs.X));
+        Assert.True(FloatAlmostEqual(lhs.Y, rhs.Y));
+    }
+
+    public static void AssertPoint3FEqual(in Point3F lhs, in Point3F rhs)
+    {
+        Assert.True(FloatAlmostEqual(lhs.X, rhs.X));
+        Assert.True(FloatAlmostEqual(lhs.Y, rhs.Y));
+        Assert.True(FloatAlmostEqual(lhs.Z, rhs.Z));
+    }
+
+    public static void AssertQuaternionEqual(in Quaternion lhs, in Quaternion rhs)
     {
         Assert.True(FloatAlmostEqual((float)lhs.X, (float)rhs.X));
         Assert.True(FloatAlmostEqual((float)lhs.Y, (float)rhs.Y));
@@ -49,7 +80,7 @@ public static class GeometryUtil
         Assert.True(FloatAlmostEqual((float)lhs.W, (float)rhs.W));
     }
 
-    public static void AssertQuaternionFloatNear(in Quaternion lhs, in Quaternion rhs, float abs_error)
+    public static void AssertQuaternionNear(in Quaternion lhs, in Quaternion rhs, float abs_error)
     {
         Assert.Equal(lhs.X, rhs.X, abs_error);
         Assert.Equal(lhs.Y, rhs.Y, abs_error);
@@ -57,7 +88,7 @@ public static class GeometryUtil
         Assert.Equal(lhs.W, rhs.W, abs_error);
     }
 
-    public static void AssertTransformFloatEqual(in Transform lhs, in Transform rhs)
+    public static void AssertTransformEqual(in Transform lhs, in Transform rhs)
     {
         for (int row = 0; row < 4; ++row)
         {
@@ -68,7 +99,7 @@ public static class GeometryUtil
         }
     }
 
-    public static void AssertTransformFloatNear(in Transform lhs, in Transform rhs, float abs_error)
+    public static void AssertTransformNear(in Transform lhs, in Transform rhs, float abs_error)
     {
         for (int row = 0; row < 4; ++row)
         {
@@ -79,7 +110,7 @@ public static class GeometryUtil
         }
     }
 
-    public static void AssertDecomposedTransformFloatEqual(in DecomposedTransform lhs, in DecomposedTransform rhs)
+    public static void AssertDecomposedTransformEqual(in DecomposedTransform lhs, in DecomposedTransform rhs)
     {
         Assert.True(FloatAlmostEqual((float)lhs.Translate.X, (float)rhs.Translate.X), "Translate.X");
         Assert.True(FloatAlmostEqual((float)lhs.Translate.Y, (float)rhs.Translate.Y), "Translate.Y");
@@ -98,6 +129,6 @@ public static class GeometryUtil
         Assert.True(FloatAlmostEqual((float)lhs.Perspective.Z, (float)rhs.Perspective.Z), "Perspective.Z");
         Assert.True(FloatAlmostEqual((float)lhs.Perspective.W, (float)rhs.Perspective.W), "Perspective.W");
 
-        AssertQuaternionFloatEqual(lhs.Quaternion, rhs.Quaternion);
+        AssertQuaternionEqual(lhs.Quaternion, rhs.Quaternion);
     }
 }

@@ -1444,7 +1444,7 @@ public static class TransformTest
         Transform result = to;
         Assert.True(result.Blend(from, 0.5));
         var expected = Transform.Affine(0, 0, 0, 1, 250, 150);
-        AssertTransformFloatEqual(expected, result);
+        AssertTransformEqual(expected, result);
     }
 
     [Fact]
@@ -1458,13 +1458,13 @@ public static class TransformTest
         Transform result = to;
         Assert.True(result.Blend(from, 0.5));
         var expected = Transform.Affine(-1, 0, 0, -1, 0, 0);
-        AssertTransformFloatEqual(expected, result);
+        AssertTransformEqual(expected, result);
 
         // Reverse from and to.
         // Expect same midpoint with counter-clockwise rotation.
         result = from;
         Assert.True(result.Blend(to, 0.5));
-        AssertTransformFloatEqual(expected, result);
+        AssertTransformEqual(expected, result);
     }
 
     private static DecomposedTransform GetRotationDecomp(double x, double y, double z, double w)
@@ -1488,24 +1488,24 @@ public static class TransformTest
         m.RotateAbout(1, 0, 0, 60);
         DecomposedTransform decomp;
         Assert.True(m.Decompose(out decomp));
-        AssertQuaternionFloatNear(decomp.Quaternion, new Quaternion(kSin30deg, 0, 0, kCos30deg), 1e-6f);
+        AssertQuaternionNear(decomp.Quaternion, new Quaternion(kSin30deg, 0, 0, kCos30deg), 1e-6f);
 
         m.MakeIdentity();
         m.RotateAbout(0, 1, 0, 60);
         Assert.True(m.Decompose(out decomp));
-        AssertQuaternionFloatNear(decomp.Quaternion, new Quaternion(0, kSin30deg, 0, kCos30deg), 1e-6f);
+        AssertQuaternionNear(decomp.Quaternion, new Quaternion(0, kSin30deg, 0, kCos30deg), 1e-6f);
 
         m.MakeIdentity();
         m.RotateAbout(0, 0, 1, 60);
         Assert.True(m.Decompose(out decomp));
-        AssertQuaternionFloatNear(decomp.Quaternion, new Quaternion(0, 0, kSin30deg, kCos30deg), 1e-6f);
+        AssertQuaternionNear(decomp.Quaternion, new Quaternion(0, 0, kSin30deg, kCos30deg), 1e-6f);
 
         // Test rotation around non-axis aligned vector.
         double sqrt2 = Math.Sqrt(2);
         m.MakeIdentity();
         m.RotateAbout(1, 1, 0, 60);
         Assert.True(m.Decompose(out decomp));
-        AssertQuaternionFloatNear(
+        AssertQuaternionNear(
         decomp.Quaternion,
         new Quaternion(kSin30deg / sqrt2,
                        kSin30deg / sqrt2, 0, kCos30deg), 1e-6f);
@@ -1519,28 +1519,28 @@ public static class TransformTest
         m.MakeIdentity();
         m.RotateAbout(1, 0, 0, 180);
         Assert.True(m.Decompose(out decomp));
-        AssertQuaternionFloatNear(decomp.Quaternion, new Quaternion(1, 0, 0, 0), 1e-6f);
+        AssertQuaternionNear(decomp.Quaternion, new Quaternion(1, 0, 0, 0), 1e-6f);
 
         m.MakeIdentity();
         m.RotateAbout(0, 1, 0, 180);
         Assert.True(m.Decompose(out decomp));
-        AssertQuaternionFloatNear(decomp.Quaternion, new Quaternion(0, 1, 0, 0), 1e-6f);
+        AssertQuaternionNear(decomp.Quaternion, new Quaternion(0, 1, 0, 0), 1e-6f);
 
         m.MakeIdentity();
         m.RotateAbout(0, 0, 1, 180);
         Assert.True(m.Decompose(out decomp));
-        AssertQuaternionFloatNear(decomp.Quaternion, new Quaternion(0, 0, 1, 0), 1e-6f);
+        AssertQuaternionNear(decomp.Quaternion, new Quaternion(0, 0, 1, 0), 1e-6f);
 
         // No rotation.
 
         m.MakeIdentity();
         Assert.True(m.Decompose(out decomp));
-        AssertQuaternionFloatNear(decomp.Quaternion, new Quaternion(0, 0, 0, 1), 1e-6f);
+        AssertQuaternionNear(decomp.Quaternion, new Quaternion(0, 0, 0, 1), 1e-6f);
 
         m.MakeIdentity();
         m.RotateAbout(0, 0, 1, 360);
         Assert.True(m.Decompose(out decomp));
-        AssertQuaternionFloatNear(decomp.Quaternion, new Quaternion(0, 0, 0, 1), 1e-6f);
+        AssertQuaternionNear(decomp.Quaternion, new Quaternion(0, 0, 0, 1), 1e-6f);
     }
 
     [Fact]
@@ -1549,31 +1549,31 @@ public static class TransformTest
         // Test rotation about each axis.
         Transform rotate_x_60deg = new();
         rotate_x_60deg.RotateAboutXAxis(60);
-        AssertTransformFloatEqual(rotate_x_60deg, Transform.Compose(GetRotationDecomp(
+        AssertTransformEqual(rotate_x_60deg, Transform.Compose(GetRotationDecomp(
                                                 kSin30deg, 0, 0, kCos30deg)));
 
         Transform rotate_y_60deg = new();
         rotate_y_60deg.RotateAboutYAxis(60);
-        AssertTransformFloatEqual(rotate_y_60deg, Transform.Compose(GetRotationDecomp(
+        AssertTransformEqual(rotate_y_60deg, Transform.Compose(GetRotationDecomp(
                                                 0, kSin30deg, 0, kCos30deg)));
 
         Transform rotate_z_60deg = new();
         rotate_z_60deg.RotateAboutZAxis(60);
-        AssertTransformFloatEqual(rotate_z_60deg, Transform.Compose(GetRotationDecomp(
+        AssertTransformEqual(rotate_z_60deg, Transform.Compose(GetRotationDecomp(
                                                 0, 0, kSin30deg, kCos30deg)));
 
         // Test non-axis aligned rotation
         Transform rotate_xy_60deg = new();
         rotate_xy_60deg.RotateAbout(1, 1, 0, 60);
         double sqrt2 = Math.Sqrt(2);
-        AssertTransformFloatEqual(rotate_xy_60deg,
+        AssertTransformEqual(rotate_xy_60deg,
                             Transform.Compose(GetRotationDecomp(
                                 kSin30deg / sqrt2,
                                 kSin30deg / sqrt2, 0, kCos30deg)));
 
         // Test 180deg rotation.
         var rotate_z_180deg = Transform.Affine(-1, 0, 0, -1, 0, 0);
-        AssertTransformFloatEqual(rotate_z_180deg, Transform.Compose(GetRotationDecomp(0, 0, 1, 0)));
+        AssertTransformEqual(rotate_z_180deg, Transform.Compose(GetRotationDecomp(0, 0, 1, 0)));
     }
 
     [Fact]
@@ -1586,14 +1586,14 @@ public static class TransformTest
         to_matrix.Blend(from_matrix, 0.5);
         Transform rotate_z_60 = new();
         rotate_z_60.Rotate(60);
-        AssertTransformFloatEqual(rotate_z_60, to_matrix);
+        AssertTransformEqual(rotate_z_60, to_matrix);
 
         // Rotate to identity matrix.
         from_matrix.MakeIdentity();
         from_matrix.RotateAbout(0, 0, 1, 120);
         to_matrix.MakeIdentity();
         Assert.True(to_matrix.Blend(from_matrix, 0.5));
-        AssertTransformFloatEqual(rotate_z_60, to_matrix);
+        AssertTransformEqual(rotate_z_60, to_matrix);
 
         // Interpolation about a common axis of rotation.
         from_matrix.MakeIdentity();
@@ -1603,7 +1603,7 @@ public static class TransformTest
         Assert.True(to_matrix.Blend(from_matrix, 0.5));
         Transform rotate_xy_90 = new();
         rotate_xy_90.RotateAbout(1, 1, 0, 90);
-        AssertTransformFloatNear(rotate_xy_90, to_matrix, 1e-15f);
+        AssertTransformNear(rotate_xy_90, to_matrix, 1e-15f);
 
         // Interpolation without a common axis of rotation.
 
@@ -1615,7 +1615,7 @@ public static class TransformTest
         Transform expected = new();
         double sqrt2 = Math.Sqrt(2);
         expected.RotateAbout(1 / sqrt2, 0, 1 / sqrt2, 70.528778372);
-        AssertTransformFloatEqual(expected, to_matrix);
+        AssertTransformEqual(expected, to_matrix);
     }
 
     [Fact]
@@ -1708,7 +1708,7 @@ public static class TransformTest
         expected.SetPerspective(0, 0, 0, 1);
         expected.SetQuaternion(0, 0, 0, 1);
 
-        AssertDecomposedTransformFloatEqual(expected, decomp_flip_x);
+        AssertDecomposedTransformEqual(expected, decomp_flip_x);
 
         DecomposedTransform decomp_flip_y;
         Transform.MakeScale(2, -2).Decompose(out decomp_flip_y);
@@ -1721,7 +1721,7 @@ public static class TransformTest
         expected.SetPerspective(0, 0, 0, 1);
         expected.SetQuaternion(0, 0, 0, 1);
         
-        AssertDecomposedTransformFloatEqual(expected, decomp_flip_y);
+        AssertDecomposedTransformEqual(expected, decomp_flip_y);
 
         DecomposedTransform decomp_rotate_180;
         Transform.Make180degRotation().Decompose(out decomp_rotate_180);
@@ -1734,7 +1734,7 @@ public static class TransformTest
         expected.SetPerspective(0, 0, 0, 1);
         expected.SetQuaternion(0, 0, 1, 0);
 
-        AssertDecomposedTransformFloatEqual(expected, decomp_rotate_180);
+        AssertDecomposedTransformEqual(expected, decomp_rotate_180);
 
         DecomposedTransform decomp_rotate_90;
         Transform.Make90degRotation().Decompose(out decomp_rotate_90);
@@ -1749,7 +1749,7 @@ public static class TransformTest
         expected.SetPerspective(0, 0, 0, 1);
         expected.SetQuaternion(0, 0, 1.0 / sqrt2, 1.0 / sqrt2);
 
-        AssertDecomposedTransformFloatEqual(expected, decomp_rotate_90);
+        AssertDecomposedTransformEqual(expected, decomp_rotate_90);
 
         var translate_rotate_90 = Transform.MakeTranslation(-1, 1) * Transform.Make90degRotation();
         DecomposedTransform decomp_translate_rotate_90;
@@ -1763,7 +1763,7 @@ public static class TransformTest
         expected.SetPerspective(0, 0, 0, 1);
         expected.SetQuaternion(0, 0, 1.0 / sqrt2, 1.0 / sqrt2);
 
-        AssertDecomposedTransformFloatEqual(expected, decomp_translate_rotate_90);
+        AssertDecomposedTransformEqual(expected, decomp_translate_rotate_90);
 
         DecomposedTransform decomp_skew_rotate;
         Transform.Affine(1, 1, 1, 0, 0, 0).Decompose(out decomp_skew_rotate);
@@ -1776,7 +1776,7 @@ public static class TransformTest
         expected.SetPerspective(0, 0, 0, 1);
         expected.SetQuaternion(0, 0, Math.Sin(Math.PI / 8), Math.Cos(Math.PI / 8));
 
-        AssertDecomposedTransformFloatEqual(expected, decomp_skew_rotate);
+        AssertDecomposedTransformEqual(expected, decomp_skew_rotate);
     }
 
     private static double ComputeDecompRecompError(in Transform transform)
@@ -1975,8 +1975,8 @@ public static class TransformTest
             Assert.True(m2.GetInverse(out inverse_m2));
             Assert.True(inverse_m1.Is2dTransform);
             Assert.True(inverse_m2.Is2dTransform);
-            AssertTransformFloatNear(m1, inverse_m2, 1e-6f);
-            AssertTransformFloatNear(m2, inverse_m1, 1e-6f);
+            AssertTransformNear(m1, inverse_m2, 1e-6f);
+            AssertTransformNear(m2, inverse_m1, 1e-6f);
         }
 
         {
@@ -1993,8 +1993,8 @@ public static class TransformTest
             Transform inverse_m1, inverse_m2;
             Assert.True(m1.GetInverse(out inverse_m1));
             Assert.True(m2.GetInverse(out inverse_m2));
-            AssertTransformFloatNear(m1, inverse_m2, 1e-6f);
-            AssertTransformFloatNear(m2, inverse_m1, 1e-6f);
+            AssertTransformNear(m1, inverse_m2, 1e-6f);
+            AssertTransformNear(m2, inverse_m1, 1e-6f);
         }
 
         {
@@ -4063,9 +4063,42 @@ public static class TransformTest
         t.Rotate(-1e-30);
     }
 
-    private static void Test1()
+    [Fact]
+    private static void TestMapPoint()
     {
-        
+        Transform transform = new();
+        transform.Translate3D(1.25f, 2.75f, 3.875f);
+        transform.Scale3D(3, 4, 5);
+        Assert.Equal(new PointF(38.75f, 140.75f), transform.MapPoint(new PointF(12.5f, 34.5f)));
+        Assert.Equal(new Point3F(38.75f, 140.75f, 286.375f), transform.MapPoint(new Point3F(12.5f, 34.5f, 56.5f)));
+
+        transform.MakeIdentity();
+        transform.set_rc(3, 0, 0.5);
+        transform.set_rc(3, 1, 2);
+        transform.set_rc(3, 2, 0.75);
+        AssertPointFEqual(new PointF(0.2f, 0.4f), transform.MapPoint(new PointF(2, 4)));
+        AssertPoint3FEqual(new Point3F(0.18181818f, 0.27272727f, 0.36363636f), transform.MapPoint(new Point3F(2, 3, 4)));
+
+        // 0 in all perspectives should be ignored.
+        transform.MakeIdentity();
+        transform.Translate3D(10, 20, 30);
+        transform.set_rc(3, 3, 0);
+        Assert.Equal(new PointF(12, 24), transform.MapPoint(new PointF(2, 4)));
+        Assert.Equal(new Point3F(12, 23, 34), transform.MapPoint(new Point3F(2, 3, 4)));
+
+        // NaN in perspective should be ignored.
+        transform.set_rc(3, 3, float.NaN);
+        Assert.Equal(new PointF(12, 24), transform.MapPoint(new PointF(2, 4)));
+        Assert.Equal(new Point3F(12, 23, 34), transform.MapPoint(new Point3F(2, 3, 4)));
+
+        // MapPoint with simple 2d transform.
+        transform = Transform.MakeTranslation(10, 20) * Transform.MakeScale(3, 4);
+        Assert.Equal(new PointF(47.5f, 158.0f), transform.MapPoint(new PointF(12.5f, 34.5f)));
+        Assert.Equal(new Point3F(47.5f, 158.0f, 56.5f), transform.MapPoint(new Point3F(12.5f, 34.5f, 56.5f)));
+
+        transform.EnsureFullMatrix();
+        Assert.Equal(new PointF(47.5f, 158.0f), transform.MapPoint(new PointF(12.5f, 34.5f)));
+        Assert.Equal(new Point3F(47.5f, 158.0f, 56.5f), transform.MapPoint(new Point3F(12.5f, 34.5f, 56.5f)));
     }
 
     private static void Test2()
