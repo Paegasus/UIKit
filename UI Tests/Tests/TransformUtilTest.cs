@@ -28,4 +28,18 @@ public static class TransformUtilTest
             }
         }
     }
+
+    [Fact]
+    private static void TestTransformAboutPivot()
+    {
+        Transform transform = new();
+        transform.Scale(3, 4);
+        transform = TransformAboutPivot(new PointF(7, 8), transform);
+
+        Point point = transform.MapPoint(new Point(0, 0));
+        Assert.Equal(new Point(-14, -24).ToString(), point.ToString());
+
+        point = transform.MapPoint(new Point(1, 1));
+        Assert.Equal(new Point(-11, -20).ToString(), point.ToString());
+    }
 }
