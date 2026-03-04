@@ -4,7 +4,6 @@ using UI.GFX.Geometry;
 
 using static UI.GFX.Geometry.TransformUtil;
 using static UI.Tests.GeometryUtil;
-using System.Diagnostics;
 
 namespace UI.Tests;
 
@@ -234,62 +233,4 @@ public static class TransformUtilTest
 				Assert.Equal(new Vector2DF(fallback, fallback), result);
 		}
 	}
-
-/*
-    [Fact]
-    private static void TestTransform2dScaleComponents()
-    {
-        // Values to test quiet NaN, infinity, and a denormal float if they're present;
-        // zero otherwise (since for the case this is used for, it should produce the same result).
-
-        const float quiet_NaN_or_zero = float.NaN;
-        const float infinity_or_zero = float.PositiveInfinity;  // Or float.NegativeInfinity if needed
-        const float denorm_min = float.Epsilon;
-
-        (Transform transform, Vector2DF? expected_scale)[] tests =
-        [
-            // A matrix with only scale and translation.
-            (Transform.RowMajor(3, 0, 0, -23, 0, 7, 0, 31, 0, 0, 11, 47, 0, 0, 0, 1), new Vector2DF(3, 7)),
-            // Matrices like the first, but also with various
-            // perspective-altering components.
-            (Transform.RowMajor(3, 0, 0, -23, 0, 7, 0, 31, 0, 0, 11, 47, 0, 0, -0.5, 1), new Vector2DF(3, 7)),
-            // The result is always non-negative.
-            (Transform.RowMajor(3, 0, 0, -23, 0, -7, 0, 31, 0, 0, 11, 47, 0, 0, -0.5, 1), new Vector2DF(3, 7)),
-            // Values are clamped.
-            (Transform.RowMajor(double.MaxValue, 0, 0, -23, 0, double.MinValue, 0, 31, 0, 0, 11, 47, 0, 0, -0.5f, 1), new Vector2DF(ClampFloatGeometryHelper.Max, ClampFloatGeometryHelper.Max)),
-            (Transform.RowMajor(3, 0, 0, -23, 0, 7, 0, 31, 0, 0, 11, 47, 0.2f, 0, -0.5f, 1), null),
-            (Transform.RowMajor(3, 0, 0, -23, 0, 7, 0, 31, 0, 0, 11, 47, 0.2f, -0.2f, -0.5f, 1), null),
-            (Transform.RowMajor(3, 0, 0, -23, 0, 7, 0, 31, 0, 0, 11, 47, 0.2f, -0.2f, -0.5f, 1), null),
-            (Transform.RowMajor(3, 0, 0, -23, 0, 7, 0, 31, 0, 0, 11, 47, 0, -0.2f, -0.5f, 1), null),
-            (Transform.RowMajor(3, 0, 0, -23, 0, 7, 0, 31, 0, 0, 11, 47, 0, 0, -0.5f, 0.25f), new Vector2DF(12, 28)),
-            // Matrices like the first, but with some types of rotation.
-            (Transform.RowMajor(0, 3, 0, -23, 7, 0, 0, 31, 0, 0, 11, 47, 0, 0, 0, 1), new Vector2DF(7, 3)),
-            (Transform.RowMajor(3, 8, 0, -23, 4, 6, 0, 31, 0, 0, 11, 47, 0, 0, 0, 1), new Vector2DF(5, 10)),
-            // Combination of rotation and perspective
-            (Transform.RowMajor(3, 8, 0, -23, 4, 6, 0, 31, 0, 0, 11, 47, 0, 0, 0, 0.25f), new Vector2DF(20, 40)),
-            // Error handling cases for final perspective component.
-            (Transform.RowMajor(3, 0, 0, -23, 0, 7, 0, 31, 0, 0, 11, 47, 0, 0, 0, 0), null),
-            (Transform.RowMajor(3, 0, 0, -23, 0, 7, 0, 31, 0, 0, 11, 47, 0, 0, 0, quiet_NaN_or_zero), null),
-            (Transform.RowMajor(3, 0, 0, -23, 0, 7, 0, 31, 0, 0, 11, 47, 0, 0, 0, infinity_or_zero), null),
-            (Transform.RowMajor(3, 0, 0, -23, 0, 7, 0, 31, 0, 0, 11, 47, 0, 0, 0, denorm_min), null)
-        ];
-
-        const float fallback = 1.409718f;  // randomly generated in [1,2)
-
-        foreach (var (transform, expected_scale) in tests)
-        {
-            Vector2DF? try_result = TryComputeTransform2dScaleComponents(transform);
-            Assert.Equal(try_result, expected_scale);
-            Vector2DF result = ComputeTransform2dScaleComponents(transform, fallback);
-            if (expected_scale.HasValue)
-            {
-                Assert.Equal(result, expected_scale);
-            }
-            else
-            {
-                Assert.Equal(result, new Vector2DF(fallback, fallback));
-            }
-        }
-    }
-*/
 }
