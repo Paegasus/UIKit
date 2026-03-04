@@ -6,13 +6,13 @@ namespace UI.GFX.Geometry;
 // A floating version of Rect.
 public struct RectF
 {
-    private PointF m_Origin;
-    private SizeF m_Size;
+    public PointF Origin;
+    public SizeF Size;
 
     public RectF(float x, float y, float width, float height) 
     {
-        m_Origin = new PointF(x, y);
-        m_Size = new SizeF(width, height);
+        Origin = new PointF(x, y);
+        Size = new SizeF(width, height);
     }
 
     public RectF(float width, float height) : this(0, 0, width, height) { }
@@ -22,14 +22,11 @@ public struct RectF
     public RectF(in PointF origin, in SizeF size) : this(origin.X, origin.Y, size.Width, size.Height) { }
     public RectF(in Rect r) : this(r.X, r.Y, r.Width, r.Height) { }
 
-    public float X { readonly get => m_Origin.X; set => m_Origin.X = value; }
-    public float Y { readonly get => m_Origin.Y; set => m_Origin.Y = value; }
-    public float Width { readonly get => m_Size.Width; set => m_Size.Width = value; }
-    public float Height { readonly get => m_Size.Height; set => m_Size.Height = value; }
+    public float X { readonly get => Origin.X; set => Origin.X = value; }
+    public float Y { readonly get => Origin.Y; set => Origin.Y = value; }
+    public float Width { readonly get => Size.Width; set => Size.Width = value; }
+    public float Height { readonly get => Size.Height; set => Size.Height = value; }
 
-    public PointF Origin { readonly get => m_Origin; set => m_Origin = value; }
-
-    public  SizeF Size { readonly get => m_Size; set => m_Size = value; }
 
     public readonly float Right => X + Width;
     public readonly float Bottom => Y + Height;
@@ -47,8 +44,8 @@ public struct RectF
 
     public void SetRect(float x, float y, float width, float height)
     {
-        m_Origin.SetPoint(x, y);
-        m_Size.SetSize(width, height);
+        Origin.SetPoint(x, y);
+        Size.SetSize(width, height);
     }
 
     // Shrinks the rectangle by |inset| on all sides.
@@ -57,7 +54,7 @@ public struct RectF
     // Shrinks the rectangle by the given |insets|.
     public void Inset(in InsetsF insets)
     {
-        m_Origin.Offset(insets.Left, insets.Top);
+        Origin.Offset(insets.Left, insets.Top);
         Width -= insets.Width;
         Height -= insets.Height;
     }
@@ -69,13 +66,13 @@ public struct RectF
     public void Outset(in OutsetsF outsets) => Inset(outsets.ToInsets());
 
     // Move the rectangle by a horizontal and vertical distance.
-    public void Offset(float horizontal, float vertical) => m_Origin.Offset(horizontal, vertical);
-    public void Offset(in Vector2DF distance) => m_Origin.Offset(distance.X, distance.Y);
+    public void Offset(float horizontal, float vertical) => Origin.Offset(horizontal, vertical);
+    public void Offset(in Vector2DF distance) => Origin.Offset(distance.X, distance.Y);
 
     public readonly InsetsF InsetsFrom(in RectF inner) => InsetsF.TLBR(inner.Y - Y, inner.X - X, Bottom - inner.Bottom, Right - inner.Right);
 
     // Returns true if the area of the rectangle is zero.
-    public readonly bool IsEmpty() => m_Size.IsEmpty;
+    public readonly bool IsEmpty() => Size.IsEmpty;
 
     // Returns true if the point identified by point_x and point_y falls inside
     // this rectangle (including the left and the top edges, excluding the right
@@ -182,14 +179,14 @@ public struct RectF
 
         if (Right < rr && Width < float.MaxValue)
         
-            m_Size.SetToNextWidth();
+            Size.SetToNextWidth();
 #if DEBUG
             Debug.Assert(Right >= rr, "RectF.UnionEvenIfEmpty(): right() should be >= rr.");
 #endif
         
         if (Bottom < rb && Height < float.MaxValue)
         {
-            m_Size.SetToNextHeight();
+            Size.SetToNextHeight();
 #if DEBUG
             Debug.Assert(Bottom >= rb, "RectF.UnionEvenIfEmpty(): bottom() should be >= rb.");
 #endif
@@ -325,16 +322,16 @@ public struct RectF
     public void Scale(float scale) => Scale(scale, scale);
     public void Scale(float x_scale, float y_scale)
     {
-        m_Origin = PointF.ScalePoint(m_Origin, x_scale, y_scale);
-        m_Size = SizeF.ScaleSize(m_Size, x_scale, y_scale);
+        Origin = PointF.ScalePoint(Origin, x_scale, y_scale);
+        Size = SizeF.ScaleSize(Size, x_scale, y_scale);
     }
 
     // Divides the rectangle by |inv_scale|.
     public void InvScale(float inv_scale) => InvScale(inv_scale, inv_scale);
     public void InvScale(float inv_x_scale, float inv_y_scale)
     {
-        m_Origin.InvScale(inv_x_scale, inv_y_scale);
-        m_Size.InvScale(inv_x_scale, inv_y_scale);
+        Origin.InvScale(inv_x_scale, inv_y_scale);
+        Size.InvScale(inv_x_scale, inv_y_scale);
     }
 
     // This method reports if the RectF can be safely converted to an integer Rect.
@@ -358,10 +355,10 @@ public struct RectF
         MathF.Abs(Right - rect.Right) <= tolerance_x &&
         MathF.Abs(Bottom - rect.Bottom) <= tolerance_y;
 
-    public override readonly string ToString() => $"{m_Origin} {m_Size}";
-    public override readonly int GetHashCode() => HashCode.Combine(m_Origin, m_Size);
+    public override readonly string ToString() => $"{Origin} {Size}";
+    public override readonly int GetHashCode() => HashCode.Combine(Origin, Size);
     public override readonly bool Equals(object? obj) => obj is RectF other && Equals(other);
-    public readonly bool Equals(in RectF other) => m_Origin.Equals(other.m_Origin) && m_Size.Equals(other.m_Size);
+    public readonly bool Equals(in RectF other) => Origin.Equals(other.Origin) && Size.Equals(other.Size);
 
     private static void AdjustAlongAxis(float dst_origin, float dst_size, ref float origin, ref float size)
     {
@@ -475,11 +472,11 @@ public struct RectF
     {
         // Check a or b by itself.
         RectF maximum = a;
-        float maximum_area = a.m_Size.GetArea();
-        if (b.m_Size.GetArea() > maximum_area)
+        float maximum_area = a.Size.GetArea();
+        if (b.Size.GetArea() > maximum_area)
         {
             maximum = b;
-            maximum_area = b.m_Size.GetArea();
+            maximum_area = b.Size.GetArea();
         }
 
         // Check the regions that include the intersection of a and b. This can be
@@ -488,20 +485,20 @@ public struct RectF
         // a or b.
         RectF intersection = a;
         intersection.InclusiveIntersect(b);
-        if (!intersection.m_Size.IsZero)
+        if (!intersection.Size.IsZero)
         {
             RectF vert_expanded_intersection = intersection;
             vert_expanded_intersection.Y = MathF.Min(a.Y, b.Y);
             vert_expanded_intersection.Height = MathF.Max(a.Bottom, b.Bottom) - vert_expanded_intersection.Y;
-            if (vert_expanded_intersection.m_Size.GetArea() > maximum_area)
+            if (vert_expanded_intersection.Size.GetArea() > maximum_area)
             {
                 maximum = vert_expanded_intersection;
-                maximum_area = vert_expanded_intersection.m_Size.GetArea();
+                maximum_area = vert_expanded_intersection.Size.GetArea();
             }
             RectF horiz_expanded_intersection = intersection;
             horiz_expanded_intersection.X = MathF.Min(a.X, b.X);
             horiz_expanded_intersection.Width = MathF.Max(a.Right, b.Right) - horiz_expanded_intersection.X;
-            if (horiz_expanded_intersection.m_Size.GetArea() > maximum_area)
+            if (horiz_expanded_intersection.Size.GetArea() > maximum_area)
             {
                 maximum = horiz_expanded_intersection;
             }

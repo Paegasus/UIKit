@@ -784,6 +784,27 @@ public struct Transform
         return ProjectPoint(point, ref clamped);
     }
 
+    // Projects the four corners of the quad with ProjectPoint(). Returns an
+    // empty quad if all of the vertices are clamped.
+    public readonly QuadF ProjectQuad(in QuadF quad)
+    {
+        bool clamped1 = false;
+        bool clamped2 = false;
+        bool clamped3 = false;
+        bool clamped4 = false;
+
+        QuadF projected_quad = new(
+            ProjectPoint(quad.P1, ref clamped1), ProjectPoint(quad.P2, ref clamped2),
+            ProjectPoint(quad.P3, ref clamped3), ProjectPoint(quad.P4, ref clamped4));
+
+        // If all points on the quad had w < 0,
+        // then the entire quad would not be visible to the projected surface.
+        if (clamped1 && clamped2 && clamped3 && clamped4)
+            return new QuadF();
+
+        return projected_quad;
+    }
+
     public static Matrix44 AxisTransform2DToMatrix44(in AxisTransform2D axis_2d)
     {
         return new Matrix44(axis_2d.Scale.X, 0, 0, 0,  // col 0
