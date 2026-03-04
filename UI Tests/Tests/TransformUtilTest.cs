@@ -181,9 +181,8 @@ public static class TransformUtilTest
 		// present; zero otherwise.
 		float quiet_NaN_or_zero = float.IsNaN(float.NaN) ? float.NaN : 0;
         float infinity_or_zero  = float.IsInfinity(float.PositiveInfinity) ? float.PositiveInfinity : 0;
-        double denorm_min = double.Epsilon; // ~5e-324, denormal as double
-        //float denorm_min = 1.4013e-45f;
         //float denorm_min = float.Epsilon; // smallest positive denormalized float
+        double denorm_min = double.Epsilon; // ~5e-324, denormal as double
 
 		(Transform transform, Vector2DF? expected_scale)[] tests =
 		[
@@ -194,10 +193,8 @@ public static class TransformUtilTest
             (Transform.RowMajor(3, 0, 0, -23, 0, 7, 0, 31, 0, 0, 11, 47, 0, 0, -0.5, 1), new Vector2DF(3, 7)),
             // The result is always non-negative.
             (Transform.RowMajor(3, 0, 0, -23, 0, -7, 0, 31, 0, 0, 11, 47, 0, 0, -0.5, 1), new Vector2DF(3, 7)),
-            /*
             // Values are clamped.
             (Transform.RowMajor(double.MaxValue, 0, 0, -23, 0, double.MinValue, 0, 31, 0, 0, 11, 47, 0, 0, -0.5f, 1), new Vector2DF(ClampFloatGeometryHelper.Max, ClampFloatGeometryHelper.Max)),
-*/
             (Transform.RowMajor(3, 0, 0, -23, 0, 7, 0, 31, 0, 0, 11, 47, 0.2f, 0, -0.5f, 1), null),
             (Transform.RowMajor(3, 0, 0, -23, 0, 7, 0, 31, 0, 0, 11, 47, 0.2f, -0.2f, -0.5f, 1), null),
             (Transform.RowMajor(3, 0, 0, -23, 0, 7, 0, 31, 0, 0, 11, 47, 0.2f, -0.2f, -0.5f, 1), null),
