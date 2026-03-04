@@ -3,6 +3,7 @@ using Xunit;
 using UI.GFX.Geometry;
 
 using static UI.GFX.Geometry.TransformUtil;
+using static UI.Tests.GeometryUtil;
 
 namespace UI.Tests;
 
@@ -61,5 +62,38 @@ public static class TransformUtilTest
         Assert.False(double.IsNaN(result.Quaternion.Y));
         Assert.False(double.IsNaN(result.Quaternion.Z));
         Assert.False(double.IsNaN(result.Quaternion.W));
+    }
+
+    [Fact]
+    private static void TestAccumulateDecomposedTransforms()
+    {
+        DecomposedTransform a = new()
+        {
+            Translate = new(2.5, -3.25, 4.75),
+            Scale = new(4.5, -5.25, 6.75),
+            Skew = new(1.25, -2.5, 3.75),
+            Perspective = new(5, -4, 3, -2),
+            Quaternion = new(-5, 6, -7, 8)
+        };
+
+        DecomposedTransform b = new()
+        {
+            Translate = new( -2, 3, 4),
+            Scale = new( -4, 5, 6),
+            Skew = new( -1, 2, 3),
+            Perspective = new( 6, 7, -8, -9),
+            Quaternion = new( 5, 4, -3, -2)
+        };
+
+        DecomposedTransform expected = new()
+        {
+            Translate = new( 0.5, -0.25, 8.75),
+            Scale = new( -0.5, -1.25, 11.75),
+            Skew = new( 0.25, -0.5, 6.75),
+            Perspective = new( 11, 3, -5, -12),
+            Quaternion = new( +60, -30, -60, -36)
+        };
+
+        AssertDecomposedTransformEqual(expected, AccumulateDecomposedTransforms(a, b));
     }
 }
