@@ -42,4 +42,24 @@ public static class TransformUtilTest
         point = transform.MapPoint(new Point(1, 1));
         Assert.Equal(new Point(-11, -20).ToString(), point.ToString());
     }
+
+    [Fact]
+    private static void TestBlendOppositeQuaternions()
+    {
+        DecomposedTransform first = new();
+        DecomposedTransform second = new();
+        second.Quaternion.W = -second.Quaternion.W;
+
+        DecomposedTransform result = BlendDecomposedTransforms(first, second, 0.25);
+
+        Assert.True(double.IsFinite(result.Quaternion.X));
+        Assert.True(double.IsFinite(result.Quaternion.Y));
+        Assert.True(double.IsFinite(result.Quaternion.Z));
+        Assert.True(double.IsFinite(result.Quaternion.W));
+
+        Assert.False(double.IsNaN(result.Quaternion.X));
+        Assert.False(double.IsNaN(result.Quaternion.Y));
+        Assert.False(double.IsNaN(result.Quaternion.Z));
+        Assert.False(double.IsNaN(result.Quaternion.W));
+    }
 }
