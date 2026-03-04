@@ -4501,8 +4501,32 @@ public static class TransformTest
         AssertPoint3FEqual(expected, zoomed.MapPoint(p));
     }
 
-    private static void Test6()
+    [Fact]
+    private static void TestApproximatelyEqual()
     {
-        
+        Assert.True(new Transform().ApproximatelyEqual(new Transform()));
+        Assert.True(new Transform().ApproximatelyEqual(new Transform(), 0));
+        Assert.True(GetTestMatrix1().ApproximatelyEqual(GetTestMatrix1()));
+        Assert.True(GetTestMatrix1().ApproximatelyEqual(GetTestMatrix1(), 0));
+
+        Transform t1 = Transform.MakeTranslation(0.9f, -0.9f);
+        Transform t2 = Transform.MakeScale(1.099f, 0.901f);
+        Assert.True(t1.ApproximatelyEqual(t2));
+        Assert.False(t1.ApproximatelyEqual(t2, 0.8f, 0.2f, 0.0f));
+        Assert.False(t1.ApproximatelyEqual(t2, 1.0f, 0.01f, 0.0f));
+        Assert.False(t1.ApproximatelyEqual(t2, 1.0f, 0.01f, 0.05f));
+        Assert.True(t1.ApproximatelyEqual(t2, 1.0f, 0.2f, 1.0f));
+        Assert.True(t1.ApproximatelyEqual(t2, 1.0f, 0.2f, 0.1f));
+
+        for (int r = 0; r < 4; r++)
+        {
+            for (int c = 0; c < 4; c++)
+            {
+                t1 = new Transform();
+                t1.set_rc(r, c, t1.rc(r, c) + 0.25f);
+                Assert.True(t1.ApproximatelyEqual(new Transform(), 0.25f));
+                Assert.False(t1.ApproximatelyEqual(new Transform(), 0.24f));
+            }
+        }
     }
 }

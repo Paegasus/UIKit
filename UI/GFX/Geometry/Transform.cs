@@ -1,6 +1,5 @@
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
-using UI.Extensions;
 
 using static UI.GFX.Geometry.ClampFloatGeometryHelper;
 using static UI.GFX.Geometry.PointConversions;
@@ -1132,6 +1131,81 @@ public struct Transform
                 Math.Round(matrix_.rc(2, 3), MidpointRounding.AwayFromZero), 1);
         }
     }
+
+    // Checks whether `this` approximately equals `transform`.
+    // Returns true if all following conditions are met:
+    // - For (x, y) in all translation components of (this, transform):
+    //   abs(x - y) <= abs_translation_tolerance
+    // - For (x, y) in all other components of (this, transform):
+    //   abs(x - y) <= abs_other_tolerance
+    // - If rel_scale_tolerance is not zero, for (x, y) in all scale components:
+    //   abs(x - y) <= (abs(x) + abs(y)) * rel_scale_tolerance.
+    public readonly bool ApproximatelyEqual(in Transform transform, float abs_translation_tolerance, float abs_other_tolerance, float rel_scale_tolerance)
+    {
+        if (this == transform)
+            return true;
+
+        if (abs_translation_tolerance == 0 && abs_other_tolerance == 0)
+            return false;
+
+        bool approximately_equal (float a, float b) => MathF.Abs(a - b) <= abs_other_tolerance;
+        
+        bool translation_approximately_equal(float a, float b) => MathF.Abs(a - b) <= abs_translation_tolerance;
+        
+        bool scale_approximately_equal(float a, float b)
+        {
+            float diff = MathF.Abs(a - b);
+            return diff <= abs_other_tolerance &&
+                   (rel_scale_tolerance == 0 ||
+                    diff <= (MathF.Abs(a) + MathF.Abs(b)) * rel_scale_tolerance);
+        }
+
+        if (!full_matrix_ && !transform.full_matrix_)
+        {
+            return scale_approximately_equal(axis_2d_.Scale.X,
+                                             transform.axis_2d_.Scale.X) &&
+                   scale_approximately_equal(axis_2d_.Scale.Y,
+                                             transform.axis_2d_.Scale.Y) &&
+                   translation_approximately_equal(
+                       axis_2d_.Translation.X,
+                       transform.axis_2d_.Translation.X) &&
+                   translation_approximately_equal(
+                       axis_2d_.Translation.Y,
+                       transform.axis_2d_.Translation.Y);
+        }
+
+        for (int row = 0; row < 4; row++)
+        {
+            for (int col = 0; col < 4; col++)
+            {
+                float x = (float) rc(row, col);
+                float y = (float) transform.rc(row, col);
+                if (row < 3 && col == 3)
+                {
+                    if (!translation_approximately_equal(x, y))
+                        return false;
+                }
+                else if (row < 3 && col == row)
+                {
+                    if (!scale_approximately_equal(x, y))
+                        return false;
+                }
+                else if (!approximately_equal(x, y))
+                {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    // Checks approximate equality with one tolerance for all components.
+    public readonly bool ApproximatelyEqual(in Transform transform, float abs_tolerance) => ApproximatelyEqual(transform, abs_tolerance, abs_tolerance, 0.0f);
+
+    // Checks approximate equality with default tolerances. Note that the
+    // tolerance for translation is big to tolerate scroll components due to
+    // snapping (floating point error might round the other way).
+    public readonly bool ApproximatelyEqual(in Transform transform) => ApproximatelyEqual(transform, 1.0f, 0.1f, 0.0f);
 
     // Applies the current transformation on a 2d rotation and assigns the result
     // to |this|, i.e. this = this * rotation.
