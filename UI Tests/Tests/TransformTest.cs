@@ -3895,14 +3895,68 @@ public static class TransformTest
         Assert.Equal(expected.ToString(), translation.ToString());
     }
 
-    private static void Test5()
+    [Fact]
+    private static void TestFloor2dTranslationComponents()
     {
-        
+        Transform translation = new();
+        Transform expected = new();
+
+        translation.Floor2dTranslationComponents();
+        Assert.Equal(expected.ToString(), translation.ToString());
+
+        translation.Translate(1.0f, 1.0f);
+        expected.Translate(1.0f, 1.0f);
+        translation.Floor2dTranslationComponents();
+        Assert.Equal(expected.ToString(), translation.ToString());
+
+        translation.Translate(0.5f, 0.4f);
+        expected.Translate(0.0f, 0.0f);
+        translation.Floor2dTranslationComponents();
+        Assert.Equal(expected.ToString(), translation.ToString());
+
+        // Flooring should only affect 2d translation components.
+        translation.Translate3D(0.0f, 0.0f, 0.5f);
+        expected.Translate3D(0.0f, 0.0f, 0.5f);
+        translation.Floor2dTranslationComponents();
+        Assert.Equal(expected.ToString(), translation.ToString());
+
+        translation.Translate(3.9f, 4.4f);
+        expected.Translate(3.0f, 4.0f);
+        translation.Floor2dTranslationComponents();
+        Assert.Equal(expected.ToString(), translation.ToString());
+
+        translation.Translate(3.9f, 4.4f);
+        translation.EnsureFullMatrix();
+        expected.Translate(3.0f, 4.0f);
+        translation.EnsureFullMatrix();
+
+        translation.Floor2dTranslationComponents();
+        Assert.Equal(expected.ToString(), translation.ToString());
     }
 
-    private static void Test6()
+    [Fact]
+    private static void TestBackFaceVisiblilityTolerance()
     {
-        
+        Transform backface_invisible = new();
+        backface_invisible.set_rc(0, 3, 1.0f);
+        backface_invisible.set_rc(3, 0, 1.0f);
+        backface_invisible.set_rc(2, 0, 1.0f);
+        backface_invisible.set_rc(3, 2, 1.0f);
+
+        // The transformation matrix has a determinant = 1 and cofactor33 = 0. So,
+        // IsBackFaceVisible should return false.
+        Assert.Equal(1.0f, backface_invisible.Determinant);
+        Assert.False(backface_invisible.IsBackFaceVisible());
+
+        // Adding a noise to the transformsation matrix that is within the tolerance
+        // (machine epsilon) should not change the result.
+        float noise = float.MachineEpsilon;
+        backface_invisible.set_rc(0, 3, 1.0f + noise);
+        Assert.False(backface_invisible.IsBackFaceVisible());
+
+        // A noise that is more than the tolerance should change the result.
+        backface_invisible.set_rc(0, 3, 1.0f + (2 * noise));
+        Assert.True(backface_invisible.IsBackFaceVisible());
     }
 
     private static void Test7()
