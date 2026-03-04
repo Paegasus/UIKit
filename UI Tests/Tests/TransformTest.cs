@@ -4001,17 +4001,89 @@ public static class TransformTest
         Assert.Equal(expected, vector);
     }
 
-    private static void Test8()
+    [Fact]
+    private static void TestMake90NRotation()
+    {
+        var t1 = Transform.Make90degRotation();
+        Assert.Equal(new PointF(-50, 100), t1.MapPoint(new PointF(100, 50)));
+
+        var t2 = Transform.Make180degRotation();
+        Assert.Equal(Transform.MakeScale(-1), t2);
+        Assert.Equal(new PointF(-100, -50), t2.MapPoint(new PointF(100, 50)));
+
+        var t3 = Transform.Make270degRotation();
+        Assert.Equal(new PointF(50, -100), t3.MapPoint(new PointF(100, 50)));
+
+        var t4 = t1 * t1;
+        Assert.Equal(t2, t4);
+        t4.PreConcat(t1);
+        Assert.Equal(t3, t4);
+        t4.PreConcat(t1);
+        Assert.True(t4.IsIdentity);
+        t2.PreConcat(t2);
+        Assert.True(t2.IsIdentity);
+    }
+
+    [Fact]
+    private static void TestRotate90NDegrees()
+    {
+        Transform t1 = new();
+        t1.Rotate(90);
+        Assert.Equal(Transform.Make90degRotation(), t1);
+
+        Transform t2 = new();
+        t2.Rotate(180);
+        Assert.Equal(Transform.Make180degRotation(), t2);
+
+        Transform t3 = new();
+        t3.Rotate(270);
+        Assert.Equal(Transform.Make270degRotation(), t3);
+
+        Transform t4 = new();
+        t4.Rotate(360);
+        Assert.Equal(new Transform(), t4);
+        t4.Rotate(-270);
+        Assert.Equal(t1, t4);
+        t4.Rotate(-180);
+        Assert.Equal(t3, t4);
+        t4.Rotate(270);
+        Assert.Equal(t2, t4);
+
+        t1.Rotate(-90);
+        t2.Rotate(180);
+        t3.Rotate(-270);
+        t4.Rotate(-180);
+        Assert.True(t1.IsIdentity);
+        Assert.True(t2.IsIdentity);
+        Assert.True(t3.IsIdentity);
+        Assert.True(t4.IsIdentity);
+
+        // This should not crash. https://crbug.com/1378323.
+        Transform t = new();
+        t.Rotate(-1e-30);
+    }
+
+    private static void Test1()
     {
         
     }
 
-    private static void Test9()
+    private static void Test2()
     {
         
     }
 
-    private static void Test10()
+    private static void Test3()
+    {
+        
+    }
+
+    private static void Test4()
+    {
+        
+    }
+
+    private static void Test5()
     {
         
     }
