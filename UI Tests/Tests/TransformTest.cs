@@ -4387,7 +4387,48 @@ public static class TransformTest
         Assert.Equal(q1.P4.Y, kProjectionClampedBigNumber);
     }
 
+    [Fact]
+    private static void TestToString()
+    {
+        var zeros = Transform.ColMajor(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+        Assert.Equal("[ 0 0 0 0\n  0 0 0 0\n  0 0 0 0\n  0 0 0 0 ]\n", zeros.ToString());
+        Assert.Equal("[ 0 0 0 0\n  0 0 0 0\n  0 0 0 0\n  0 0 0 0 ]\n(degenerate)", zeros.ToDecomposedString());
+
+        Transform identity = new();
+        Assert.Equal("[ 1 0 0 0\n  0 1 0 0\n  0 0 1 0\n  0 0 0 1 ]\n", identity.ToString());
+        Assert.Equal("identity", identity.ToDecomposedString());
+
+        Transform translation = new();
+        translation.Translate3D(3, 5, 7);
+        Assert.Equal("[ 1 0 0 3\n  0 1 0 5\n  0 0 1 7\n  0 0 0 1 ]\n", translation.ToString());
+        Assert.Equal("translate: 3,5,7", translation.ToDecomposedString());
+
+        var transform = Transform.ColMajor(1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 1e20, 1e-20, 1.0 / 3.0, 0, 0, 0, 0, 1);
+        Assert.Equal("[ 1.1 5.5 1E+20 0\n  2.2 6.6 1E-20 0\n  3.3 7.7 0.333333 0\n  4.4 8.8 0 1 ]\n", transform.ToString());
+        Assert.Equal("translate: +0 +0 +0\nscale: -4.11582 -2.88048 -4.08248e+19\nskew: +3.87836 +0.654654 +2.13809\nperspective: -6.66667e-21 -1 +2 +1\nquaternion: -0.582925 +0.603592 +0.518949 +0.162997\n", transform.ToDecomposedString());
+    }
+
+    private static void Test2()
+    {
+        
+    }
+
+    private static void Test3()
+    {
+        
+    }
+
+    private static void Test4()
+    {
+        
+    }
+
     private static void Test5()
+    {
+        
+    }
+
+    private static void Test6()
     {
         
     }

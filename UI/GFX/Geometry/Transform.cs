@@ -1544,7 +1544,28 @@ public struct Transform
     // Returns a string in the format of "[ row0\n, row1\n, row2\n, row3 ]\n".
     public override readonly string ToString()
     {
-        return $"[ {rc(0, 0)} {rc(0, 1)} {rc(0, 2)} {rc(0, 3)}\n  {rc(1, 0)} {rc(1, 1)} {rc(1, 2)} {rc(1, 3)}\n  {rc(2, 0)} {rc(2, 1)} {rc(2, 2)} {rc(2, 3)}\n  {rc(3, 0)} {rc(3, 1)} {rc(3, 2)} {rc(3, 3)} ]\n";
+        return $"[ {rc(0, 0):G6} {rc(0, 1):G6} {rc(0, 2):G6} {rc(0, 3):G6}\n  {rc(1, 0):G6} {rc(1, 1):G6} {rc(1, 2):G6} {rc(1, 3):G6}\n  {rc(2, 0):G6} {rc(2, 1):G6} {rc(2, 2):G6} {rc(2, 3):G6}\n  {rc(3, 0):G6} {rc(3, 1):G6} {rc(3, 2):G6} {rc(3, 3):G6} ]\n";
+    }
+
+    // Returns a string containing decomposed components.
+    public readonly string ToDecomposedString()
+    {
+        DecomposedTransform decomp;
+
+        if (!Decompose(out decomp))
+            return ToString() + "(degenerate)";
+
+        if (IsIdentity)
+
+            return "identity";
+
+
+        if (IsIdentityOrTranslation)
+
+            return $"translate: {decomp.Translate.X},{decomp.Translate.Y},{decomp.Translate.Z}";
+
+
+        return decomp.ToString();
     }
 
     // It's not easy to get a hash code
