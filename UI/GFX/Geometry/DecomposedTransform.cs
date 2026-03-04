@@ -1,3 +1,5 @@
+using System.Globalization;
+
 namespace UI.GFX.Geometry;
 
 // Contains the components of a factored transform.
@@ -58,11 +60,23 @@ public struct DecomposedTransform
         Quaternion.W = w;
     }
 
+    /*
     public override readonly string ToString()
     {
       return $"translate: {Translate.X} {Translate.Y} {Translate.Z}\nscale: {Scale.X} {Scale.Y} {Scale.Z}\nskew: {Skew.X} {Skew.Y} {Skew.Z}\nperspective: {Perspective.X} {Perspective.Y} {Perspective.Z} {Perspective.W}\nquaternion: {Quaternion.X} {Quaternion.Y} {Quaternion.Z} {Quaternion.W}\n";
     }
+    */
+    public override readonly string ToString()
+    {
+        static string F(double v) => (v >= 0 ? "+" : "") + v.ToString("G6", CultureInfo.InvariantCulture);
 
+        return $"translate: {F(Translate.X)} {F(Translate.Y)} {F(Translate.Z)}\n" +
+               $"scale: {F(Scale.X)} {F(Scale.Y)} {F(Scale.Z)}\n" +
+               $"skew: {F(Skew.X)} {F(Skew.Y)} {F(Skew.Z)}\n" +
+               $"perspective: {F(Perspective.X)} {F(Perspective.Y)} {F(Perspective.Z)} {F(Perspective.W)}\n" +
+               $"quaternion: {F(Quaternion.X)} {F(Quaternion.Y)} {F(Quaternion.Z)} {F(Quaternion.W)}\n";
+    }
+    
     public override readonly int GetHashCode() => HashCode.Combine(Translate, Scale, Skew, Perspective, Quaternion);
     
     public readonly bool Equals(DecomposedTransform other) => Translate == other.Translate && Scale == other.Scale && Skew == other.Skew && Perspective == other.Perspective && Quaternion == other.Quaternion;

@@ -1562,7 +1562,7 @@ public struct Transform
 
         if (IsIdentityOrTranslation)
 
-            return $"translate: {decomp.Translate.X},{decomp.Translate.Y},{decomp.Translate.Z}";
+            return $"translate: {decomp.Translate.X:G6},{decomp.Translate.Y:G6},{decomp.Translate.Z:G6}";
 
 
         return decomp.ToString();
