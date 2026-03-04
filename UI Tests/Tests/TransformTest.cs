@@ -3959,9 +3959,46 @@ public static class TransformTest
         Assert.True(backface_invisible.IsBackFaceVisible());
     }
 
-    private static void Test7()
+    [Fact]
+    private static void TestTransformVector4()
     {
-        
+        Transform transform = new();
+        transform.set_rc(0, 0, 2.5f);
+        transform.set_rc(1, 1, 3.5f);
+        transform.set_rc(2, 2, 4.5f);
+        transform.set_rc(3, 3, 5.5f);
+
+        ReadOnlySpan<float> input = [ 11.5f, 22.5f, 33.5f, 44.5f];
+        Span<float> vector = stackalloc float[4];
+        input.CopyTo(vector); //vector = input
+
+        Span<float> expected = [28.75f, 78.75f, 150.75f, 244.75f];
+        transform.TransformVector4(vector);
+        Assert.Equal(expected, vector);
+
+        // With translations and perspectives.
+        transform.set_rc(0, 3, 10);
+        transform.set_rc(1, 3, 20);
+        transform.set_rc(2, 3, 30);
+        transform.set_rc(3, 0, 40);
+        transform.set_rc(3, 1, 50);
+        transform.set_rc(3, 2, 60);
+        input.CopyTo(vector); //vector = input
+        expected = [473.75f, 968.75f, 1485.75f, 3839.75f];
+        transform.TransformVector4(vector);
+        Assert.Equal(expected, vector);
+
+        // TransformVector4 with simple 2d transform.
+        transform = Transform.MakeTranslation(10, 20) * Transform.MakeScale(2.5f, 3.5f);
+        input.CopyTo(vector); //vector = input
+        expected = [473.75f, 968.75f, 33.5f, 44.5f];
+        transform.TransformVector4(vector);
+        Assert.Equal(expected, vector);
+
+        input.CopyTo(vector); //vector = input
+        transform.EnsureFullMatrix();
+        transform.TransformVector4(vector);
+        Assert.Equal(expected, vector);
     }
 
     private static void Test8()

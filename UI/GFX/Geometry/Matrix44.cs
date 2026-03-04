@@ -600,7 +600,7 @@ public struct Matrix44
     }
 
     // Applies the matrix to the vector in place.
-    public readonly void MapVector4(double[] vec)
+    public readonly void MapVector4(Span<double> vec)
     {
         Double4 v = new(vec[0], vec[1], vec[2], vec[3]);
 

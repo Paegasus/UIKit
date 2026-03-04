@@ -422,6 +422,8 @@ public struct Transform
         return new PointF(ClampFloatGeometry(p[0]), ClampFloatGeometry(p[1]));
     }
 
+    // Maps [point.x(), point.y(), 0] to [result.x(), result.y(), discarded_z].
+
     public readonly Point MapPoint(in Point point)
     {
         return ToRoundedPoint(MapPoint(new PointF(point)));
@@ -437,6 +439,7 @@ public struct Transform
         return MapPointInternal(matrix_, point);
     }
 
+    // Returns the point with the transformation applied to |point|, clamped with ClampFloatGeometry().
     public readonly Point3F MapPoint(in Point3F point)
     {
         if (!full_matrix_)
@@ -448,12 +451,56 @@ public struct Transform
         return MapPointInternal(matrix_, point);
     }
 
+    // Returns the vector with the transformation applied to |vector|, clamped
+    // with ClampFloatGeometry(). It differs from MapPoint() by that the
+    // translation and perspective components of the matrix are ignored.
+    public readonly Vector3DF MapVector(in Vector3DF vector)
+    {
+        if (!full_matrix_)
+        {
+            return new Vector3DF(ClampFloatGeometry(vector.X * axis_2d_.Scale.X),
+                             ClampFloatGeometry(vector.Y * axis_2d_.Scale.Y),
+                             ClampFloatGeometry(vector.Z));
+        }
+
+        Span<double> p = [vector.X, vector.Y, vector.Z, 0];
+        matrix_.MapVector4(p);
+        return new Vector3DF(ClampFloatGeometry(p[0]), ClampFloatGeometry(p[1]),
+                         ClampFloatGeometry(p[2]));
+    }
+
+    // Applies the transformation to the vector. The results are clamped with ClampFloatGeometry().
+    public readonly void TransformVector4(Span<float> vector)
+    {
+#if DEBUG
+        Debug.Assert(!vector.IsEmpty);
+#endif
+        if (!full_matrix_)
+        {
+            vector[0] = vector[0] * axis_2d_.Scale.X +
+                        vector[3] * axis_2d_.Translation.X;
+            vector[1] = vector[1] * axis_2d_.Scale.Y +
+                        vector[3] * axis_2d_.Translation.Y;
+            for (int i = 0; i < 4; i++)
+                vector[i] = ClampFloatGeometry(vector[i]);
+        }
+        else
+        {
+            Span<double> v = [vector[0], vector[1], vector[2], vector[3]];
+            
+            matrix_.MapVector4(v);
+            
+            for (int i = 0; i < 4; i++)
+                vector[i] = ClampFloatGeometry(v[i]);
+        }
+    }
+
     public readonly Point3F MapPointInternal(in Matrix44 matrix, in Point3F point)
     {
 #if DEBUG
         Debug.Assert(full_matrix_);
 #endif
-        double[] p = [point.X, point.Y, point.Z, 1];
+        Span<double> p = [point.X, point.Y, point.Z, 1];
 
         matrix.MapVector4(p);
 
