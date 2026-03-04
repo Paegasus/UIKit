@@ -3858,14 +3858,41 @@ public static class TransformTest
                   rotate.MapQuad(q));
     }
 
-    private static void Test3()
+    [Fact]
+    private static void TestMapBox()
     {
-        
+        Transform translation = new();
+        translation.Translate3D(3.0f, 7.0f, 6.0f);
+        BoxF box = new(1.0f, 2.0f, 3.0f, 4.0f, 5.0f, 6.0f);
+        BoxF expected = new(4.0f, 9.0f, 9.0f, 4.0f, 5.0f, 6.0f);
+        BoxF transformed = translation.MapBox(box);
+        Assert.Equal(expected, transformed);
     }
 
-    private static void Test4()
+    [Fact]
+    private static void TestRound2dTranslationComponents()
     {
-        
+        Transform translation = new();
+        Transform expected = new();
+
+        translation.Round2dTranslationComponents();
+        Assert.Equal(expected.ToString(), translation.ToString());
+
+        translation.Translate(1.0f, 1.0f);
+        expected.Translate(1.0f, 1.0f);
+        translation.Round2dTranslationComponents();
+        Assert.Equal(expected.ToString(), translation.ToString());
+
+        translation.Translate(0.5f, 0.4f);
+        expected.Translate(1.0f, 0.0f);
+        translation.Round2dTranslationComponents();
+        Assert.Equal(expected.ToString(), translation.ToString());
+
+        // Rounding should only affect 2d translation components.
+        translation.Translate3D(0.0f, 0.0f, 0.5f);
+        expected.Translate3D(0.0f, 0.0f, 0.5f);
+        translation.Round2dTranslationComponents();
+        Assert.Equal(expected.ToString(), translation.ToString());
     }
 
     private static void Test5()

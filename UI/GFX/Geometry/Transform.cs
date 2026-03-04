@@ -872,6 +872,38 @@ public struct Transform
 
     public readonly double Determinant => !full_matrix_ ? axis_2d_.Determinant() : matrix_.Determinant();
 
+    // Rounds 2d translation components rc(0, 3), rc(1, 3) to integers.
+    public void Round2dTranslationComponents()
+    {
+        if (!full_matrix_)
+        {
+            axis_2d_ = AxisTransform2D.FromScaleAndTranslation(
+                axis_2d_.Scale, new Vector2DF(MathF.Round(axis_2d_.Translation.X, MidpointRounding.AwayFromZero),
+                                            MathF.Round(axis_2d_.Translation.Y, MidpointRounding.AwayFromZero)));
+        }
+        else
+        {
+            matrix_.set_rc(0, 3, Math.Round(matrix_.rc(0, 3), MidpointRounding.AwayFromZero));
+            matrix_.set_rc(1, 3, Math.Round(matrix_.rc(1, 3), MidpointRounding.AwayFromZero));
+        }
+    }
+
+    // Makes rc(0, 3) and rc(1, 3) components integers by flooring.
+    public void Floor2dTranslationComponents()
+    {
+        if (!full_matrix_)
+        {
+            axis_2d_ = AxisTransform2D.FromScaleAndTranslation(
+                axis_2d_.Scale, new Vector2DF(MathF.Floor(axis_2d_.Translation.X),
+                                            MathF.Floor(axis_2d_.Translation.Y)));
+        }
+        else
+        {
+            matrix_.set_rc(0, 3, Math.Floor(matrix_.rc(0, 3)));
+            matrix_.set_rc(1, 3, Math.Floor(matrix_.rc(1, 3)));
+        }
+    }
+
     // Rounds translation components to integers, and all other components to
     // identity. Normally this function is meaningful only if
     // IsApproximatelyIdentityOrIntegerTranslation() is true.
