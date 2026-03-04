@@ -4408,24 +4408,97 @@ public static class TransformTest
         Assert.Equal("translate: +0 +0 +0\nscale: -4.11582 -2.88048 -4.08248E+19\nskew: +3.87836 +0.654654 +2.13809\nperspective: -6.66667E-21 -1 +2 +1\nquaternion: -0.582925 +0.603592 +0.518949 +0.162997\n", transform.ToDecomposedString());
     }
 
-    private static void Test2()
+    [Fact]
+    private static void TestIs2dProportionalUpscaleAndOr2dTranslation()
     {
-        
+        Transform transform = new();
+        Assert.True(transform.Is2dProportionalUpscaleAndOr2dTranslation());
+
+        transform.MakeIdentity();
+        transform.Translate(10, 0);
+        Assert.True(transform.Is2dProportionalUpscaleAndOr2dTranslation());
+
+        transform.MakeIdentity();
+        transform.Scale(1.3f);
+        Assert.True(transform.Is2dProportionalUpscaleAndOr2dTranslation());
+
+        transform.MakeIdentity();
+        transform.Translate(0, -20);
+        transform.Scale(1.7f);
+        Assert.True(transform.Is2dProportionalUpscaleAndOr2dTranslation());
+
+        transform.MakeIdentity();
+        transform.Scale(0.99f);
+        Assert.False(transform.Is2dProportionalUpscaleAndOr2dTranslation());
+
+        transform.MakeIdentity();
+        transform.Translate3D(0, 0, 1);
+        Assert.False(transform.Is2dProportionalUpscaleAndOr2dTranslation());
+
+        transform.MakeIdentity();
+        transform.Rotate(40);
+        Assert.False(transform.Is2dProportionalUpscaleAndOr2dTranslation());
+
+        transform.MakeIdentity();
+        transform.SkewX(30);
+        Assert.False(transform.Is2dProportionalUpscaleAndOr2dTranslation());
     }
 
-    private static void Test3()
+    [Fact]
+    private static void TestCreates3d()
     {
-        
+        Assert.False(new Transform().Creates3D());
+        Assert.False(Transform.MakeTranslation(1, 2).Creates3D());
+
+        Transform transform = new();
+        transform.ApplyPerspectiveDepth(100);
+        Assert.False(transform.Creates3D());
+        transform.Scale3D(2, 3, 4);
+        Assert.False(transform.Creates3D());
+        transform.Translate3D(1, 2, 3);
+        Assert.True(transform.Creates3D());
+
+        transform.MakeIdentity();
+        transform.RotateAboutYAxis(20);
+        Assert.True(transform.Creates3D());
     }
 
-    private static void Test4()
+    [Fact]
+    private static void TestApplyTransformOrigin()
     {
-        
+        // (0,0,0) is a fixed point of this scale.
+        // (1,1,1) should be scaled appropriately.
+        Transform transform = new();
+        transform.Scale3D(2, 3, 4);
+        Assert.Equal(new Point3F(0, 0, 0), transform.MapPoint(new Point3F(0, 0, 0)));
+        Assert.Equal(new Point3F(2, 3, -4), transform.MapPoint(new Point3F(1, 1, -1)));
+
+        // With the transform origin applied, (1,2,3) is the fixed point.
+        // (0,0,0) should be scaled according to its distance from (1,2,3).
+        transform.ApplyTransformOrigin(1, 2, 3);
+        Assert.Equal(new Point3F(1, 2, 3), transform.MapPoint(new Point3F(1, 2, 3)));
+        Assert.Equal(new Point3F(-1, -4, -9), transform.MapPoint(new Point3F(0, 0, 0)));
+
+        transform = GetTestMatrix1();
+        Vector3DF origin = new(5.0f, 6.0f, 7.0f);
+        Transform with_origin = transform;
+        Point3F p = new(41.0f, 43.0f, 47.0f);
+        with_origin.ApplyTransformOrigin(origin.X, origin.Y, origin.Z);
+        AssertPoint3FEqual(transform.MapPoint(p - origin) + origin, with_origin.MapPoint(p));
     }
 
-    private static void Test5()
+    [Fact]
+    private static void TestZoom()
     {
-        
+        Transform transform = GetTestMatrix1();
+        var zoomed = transform;
+        zoomed.Zoom(2.0f);
+        Point3F p = new(41.0f, 43.0f, 47.0f);
+        Point3F expected = p;
+        expected.Scale(0.5f, 0.5f, 0.5f);
+        expected = transform.MapPoint(expected);
+        expected.Scale(2.0f, 2.0f, 2.0f);
+        AssertPoint3FEqual(expected, zoomed.MapPoint(p));
     }
 
     private static void Test6()

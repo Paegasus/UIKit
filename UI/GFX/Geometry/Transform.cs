@@ -380,6 +380,24 @@ public struct Transform
         return false;
     }
 
+    // Returns true if the matrix is 2d scale or translation, and if it has scale,
+    // the scale proportionally scales up in x and y directions. This function
+    // allows rare false-negatives.
+    public readonly bool Is2dProportionalUpscaleAndOr2dTranslation()
+    {
+        if (!full_matrix_)
+        {
+            return axis_2d_.Scale.X >= 1 &&
+                axis_2d_.Scale.X == axis_2d_.Scale.Y;
+        }
+
+        return matrix_.IsScaleOrTranslation &&
+         // Check proportional upscale.
+         matrix_.rc(0, 0) >= 1 && matrix_.rc(1, 1) == matrix_.rc(0, 0) &&
+         // Check no scale/translation in z axis.
+         matrix_.rc(2, 2) == 1 && matrix_.rc(2, 3) == 0;
+    }
+
     // Returns true if the matrix is identity or, if the matrix consists only
     // of a translation whose components can be represented as integers. Returns
     // false if the translation contains a fractional component or is too large to
@@ -405,6 +423,17 @@ public struct Transform
     }
 
     public readonly bool IsIdentityOrInteger2dTranslation() => IsIdentityOrIntegerTranslation() && rc(2, 3) == 0;
+
+    // Returns whether this matrix can transform a z=0 plane to something
+    // containing points where z != 0. This is primarily intended for metrics.
+    public readonly bool Creates3D()
+    {
+        if (!full_matrix_)
+        {
+            return false;
+        }
+        return matrix_.rc(2, 0) != 0 || matrix_.rc(2, 1) != 0 || matrix_.rc(2, 3) != 0;
+    }
 
     public readonly PointF MapPointInternal(in Matrix44 matrix, in PointF point)
     {
