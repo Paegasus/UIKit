@@ -181,8 +181,10 @@ public static class TransformUtilTest
 		// present; zero otherwise.
 		float quiet_NaN_or_zero = float.IsNaN(float.NaN) ? float.NaN : 0;
         float infinity_or_zero  = float.IsInfinity(float.PositiveInfinity) ? float.PositiveInfinity : 0;
-        //float denorm_min = float.Epsilon; // smallest positive denormalized float
-        double denorm_min = double.Epsilon; // ~5e-324, denormal as double
+        // float denorm_min = float.Epsilon fails
+        // double.IsNormal(double.Epsilon) returns false,
+        // so TryComputeTransform2dScaleComponents correctly returns null
+        double denorm_min = double.Epsilon;
 
 		(Transform transform, Vector2DF? expected_scale)[] tests =
 		[
