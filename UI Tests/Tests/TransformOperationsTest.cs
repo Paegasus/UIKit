@@ -955,4 +955,32 @@ public static class TransformOperationsTest
         expected.Translate3D(4, 4, 4);
         AssertTransformEqual(expected, operations1.Blend(operations2, -0.5f).Apply());
     }
+
+    [Fact]
+    private static void TestNonDecomposableBlend()
+    {
+        TransformOperations non_decomposible_transform = new();
+        Transform non_decomposible_matrix = Transform.MakeScale(0);
+        non_decomposible_transform.AppendMatrix(non_decomposible_matrix);
+
+        TransformOperations identity_transform = new();
+        Transform identity_matrix = new();
+        identity_transform.AppendMatrix(identity_matrix);
+
+        // Before the half-way point, we should return the 'from' matrix.
+        AssertTransformEqual(
+            non_decomposible_matrix,
+            identity_transform.Blend(non_decomposible_transform, 0.0f).Apply());
+        AssertTransformEqual(
+            non_decomposible_matrix,
+            identity_transform.Blend(non_decomposible_transform, 0.49f).Apply());
+
+        // After the half-way point, we should return the 'to' matrix.
+        AssertTransformEqual(
+            identity_matrix,
+            identity_transform.Blend(non_decomposible_transform, 0.5f).Apply());
+        AssertTransformEqual(
+            identity_matrix,
+            identity_transform.Blend(non_decomposible_transform, 1.0f).Apply());
+    }
 }
