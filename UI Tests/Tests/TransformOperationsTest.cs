@@ -1688,4 +1688,72 @@ public static class TransformOperationsTest
         Assert.True(operations16.ScaleComponent(out scale));
         Assert.Equal(2.0f, scale);
     }
+
+    [Fact]
+    private static void TestApproximateEquality()
+    {
+        float noise = 1e-7f;
+        float tolerance = 1e-5f;
+        TransformOperations lhs = new();
+        TransformOperations rhs = new();
+
+        // Empty lists of operations are trivially equal.
+        Assert.True(lhs.ApproximatelyEqual(rhs, tolerance));
+
+        rhs.AppendIdentity();
+        rhs.AppendTranslate(0, 0, 0);
+        rhs.AppendRotate(1, 0, 0, 0);
+        rhs.AppendScale(1, 1, 1);
+        rhs.AppendSkew(0, 0);
+        rhs.AppendMatrix(new Transform());
+
+        // Even though both lists operations are effectively the identity matrix, rhs
+        // has a different number of operations and is therefore different.
+        Assert.False(lhs.ApproximatelyEqual(rhs, tolerance));
+
+        rhs.AppendPerspective(800);
+
+        // Assignment should produce equal lists of operations.
+        lhs = new(rhs);
+        Assert.True(lhs.ApproximatelyEqual(rhs, tolerance));
+
+        // Cannot affect identity operations.
+        lhs.At(0).X = 1;
+        Assert.True(lhs.ApproximatelyEqual(rhs, tolerance));
+
+        lhs.At(1).X += noise;
+        Assert.True(lhs.ApproximatelyEqual(rhs, tolerance));
+        lhs.At(1).X += 1;
+        Assert.False(lhs.ApproximatelyEqual(rhs, tolerance));
+
+        lhs = new(rhs);
+        lhs.At(2).Angle += noise;
+        Assert.True(lhs.ApproximatelyEqual(rhs, tolerance));
+        lhs.At(2).Angle = 1;
+        Assert.False(lhs.ApproximatelyEqual(rhs, tolerance));
+
+        lhs = new(rhs);
+        lhs.At(3).X += noise;
+        Assert.True(lhs.ApproximatelyEqual(rhs, tolerance));
+        lhs.At(3).X += 1;
+        Assert.False(lhs.ApproximatelyEqual(rhs, tolerance));
+
+        lhs = new(rhs);
+        lhs.At(4).X += noise;
+        Assert.True(lhs.ApproximatelyEqual(rhs, tolerance));
+        lhs.At(4).X = 2;
+        Assert.False(lhs.ApproximatelyEqual(rhs, tolerance));
+
+        lhs = new(rhs);
+        lhs.At(5).Matrix.Translate3D(noise, 0, 0);
+        Assert.True(lhs.ApproximatelyEqual(rhs, tolerance));
+        lhs.At(5).Matrix.Translate3D(1, 1, 1);
+        Assert.False(lhs.ApproximatelyEqual(rhs, tolerance));
+
+        lhs = new(rhs);
+        lhs.At(6).PerspectiveM43 += noise;
+        Assert.True(lhs.ApproximatelyEqual(rhs, tolerance));
+        lhs.At(6).PerspectiveM43 = -1.0f / 810;
+        Assert.False(lhs.ApproximatelyEqual(rhs, tolerance));
+    }
 }
