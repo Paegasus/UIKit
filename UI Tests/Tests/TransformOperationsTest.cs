@@ -700,4 +700,76 @@ public static class TransformOperationsTest
             AssertTransformEqual(expected, operations.Blend(identity_operation, progress).Apply());
         }
     }
+
+    [Fact]
+    private static void TestBlendTranslationFromIdentity()
+    {
+        List<TransformOperations> identity_operations = GetIdentityOperations();
+
+        foreach (var identity_operation in identity_operations)
+        {
+            TransformOperations operations = new();
+            operations.AppendTranslate(2, 2, 2);
+
+            float progress = 0.5f;
+
+            Transform expected = new();
+            expected.Translate3D(1, 1, 1);
+
+            AssertTransformEqual(
+                expected, operations.Blend(identity_operation, progress).Apply());
+
+            progress = -0.5f;
+
+            expected.MakeIdentity();
+            expected.Translate3D(-1, -1, -1);
+
+            AssertTransformEqual(
+                expected, operations.Blend(identity_operation, progress).Apply());
+
+            progress = 1.5f;
+
+            expected.MakeIdentity();
+            expected.Translate3D(3, 3, 3);
+
+            AssertTransformEqual(
+                expected, operations.Blend(identity_operation, progress).Apply());
+        }
+    }
+
+    [Fact]
+    private static void TestBlendScaleFromIdentity()
+    {
+        List<TransformOperations> identity_operations = GetIdentityOperations();
+
+        foreach (var identity_operation in identity_operations)
+        {
+            TransformOperations operations = new();
+            operations.AppendScale(3, 3, 3);
+
+            float progress = 0.5f;
+
+            Transform expected = new();
+            expected.Scale3D(2, 2, 2);
+
+            AssertTransformEqual(
+                expected, operations.Blend(identity_operation, progress).Apply());
+
+            progress = -0.5f;
+
+            expected.MakeIdentity();
+            expected.Scale3D(0, 0, 0);
+
+            AssertTransformEqual(
+                expected, operations.Blend(identity_operation, progress).Apply());
+
+            progress = 1.5f;
+
+            expected.MakeIdentity();
+            expected.Scale3D(4, 4, 4);
+
+            AssertTransformEqual(
+                expected, operations.Blend(identity_operation, progress).Apply());
+        }
+    }
 }
