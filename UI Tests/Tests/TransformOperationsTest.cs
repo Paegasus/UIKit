@@ -82,4 +82,35 @@ public static class TransformOperationsTest
             }
         }
     }
+
+    [Fact]
+    private static void TestMatchingPrefixSameLength()
+    {
+        TransformOperations translates = new();
+        translates.AppendTranslate(1, 0, 0);
+        translates.AppendTranslate(1, 0, 0);
+        translates.AppendTranslate(1, 0, 0);
+
+        TransformOperations skews = new();
+        skews.AppendSkew(0, 2);
+        skews.AppendSkew(0, 2);
+        skews.AppendSkew(0, 2);
+
+        TransformOperations translates2 = new();
+        translates2.AppendTranslate(0, 2, 0);
+        translates2.AppendTranslate(0, 2, 0);
+        translates2.AppendTranslate(0, 2, 0);
+
+        TransformOperations mixed = new();
+        mixed.AppendTranslate(0, 2, 0);
+        mixed.AppendScale(2, 1, 1);
+        mixed.AppendSkew(0, 2);
+
+        TransformOperations translates3 = translates2;
+
+        Assert.Equal(0, translates.MatchingPrefixLength(skews));
+        Assert.Equal(3, translates.MatchingPrefixLength(translates2));
+        Assert.Equal(3, translates.MatchingPrefixLength(translates3));
+        Assert.Equal(1, translates.MatchingPrefixLength(mixed));
+    }
 }
