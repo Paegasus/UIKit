@@ -280,4 +280,28 @@ public static class TransformOperationsTest
         expected.Skew(x, y);
         AssertTransformEqual(expected, operations.Apply());
     }
+
+    [Fact]
+    private static void TestApplyPerspective()
+    {
+        float depth = 800;
+        TransformOperations operations = new();
+        operations.AppendPerspective(depth);
+        Transform expected = new();
+        expected.ApplyPerspectiveDepth(depth);
+        AssertTransformEqual(expected, operations.Apply());
+    }
+
+    [Fact]
+    private static void TestApplyMatrix()
+    {
+        float dx = 1;
+        float dy = 2;
+        float dz = 3;
+        Transform expected_matrix = new();
+        expected_matrix.Translate3D(dx, dy, dz);
+        TransformOperations matrix_transform = new();
+        matrix_transform.AppendMatrix(expected_matrix);
+        AssertTransformEqual(expected_matrix, matrix_transform.Apply());
+    }
 }
