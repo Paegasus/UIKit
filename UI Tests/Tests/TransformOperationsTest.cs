@@ -1383,4 +1383,63 @@ public static class TransformOperationsTest
             AssertTransformEqual(blended_matrix, blended_transform);
         }
     }
+
+    [Fact]
+    private static void TestBlendedBoundsForPerspective()
+    {
+        (float from_depth, float to_depth)[] perspective_depths =
+        [
+            (600.0f, 400.0f),
+            (800.0f, 1000.0f),
+            (800.0f, float.PositiveInfinity)
+        ];
+
+        (float min_progress, float max_progress)[] progresses =
+        [
+            (0.0f, 1.0f),
+            (-0.1f, 1.1f)
+        ];
+
+        foreach (var perspective_depth in perspective_depths)
+        {
+            foreach (var progress in progresses)
+            {
+                TransformOperations operations_from = new();
+                operations_from.AppendPerspective(perspective_depth.from_depth);
+                TransformOperations operations_to = new();
+                operations_to.AppendPerspective(perspective_depth.to_depth);
+                EmpiricallyTestBoundsEquality(operations_from, operations_to, progress.min_progress, progress.max_progress);
+            }
+        }
+    }
+
+    [Fact]
+    private static void TestBlendedBoundsForSkew()
+    {
+        (float from_x, float from_y, float to_x, float to_y)[] skews =
+        [
+            (1.0f, 0.5f, 0.5f, 1.0f),
+            (2.0f, 1.0f, 0.5f, 0.5f)
+        ];
+
+        (float min_progress, float max_progress)[] progresses =
+        [
+            (0.0f, 1.0f),
+            (-0.1f, 1.1f)
+        ];
+
+        foreach (var skew in skews)
+        {
+            foreach (var progress in progresses)
+            {
+                TransformOperations operations_from = new();
+                operations_from.AppendSkew(skew.from_x, skew.from_y);
+                TransformOperations operations_to = new();
+                operations_to.AppendSkew(skew.to_x, skew.to_y);
+                EmpiricallyTestBoundsEquality(operations_from, operations_to,
+                                              progress.min_progress,
+                                              progress.max_progress);
+            }
+        }
+    }
 }
