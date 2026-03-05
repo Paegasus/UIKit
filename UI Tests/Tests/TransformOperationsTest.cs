@@ -1548,4 +1548,22 @@ public static class TransformOperationsTest
         scaling_matrix.AppendMatrix(scaling_transform);
         Assert.False(scaling_matrix.IsTranslation());
     }
+
+    [Fact]
+    private static void TestIsTranslationWithMultipleOperations()
+    {
+        TransformOperations operations1 = new();
+        operations1.AppendSkew(1.0f, 2.0f);
+        operations1.AppendTranslate(1.0f, 2.0f, 3.0f);
+        operations1.AppendIdentity();
+        Assert.False(operations1.IsTranslation());
+
+        TransformOperations operations2 = new();
+        operations2.AppendIdentity();
+        operations2.AppendTranslate(3.0f, 2.0f, 1.0f);
+        Transform translation_transform = new();
+        translation_transform.Translate3D(1.0f, 2.0f, 3.0f);
+        operations2.AppendMatrix(translation_transform);
+        Assert.True(operations2.IsTranslation());
+    }
 }
