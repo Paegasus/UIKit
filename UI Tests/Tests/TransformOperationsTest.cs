@@ -4,6 +4,7 @@ using UI.GFX.Geometry;
 
 using static UI.GFX.Geometry.TransformOperation;
 using static UI.Tests.GeometryUtil;
+using System.Diagnostics;
 
 namespace UI.Tests;
 
@@ -47,7 +48,7 @@ public static class TransformOperationsTest
                 break;
         }
     }
-
+    
     [Fact]
     private static void TestTransformTypesAreUnique()
     {
@@ -226,5 +227,18 @@ public static class TransformOperationsTest
         {
             Assert.Equal(operation.Size, operation.MatchingPrefixLength(none_operation));
         }
+    }
+
+    [Fact]
+    private static void TestApplyTranslate()
+    {
+        float x = 1;
+        float y = 2;
+        float z = 3;
+        TransformOperations operations = new();
+        operations.AppendTranslate(x, y, z);
+        Transform expected = new();
+        expected.Translate3D(x, y, z);
+        AssertTransformEqual(expected, operations.Apply());
     }
 }

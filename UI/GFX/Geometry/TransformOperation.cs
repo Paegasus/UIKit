@@ -34,7 +34,11 @@ public struct TransformOperation
     public float Angle;
     public float PerspectiveM43;
 
-    public TransformOperation() { }
+    public TransformOperation()
+    {
+        // explicitly initialize to identity
+        Matrix = new();
+    }
 
     public readonly bool IsIdentity()
     {

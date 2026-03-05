@@ -32,10 +32,26 @@ public class TransformOperations
     public Transform ApplyRemaining(int start)
     {
         Transform to_return = new();
+        Debug.WriteLine($"to_return before: {to_return}");
+        for (int i = start; i < operations_.Count; i++)
+        {
+            to_return.PreConcat(operations_[i].Matrix);
+        }
+        
+        Debug.WriteLine($"operations_[i].Matrix: {operations_[0].Matrix}");
+        Debug.WriteLine($"to_return after: {to_return}");
+        return to_return;
+    }
+
+    /*
+    public Transform ApplyRemaining(int start)
+    {
+        Transform to_return = new();
         for (int i = start; i < operations_.Count; i++)
             to_return.PreConcat(operations_[i].Matrix);
         return to_return;
     }
+    */
 
     // Given another set of transform operations and a progress in the range
     // [0, 1], returns a transformation matrix representing the intermediate
@@ -234,6 +250,7 @@ public class TransformOperations
     public void AppendTranslate(float x, float y, float z)
     {
         TransformOperation to_add = new();
+        Debug.WriteLine($"AppendTranslate(), to_add.Matrix: {to_add.Matrix}");
         to_add.Matrix.Translate3D(x, y, z);
         to_add.type = TransformOperation.TransformOperationType.Translate;
         to_add.X = x;
