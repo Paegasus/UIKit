@@ -408,11 +408,11 @@ public static class TransformOperationsTest
             ExpectTransformOperationEqual(expected_op, blended_op);
         }
 
-        // Note: In C++ = on a class-type calls the copy constructor — a deep copy.
+        // In C++, assignments for both classes and structs create a copy by default (value semantics):
         //
-        //       TransformOperations base_operations_expected = operations_expected;
+        // TransformOperations base_operations_expected = operations_expected;
         //
-        //       In C# we need to do this explicitly:
+        // In C#, the behavior is fundamentally different, assignments for classes copy the reference:
         TransformOperations base_operations_expected = new(operations_expected);
 
         // Create a mismatch in number of operations. Pairwise interpolation is still
