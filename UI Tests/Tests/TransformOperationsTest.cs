@@ -304,4 +304,31 @@ public static class TransformOperationsTest
         matrix_transform.AppendMatrix(expected_matrix);
         AssertTransformEqual(expected_matrix, matrix_transform.Apply());
     }
+
+    [Fact]
+    private static void TestApplyOrder()
+    {
+        float sx = 2;
+        float sy = 4;
+        float sz = 8;
+
+        float dx = 1;
+        float dy = 2;
+        float dz = 3;
+
+        TransformOperations operations = new();
+        operations.AppendScale(sx, sy, sz);
+        operations.AppendTranslate(dx, dy, dz);
+
+        Transform expected_scale_matrix = new();
+        expected_scale_matrix.Scale3D(sx, sy, sz);
+
+        Transform expected_translate_matrix = new();
+        expected_translate_matrix.Translate3D(dx, dy, dz);
+
+        Transform expected_combined_matrix = expected_scale_matrix;
+        expected_combined_matrix.PreConcat(expected_translate_matrix);
+
+        AssertTransformEqual(expected_combined_matrix, operations.Apply());
+    }
 }
