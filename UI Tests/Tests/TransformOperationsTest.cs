@@ -896,4 +896,63 @@ public static class TransformOperationsTest
 
         AssertTransformEqual(expected, empty_operation.Blend(operations, progress).Apply());
     }
+
+    [Fact]
+    private static void TestBlendPerspectiveToIdentity()
+    {
+        List<TransformOperations> identity_operations = GetIdentityOperations();
+
+        foreach (var identity_operation in identity_operations)
+        {
+            TransformOperations operations = new();
+            operations.AppendPerspective(1000);
+
+            float progress = 0.5f;
+
+            Transform expected = new();
+            expected.ApplyPerspectiveDepth(2000);
+
+            AssertTransformEqual(expected, identity_operation.Blend(operations, progress).Apply());
+        }
+    }
+
+    [Fact]
+    private static void TestExtrapolatePerspectiveBlending()
+    {
+        TransformOperations operations1 = new();
+        operations1.AppendPerspective(1000);
+
+        TransformOperations operations2 = new();
+        operations2.AppendPerspective(500);
+
+        Transform expected = new();
+        expected.ApplyPerspectiveDepth(400);
+
+        AssertTransformEqual(expected, operations1.Blend(operations2, -0.5f).Apply());
+
+        expected.MakeIdentity();
+        expected.ApplyPerspectiveDepth(2000);
+
+        AssertTransformEqual(expected, operations1.Blend(operations2, 1.5f).Apply());
+    }
+
+    [Fact]
+    private static void TestExtrapolateMatrixBlending()
+    {
+        Transform transform1 = new();
+        transform1.Translate3D(1, 1, 1);
+        TransformOperations operations1 = new();
+        operations1.AppendMatrix(transform1);
+
+        Transform transform2 = new();
+        transform2.Translate3D(3, 3, 3);
+        TransformOperations operations2 = new();
+        operations2.AppendMatrix(transform2);
+
+        Transform expected = new();
+        AssertTransformEqual(expected, operations1.Blend(operations2, 1.5f).Apply());
+
+        expected.Translate3D(4, 4, 4);
+        AssertTransformEqual(expected, operations1.Blend(operations2, -0.5f).Apply());
+    }
 }
