@@ -983,4 +983,123 @@ public static class TransformOperationsTest
             identity_matrix,
             identity_transform.Blend(non_decomposible_transform, 1.0f).Apply());
     }
+
+    [Fact]
+    private static void TestBlendedBoundsWhenTypesDoNotMatch()
+    {
+        TransformOperations operations_from = new();
+        operations_from.AppendScale(2.0f, 4.0f, 8.0f);
+        operations_from.AppendTranslate(1.0f, 2.0f, 3.0f);
+
+        TransformOperations operations_to = new();
+        operations_to.AppendTranslate(10.0f, 20.0f, 30.0f);
+        operations_to.AppendScale(4.0f, 8.0f, 16.0f);
+
+        BoxF box = new(1.0f, 1.0f, 1.0f);
+        BoxF bounds;
+
+        float min_progress = 0.0f;
+        float max_progress = 1.0f;
+
+        Assert.False(operations_to.BlendedBoundsForBox(box, operations_from, min_progress, max_progress, out bounds));
+    }
+
+    [Fact]
+    private static void TestBlendedBoundsForIdentity()
+    {
+        TransformOperations operations_from = new();
+        operations_from.AppendIdentity();
+        TransformOperations operations_to = new();
+        operations_to.AppendIdentity();
+
+        BoxF box = new(1.0f, 2.0f, 3.0f);
+        BoxF bounds;
+
+        float min_progress = 0.0f;
+        float max_progress = 1.0f;
+
+        Assert.True(operations_to.BlendedBoundsForBox(box, operations_from, min_progress, max_progress, out bounds));
+        Assert.Equal(box.ToString(), bounds.ToString());
+    }
+
+    [Fact]
+    private static void TestBlendedBoundsForTranslate()
+    {
+        TransformOperations operations_from = new();
+        operations_from.AppendTranslate(3.0f, -4.0f, 2.0f);
+        TransformOperations operations_to = new();
+        operations_to.AppendTranslate(7.0f, 4.0f, -2.0f);
+
+        BoxF box = new(1.0f, 2.0f, 3.0f, 4.0f, 4.0f, 4.0f);
+        BoxF bounds;
+
+        float min_progress = -0.5f;
+        float max_progress = 1.5f;
+        Assert.True(operations_to.BlendedBoundsForBox(box, operations_from, min_progress, max_progress, out bounds));
+        Assert.Equal(new BoxF(2.0f, -6.0f, -1.0f, 12.0f, 20.0f, 12.0f).ToString(), bounds.ToString());
+
+        min_progress = 0.0f;
+        max_progress = 1.0f;
+        Assert.True(operations_to.BlendedBoundsForBox(box, operations_from, min_progress, max_progress, out bounds));
+        Assert.Equal(new BoxF(4.0f, -2.0f, 1.0f, 8.0f, 12.0f, 8.0f).ToString(), bounds.ToString());
+
+        TransformOperations identity = new();
+        Assert.True(operations_to.BlendedBoundsForBox(box, identity, min_progress, max_progress, out bounds));
+        Assert.Equal(new BoxF(1.0f, 2.0f, 1.0f, 11.0f, 8.0f, 6.0f).ToString(), bounds.ToString());
+
+        Assert.True(identity.BlendedBoundsForBox(box, operations_from, min_progress, max_progress, out bounds));
+        Assert.Equal(new BoxF(1.0f, -2.0f, 3.0f, 7.0f, 8.0f, 6.0f).ToString(), bounds.ToString());
+    }
+
+    [Fact]
+    private static void TestBlendedBoundsForScale()
+    {
+        TransformOperations operations_from = new();
+        operations_from.AppendScale(3.0f, 0.5f, 2.0f);
+        TransformOperations operations_to = new();
+        operations_to.AppendScale(7.0f, 4.0f, -2.0f);
+
+        BoxF box = new(1.0f, 2.0f, 3.0f, 4.0f, 4.0f, 4.0f);
+        BoxF bounds;
+
+        float min_progress = -0.5f;
+        float max_progress = 1.5f;
+        Assert.True(operations_to.BlendedBoundsForBox(box, operations_from, min_progress, max_progress, out bounds));
+        Assert.Equal(new BoxF(1.0f, -7.5f, -28.0f, 44.0f, 42.0f, 56.0f).ToString(), bounds.ToString());
+
+        min_progress = 0.0f;
+        max_progress = 1.0f;
+        Assert.True(operations_to.BlendedBoundsForBox(box, operations_from, min_progress, max_progress, out bounds));
+        Assert.Equal(new BoxF(3.0f, 1.0f, -14.0f, 32.0f, 23.0f, 28.0f).ToString(), bounds.ToString());
+
+        TransformOperations identity = new();
+        Assert.True(operations_to.BlendedBoundsForBox(box, identity, min_progress, max_progress, out bounds));
+        Assert.Equal(new BoxF(1.0f, 2.0f, -14.0f, 34.0f, 22.0f, 21.0f).ToString(), bounds.ToString());
+
+        Assert.True(identity.BlendedBoundsForBox(box, operations_from, min_progress, max_progress, out bounds));
+        Assert.Equal(new BoxF(1.0f, 1.0f, 3.0f, 14.0f, 5.0f, 11.0f).ToString(), bounds.ToString());
+    }
+
+    [Fact]
+    private static void TestBlendedBoundsWithZeroScale()
+    {
+        TransformOperations zero_scale = new();
+        zero_scale.AppendScale(0.0f, 0.0f, 0.0f);
+        TransformOperations non_zero_scale = new();
+        non_zero_scale.AppendScale(2.0f, -4.0f, 5.0f);
+
+        BoxF box = new(1.0f, 2.0f, 3.0f, 4.0f, 4.0f, 4.0f);
+        BoxF bounds;
+
+        float min_progress = 0.0f;
+        float max_progress = 1.0f;
+        Assert.True(zero_scale.BlendedBoundsForBox(box, non_zero_scale, min_progress, max_progress, out bounds));
+        Assert.Equal(new BoxF(0.0f, -24.0f, 0.0f, 10.0f, 24.0f, 35.0f).ToString(), bounds.ToString());
+
+        Assert.True(non_zero_scale.BlendedBoundsForBox(box, zero_scale, min_progress, max_progress, out bounds));
+        Assert.Equal(new BoxF(0.0f, -24.0f, 0.0f, 10.0f, 24.0f, 35.0f).ToString(), bounds.ToString());
+
+        Assert.True(zero_scale.BlendedBoundsForBox(box, zero_scale, min_progress, max_progress, out bounds));
+        Assert.Equal(new BoxF().ToString(), bounds.ToString());
+    }
 }
