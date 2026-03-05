@@ -1115,9 +1115,10 @@ public static class TransformOperationsTest
         BoxF box = new(-sqrt_2, -sqrt_2, 0.0f, sqrt_2, sqrt_2, 0.0f);
         BoxF bounds;
 
-        // Since we're rotating 360 degrees, any box with dimensions between 0 and
-        // 2 * sqrt(2) should give the same result.
+        // Since we're rotating 360 degrees,
+        // any box with dimensions between 0 and 2 * sqrt(2) should give the same result.
         float[] sizes = [0.0f, 0.1f, sqrt_2, 2.0f * sqrt_2];
+        
         foreach (float size in sizes)
         {
             box.SetSize(size, size, 0.0f);
