@@ -138,4 +138,27 @@ public static class TransformOperationsTest
         Assert.Equal(3, translates.MatchingPrefixLength(translates2));
         Assert.Equal(3, translates.MatchingPrefixLength(none));
     }
+
+    [Fact]
+    private static void TestMatchingPrefixLengthOrder()
+    {
+        TransformOperations mix_order_identity = new();
+        mix_order_identity.AppendTranslate(0, 0, 0);
+        mix_order_identity.AppendScale(1, 1, 1);
+        mix_order_identity.AppendTranslate(0, 0, 0);
+
+        TransformOperations mix_order_one = new();
+        mix_order_one.AppendTranslate(0, 1, 0);
+        mix_order_one.AppendScale(2, 1, 3);
+        mix_order_one.AppendTranslate(1, 0, 0);
+
+        TransformOperations mix_order_two = new();
+        mix_order_two.AppendTranslate(0, 1, 0);
+        mix_order_two.AppendTranslate(1, 0, 0);
+        mix_order_two.AppendScale(2, 1, 3);
+
+        Assert.Equal(3, mix_order_identity.MatchingPrefixLength(mix_order_one));
+        Assert.Equal(1, mix_order_identity.MatchingPrefixLength(mix_order_two));
+        Assert.Equal(1, mix_order_one.MatchingPrefixLength(mix_order_two));
+    }
 }
