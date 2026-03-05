@@ -161,4 +161,70 @@ public static class TransformOperationsTest
         Assert.Equal(1, mix_order_identity.MatchingPrefixLength(mix_order_two));
         Assert.Equal(1, mix_order_one.MatchingPrefixLength(mix_order_two));
     }
+
+    private static List<TransformOperations> GetIdentityOperations()
+    {
+        List<TransformOperations> operations = new();
+        TransformOperations to_add = new();
+        operations.Add(to_add);
+
+        to_add = new();
+        to_add.AppendTranslate(0, 0, 0);
+        operations.Add(to_add);
+
+        to_add = new();
+        to_add.AppendTranslate(0, 0, 0);
+        to_add.AppendTranslate(0, 0, 0);
+        operations.Add(to_add);
+
+        to_add = new();
+        to_add.AppendScale(1, 1, 1);
+        operations.Add(to_add);
+
+        to_add = new();
+        to_add.AppendScale(1, 1, 1);
+        to_add.AppendScale(1, 1, 1);
+        operations.Add(to_add);
+
+        to_add = new();
+        to_add.AppendSkew(0, 0);
+        operations.Add(to_add);
+
+        to_add = new();
+        to_add.AppendSkew(0, 0);
+        to_add.AppendSkew(0, 0);
+        operations.Add(to_add);
+
+        to_add = new();
+        to_add.AppendRotate(0, 0, 1, 0);
+        operations.Add(to_add);
+
+        to_add = new();
+        to_add.AppendRotate(0, 0, 1, 0);
+        to_add.AppendRotate(0, 0, 1, 0);
+        operations.Add(to_add);
+
+        to_add = new();
+        to_add.AppendMatrix(new Transform());
+        operations.Add(to_add);
+
+        to_add = new();
+        to_add.AppendMatrix(new Transform());
+        to_add.AppendMatrix(new Transform());
+        operations.Add(to_add);
+
+        return operations;
+    }
+
+    [Fact]
+    private static void TestNoneAlwaysMatches()
+    {
+        List<TransformOperations> operations = GetIdentityOperations();
+
+        TransformOperations none_operation = new();
+        foreach (var operation in operations)
+        {
+            Assert.Equal(operation.Size, operation.MatchingPrefixLength(none_operation));
+        }
+    }
 }
