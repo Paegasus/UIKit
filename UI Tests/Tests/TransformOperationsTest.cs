@@ -48,8 +48,37 @@ public static class TransformOperationsTest
     }
 
     [Fact]
-    private static void Test()
+    private static void TestTransformTypesAreUnique()
     {
-        
+        List<TransformOperations> transforms = [];
+
+        TransformOperations to_add = new();
+        to_add.AppendTranslate(1, 0, 0);
+        transforms.Add(to_add);
+
+        to_add = new();
+        to_add.AppendRotate(0, 0, 1, 2);
+        transforms.Add(to_add);
+
+        to_add = new();
+        to_add.AppendScale(2, 2, 2);
+        transforms.Add(to_add);
+
+        to_add = new();
+        to_add.AppendSkew(1, 0);
+        transforms.Add(to_add);
+
+        to_add = new();
+        to_add.AppendPerspective(800);
+        transforms.Add(to_add);
+
+        for (int i = 0; i < transforms.Count; ++i)
+        {
+            for (int j = 0; j < transforms.Count; ++j)
+            {
+                bool matches_type = transforms[i].MatchesTypes(transforms[j]);
+                Assert.True((i == j && matches_type) || !matches_type);
+            }
+        }
     }
 }
