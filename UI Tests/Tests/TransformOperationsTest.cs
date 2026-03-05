@@ -459,7 +459,7 @@ public static class TransformOperationsTest
         expected.PreConcat(blended_translate);
         expected.PreConcat(blended_matrix);
 
-        operations_expected = base_operations_expected;
+        operations_expected = new(base_operations_expected);
         operations_expected.AppendMatrix(blended_matrix);
 
         AssertTransformEqual(expected, blended.Apply());
@@ -471,5 +471,101 @@ public static class TransformOperationsTest
             TransformOperation blended_op = blended.At(i);
             ExpectTransformOperationEqual(expected_op, blended_op);
         }
+    }
+
+    private static void CheckProgress(float progress, in Transform from_matrix, in Transform to_matrix, in TransformOperations from_transform, in TransformOperations to_transform)
+    {
+        Transform expected_matrix = to_matrix;
+        expected_matrix.Blend(from_matrix, progress);
+        AssertTransformEqual(expected_matrix, to_transform.Blend(from_transform, progress).Apply());
+    }
+
+    [Fact]
+    private static void TestBlendProgress()
+    {
+        float sx = 2;
+        float sy = 4;
+        float sz = 8;
+        TransformOperations operations_from = new();
+        operations_from.AppendScale(sx, sy, sz);
+
+        Transform matrix_from = new();
+        matrix_from.Scale3D(sx, sy, sz);
+
+        sx = 4;
+        sy = 8;
+        sz = 16;
+        TransformOperations operations_to = new();
+        operations_to.AppendScale(sx, sy, sz);
+
+        Transform matrix_to = new();
+        matrix_to.Scale3D(sx, sy, sz);
+
+        CheckProgress(-1, matrix_from, matrix_to, operations_from, operations_to);
+        CheckProgress(0, matrix_from, matrix_to, operations_from, operations_to);
+        CheckProgress(0.25f, matrix_from, matrix_to, operations_from, operations_to);
+        CheckProgress(0.5f, matrix_from, matrix_to, operations_from, operations_to);
+        CheckProgress(1, matrix_from, matrix_to, operations_from, operations_to);
+        CheckProgress(2, matrix_from, matrix_to, operations_from, operations_to);
+    }
+
+    [Fact]
+    private static void TestBlendWhenTypesDoNotMatch()
+    {
+        float sx1 = 2;
+        float sy1 = 4;
+        float sz1 = 8;
+
+        float dx1 = 1;
+        float dy1 = 2;
+        float dz1 = 3;
+
+        float sx2 = 4;
+        float sy2 = 8;
+        float sz2 = 16;
+
+        float dx2 = 10;
+        float dy2 = 20;
+        float dz2 = 30;
+
+        TransformOperations operations_from = new();
+        operations_from.AppendScale(sx1, sy1, sz1);
+        operations_from.AppendTranslate(dx1, dy1, dz1);
+
+        TransformOperations operations_to = new();
+        operations_to.AppendTranslate(dx2, dy2, dz2);
+        operations_to.AppendScale(sx2, sy2, sz2);
+
+        Transform from = new();
+        from.Scale3D(sx1, sy1, sz1);
+        from.Translate3D(dx1, dy1, dz1);
+
+        Transform to = new();
+        to.Translate3D(dx2, dy2, dz2);
+        to.Scale3D(sx2, sy2, sz2);
+
+        float progress = 0.25f;
+
+        Transform expected = to;
+        expected.Blend(from, progress);
+
+        AssertTransformEqual(expected, operations_to.Blend(operations_from, progress).Apply());
+    }
+
+    [Fact]
+    private static void TestLargeRotationsWithSameAxis()
+    {
+        TransformOperations operations_from = new();
+        operations_from.AppendRotate(0, 0, 1, 0);
+
+        TransformOperations operations_to = new();
+        operations_to.AppendRotate(0, 0, 2, 360);
+
+        float progress = 0.5f;
+
+        Transform expected = new();
+        expected.RotateAbout(new Vector3DF(0, 0, 1), 180);
+
+        AssertTransformEqual(expected, operations_to.Blend(operations_from, progress).Apply());
     }
 }

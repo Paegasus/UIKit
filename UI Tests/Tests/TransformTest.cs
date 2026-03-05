@@ -3435,7 +3435,7 @@ public static class TransformTest
         foreach (var (transform, expected) in test_cases)
         {
 #if DEBUG
-            Debug.WriteLine($"transform = {transform}, expected = {expected}");
+            //Debug.WriteLine($"transform = {transform}, expected = {expected}");
 #endif
             if (expected)
             {
