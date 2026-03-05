@@ -1191,4 +1191,44 @@ public static class TransformOperationsTest
         Assert.True(operations_to.BlendedBoundsForBox(box, operations_from, 0.0f, 1.0f, out bounds));
         Assert.Equal(box.ToString(), bounds.ToString());
     }
+
+    [Fact]
+    private static void TestBlendedBoundsForRotationProblematicAxes()
+    {
+        // Zeros in the components of the axis of rotation
+        // turned out to be tricky to deal with in practice.
+        // This function tests some potentially problematic axes to ensure sane behavior.
+
+        // Some common values used in the expected boxes.
+        float dim1 = 0.292893f;
+        float dim2 = MathF.Sqrt(2.0f);
+        float dim3 = 2.0f * dim2;
+
+        (float x, float y, float z, BoxF expected)[] tests =
+        [
+            (0.0f, 0.0f, 0.0f, new BoxF(1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f)),
+            (1.0f, 0.0f, 0.0f, new BoxF(1.0f, -dim2, -dim2, 0.0f, dim3, dim3)),
+            (0.0f, 1.0f, 0.0f, new BoxF(-dim2, 1.0f, -dim2, dim3, 0.0f, dim3)),
+            (0.0f, 0.0f, 1.0f, new BoxF(-dim2, -dim2, 1.0f, dim3, dim3, 0.0f)),
+            (1.0f, 1.0f, 0.0f, new BoxF(dim1, dim1, -1.0f, dim2, dim2, 2.0f)),
+            (0.0f, 1.0f, 1.0f, new BoxF(-1.0f, dim1, dim1, 2.0f, dim2, dim2)),
+            (1.0f, 0.0f, 1.0f, new BoxF(dim1, -1.0f, dim1, dim2, 2.0f, dim2))
+        ];
+
+        foreach (var test in tests)
+        {
+            float x = test.x;
+            float y = test.y;
+            float z = test.z;
+            TransformOperations operations_from = new();
+            operations_from.AppendRotate(x, y, z, 0.0f);
+            TransformOperations operations_to = new();
+            operations_to.AppendRotate(x, y, z, 360.0f);
+            BoxF box = new(1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f);
+            BoxF bounds;
+
+            Assert.True(operations_to.BlendedBoundsForBox(box, operations_from, 0.0f, 1.0f, out bounds));
+            Assert.Equal(test.expected.ToString(), bounds.ToString());
+        }
+    }
 }
