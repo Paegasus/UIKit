@@ -32,14 +32,17 @@ public class TransformOperations
     public Transform ApplyRemaining(int start)
     {
         Transform to_return = new();
+#if DEBUG
         Debug.WriteLine($"to_return before: {to_return}");
+#endif
         for (int i = start; i < operations_.Count; i++)
         {
             to_return.PreConcat(operations_[i].Matrix);
         }
-        
+#if DEBUG
         Debug.WriteLine($"operations_[i].Matrix: {operations_[0].Matrix}");
         Debug.WriteLine($"to_return after: {to_return}");
+#endif
         return to_return;
     }
 
@@ -250,7 +253,9 @@ public class TransformOperations
     public void AppendTranslate(float x, float y, float z)
     {
         TransformOperation to_add = new();
+#if DEBUG
         Debug.WriteLine($"AppendTranslate(), to_add.Matrix: {to_add.Matrix}");
+#endif
         to_add.Matrix.Translate3D(x, y, z);
         to_add.type = TransformOperation.TransformOperationType.Translate;
         to_add.X = x;
@@ -324,7 +329,9 @@ public class TransformOperations
         to_add.type = TransformOperation.TransformOperationType.Perspective;
         if (depth.HasValue)
         {
+#if DEBUG
             Debug.Assert(depth.Value >= 1.0f);
+#endif
             to_add.PerspectiveM43 = -1.0f / depth.Value;
         }
         else
@@ -368,7 +375,9 @@ public class TransformOperations
 
     public ref TransformOperation At(int index)
     {
+#if DEBUG
         Debug.Assert(index < Size);
+#endif
         return ref System.Runtime.InteropServices.CollectionsMarshal.AsSpan(operations_)[index];
     }
 

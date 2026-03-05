@@ -1,6 +1,7 @@
 using Xunit;
 
 using UI.GFX.Geometry;
+using UI.GFX.Animation;
 
 using static UI.GFX.Geometry.TransformOperation;
 using static UI.Tests.GeometryUtil;
@@ -330,5 +331,140 @@ public static class TransformOperationsTest
         expected_combined_matrix.PreConcat(expected_translate_matrix);
 
         AssertTransformEqual(expected_combined_matrix, operations.Apply());
+    }
+
+    [Fact]
+    private static void TestBlendOrder()
+    {
+        float sx1 = 2;
+        float sy1 = 4;
+        float sz1 = 8;
+
+        float dx1 = 1;
+        float dy1 = 2;
+        float dz1 = 3;
+
+        float sx2 = 4;
+        float sy2 = 8;
+        float sz2 = 16;
+
+        float dx2 = 10;
+        float dy2 = 20;
+        float dz2 = 30;
+
+        float sx3 = 2;
+        float sy3 = 1;
+        float sz3 = 1;
+
+        TransformOperations operations_from = new();
+        operations_from.AppendScale(sx1, sy1, sz1);
+        operations_from.AppendTranslate(dx1, dy1, dz1);
+
+        TransformOperations operations_to = new();
+        operations_to.AppendScale(sx2, sy2, sz2);
+        operations_to.AppendTranslate(dx2, dy2, dz2);
+
+        Transform scale_from = new();
+        scale_from.Scale3D(sx1, sy1, sz1);
+        Transform translate_from = new();
+        translate_from.Translate3D(dx1, dy1, dz1);
+
+        Transform scale_to = new();
+        scale_to.Scale3D(sx2, sy2, sz2);
+        Transform translate_to = new();
+        translate_to.Translate3D(dx2, dy2, dz2);
+
+        float progress = 0.25f;
+
+        TransformOperations operations_expected = new();
+        operations_expected.AppendScale(
+            Tween.FloatValueBetween(progress, sx1, sx2),
+            Tween.FloatValueBetween(progress, sy1, sy2),
+            Tween.FloatValueBetween(progress, sz1, sz2));
+
+        operations_expected.AppendTranslate(
+            Tween.FloatValueBetween(progress, dx1, dx2),
+            Tween.FloatValueBetween(progress, dy1, dy2),
+            Tween.FloatValueBetween(progress, dz1, dz2));
+
+        Transform blended_scale = scale_to;
+        blended_scale.Blend(scale_from, progress);
+
+        Transform blended_translate = translate_to;
+        blended_translate.Blend(translate_from, progress);
+
+        Transform expected = blended_scale;
+        expected.PreConcat(blended_translate);
+
+        TransformOperations blended = operations_to.Blend(operations_from, progress);
+
+        AssertTransformEqual(expected, blended.Apply());
+        AssertTransformEqual(operations_expected.Apply(), blended.Apply());
+        Assert.Equal(operations_expected.Size, blended.Size);
+        for (int i = 0; i < operations_expected.Size; ++i)
+        {
+            TransformOperation expected_op = operations_expected.At(i);
+            TransformOperation blended_op = blended.At(i);
+            ExpectTransformOperationEqual(expected_op, blended_op);
+        }
+
+        TransformOperations base_operations_expected = operations_expected;
+
+        // Create a mismatch in number of operations. Pairwise interpolation is still
+        // used when the operations match up to the length of the shorter list.
+        operations_to.AppendScale(sx3, sy3, sz3);
+
+        Transform appended_scale = new();
+        appended_scale.Scale3D(sx3, sy3, sz3);
+
+        Transform blended_append_scale = appended_scale;
+        blended_append_scale.Blend(new Transform(), progress);
+        expected.PreConcat(blended_append_scale);
+
+        operations_expected.AppendScale(
+            Tween.FloatValueBetween(progress, 1, sx3),
+            Tween.FloatValueBetween(progress, 1, sy3),
+            Tween.FloatValueBetween(progress, 1, sz3));
+
+        blended = operations_to.Blend(operations_from, progress);
+
+        AssertTransformEqual(expected, blended.Apply());
+        AssertTransformEqual(operations_expected.Apply(), blended.Apply());
+        Assert.Equal(operations_expected.Size, blended.Size);
+        for (int i = 0; i < operations_expected.Size; ++i)
+        {
+            TransformOperation expected_op = operations_expected.At(i);
+            TransformOperation blended_op = blended.At(i);
+            ExpectTransformOperationEqual(expected_op, blended_op);
+        }
+
+        // Create a mismatch, forcing matrix interpolation for the last operator pair.
+        operations_from.AppendRotate(0, 0, 1, 90);
+
+        blended = operations_to.Blend(operations_from, progress);
+
+        Transform transform_from = new();
+        transform_from.RotateAboutZAxis(90);
+        Transform transform_to = new();
+        transform_to.Scale3D(sx3, sy3, sz3);
+        Transform blended_matrix = transform_to;
+        blended_matrix.Blend(transform_from, progress);
+
+        expected = blended_scale;
+        expected.PreConcat(blended_translate);
+        expected.PreConcat(blended_matrix);
+
+        operations_expected = base_operations_expected;
+        operations_expected.AppendMatrix(blended_matrix);
+
+        AssertTransformEqual(expected, blended.Apply());
+        AssertTransformEqual(operations_expected.Apply(), blended.Apply());
+        Assert.Equal(operations_expected.Size, blended.Size);
+        for (int i = 0; i < operations_expected.Size; ++i)
+        {
+            TransformOperation expected_op = operations_expected.At(i);
+            TransformOperation blended_op = blended.At(i);
+            ExpectTransformOperationEqual(expected_op, blended_op);
+        }
     }
 }
