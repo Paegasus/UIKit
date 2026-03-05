@@ -2,6 +2,7 @@ using Xunit;
 
 using UI.GFX.Geometry;
 
+using static UI.GFX.Geometry.TransformOperation;
 using static UI.Tests.GeometryUtil;
 
 namespace UI.Tests;
@@ -16,33 +17,33 @@ public static class TransformOperationsTest
         
         switch (lhs.type)
         {
-            case TransformOperation.TransformOperationType.Translate:
+            case TransformOperationType.Translate:
                 AssertFloatEqual(lhs.X, rhs.X);
                 AssertFloatEqual(lhs.Y, rhs.Y);
                 AssertFloatEqual(lhs.Z, rhs.Z);
                 break;
-            case TransformOperation.TransformOperationType.Rotate:
+            case TransformOperationType.Rotate:
                 AssertFloatEqual(lhs.X, rhs.X);
                 AssertFloatEqual(lhs.Y, rhs.Y);
                 AssertFloatEqual(lhs.Z, rhs.Z);
                 AssertFloatEqual(lhs.Angle, rhs.Angle);
                 break;
-            case TransformOperation.TransformOperationType.Scale:
+            case TransformOperationType.Scale:
                 AssertFloatEqual(lhs.X, rhs.X);
                 AssertFloatEqual(lhs.Y, rhs.Y);
                 AssertFloatEqual(lhs.Z, rhs.Z);
                 break;
-            case TransformOperation.TransformOperationType.SkewX:
-            case TransformOperation.TransformOperationType.SkewY:
-            case TransformOperation.TransformOperationType.Skew:
+            case TransformOperationType.SkewX:
+            case TransformOperationType.SkewY:
+            case TransformOperationType.Skew:
                 AssertFloatEqual(lhs.X, rhs.X);
                 AssertFloatEqual(lhs.Y, rhs.Y);
                 break;
-            case TransformOperation.TransformOperationType.Perspective:
+            case TransformOperationType.Perspective:
                 AssertFloatEqual(lhs.PerspectiveM43, rhs.PerspectiveM43);
                 break;
-            case TransformOperation.TransformOperationType.Matrix:
-            case TransformOperation.TransformOperationType.Identity:
+            case TransformOperationType.Matrix:
+            case TransformOperationType.Identity:
                 break;
         }
     }
