@@ -568,4 +568,136 @@ public static class TransformOperationsTest
 
         AssertTransformEqual(expected, operations_to.Blend(operations_from, progress).Apply());
     }
+
+    [Fact]
+    private static void TestLargeRotationsWithSameAxisInDifferentDirection()
+    {
+        TransformOperations operations_from = new();
+        operations_from.AppendRotate(0, 0, 1, 180);
+
+        TransformOperations operations_to = new();
+        operations_to.AppendRotate(0, 0, -1, 180);
+
+        float progress = 0.5f;
+
+        Transform expected = new();
+
+        AssertTransformEqual(expected,
+                            operations_to.Blend(operations_from, progress).Apply());
+    }
+
+    [Fact]
+    private static void TestLargeRotationsWithDifferentAxes()
+    {
+        TransformOperations operations_from = new();
+        operations_from.AppendRotate(0, 0, 1, 175);
+
+        TransformOperations operations_to = new();
+        operations_to.AppendRotate(0, 1, 0, 175);
+
+        float progress = 0.5f;
+        Transform matrix_from = new();
+        matrix_from.RotateAbout(new Vector3DF(0, 0, 1), 175);
+
+        Transform matrix_to = new();
+        matrix_to.RotateAbout(new Vector3DF(0, 1, 0), 175);
+
+        Transform expected = matrix_to;
+        expected.Blend(matrix_from, progress);
+
+        AssertTransformEqual(expected, operations_to.Blend(operations_from, progress).Apply());
+    }
+
+    [Fact]
+    private static void TestRotationFromZeroDegDifferentAxes()
+    {
+        TransformOperations operations_from = new();
+        operations_from.AppendRotate(0, 0, 1, 0);
+
+        TransformOperations operations_to = new();
+        operations_to.AppendRotate(0, 1, 0, 450);
+
+        float progress = 0.5f;
+        Transform expected = new();
+        expected.RotateAbout(new Vector3DF(0, 1, 0), 225);
+        AssertTransformEqual(expected, operations_to.Blend(operations_from, progress).Apply());
+    }
+
+    [Fact]
+    private static void TestRotationFromZeroDegSameAxes()
+    {
+        TransformOperations operations_from = new();
+        operations_from.AppendRotate(0, 0, 1, 0);
+
+        TransformOperations operations_to = new();
+        operations_to.AppendRotate(0, 0, 1, 450);
+
+        float progress = 0.5f;
+        Transform expected = new();
+        expected.RotateAbout(new Vector3DF(0, 0, 1), 225);
+        AssertTransformEqual(expected, operations_to.Blend(operations_from, progress).Apply());
+    }
+
+    [Fact]
+    private static void TestRotationToZeroDegDifferentAxes()
+    {
+        TransformOperations operations_from = new();
+        operations_from.AppendRotate(0, 1, 0, 450);
+
+        TransformOperations operations_to = new();
+        operations_to.AppendRotate(0, 0, 1, 0);
+
+        float progress = 0.5f;
+        Transform expected = new();
+        expected.RotateAbout(new Vector3DF(0, 1, 0), 225);
+        AssertTransformEqual(expected, operations_to.Blend(operations_from, progress).Apply());
+    }
+
+    [Fact]
+    private static void TestRotationToZeroDegSameAxes()
+    {
+        TransformOperations operations_from = new();
+        operations_from.AppendRotate(0, 0, 1, 450);
+
+        TransformOperations operations_to = new();
+        operations_to.AppendRotate(0, 0, 1, 0);
+
+        float progress = 0.5f;
+        Transform expected = new();
+        expected.RotateAbout(new Vector3DF(0, 0, 1), 225);
+        AssertTransformEqual(expected, operations_to.Blend(operations_from, progress).Apply());
+    }
+
+    [Fact]
+    private static void TestBlendRotationFromIdentity()
+    {
+        List<TransformOperations> identity_operations = GetIdentityOperations();
+
+        foreach (var identity_operation in identity_operations)
+        {
+            TransformOperations operations = new();
+            operations.AppendRotate(0, 0, 1, 90);
+
+            float progress = 0.5f;
+
+            Transform expected = new();
+            expected.RotateAbout(new Vector3DF(0, 0, 1), 45);
+
+            AssertTransformEqual(expected, operations.Blend(identity_operation, progress).Apply());
+
+            progress = -0.5f;
+
+            expected.MakeIdentity();
+            expected.RotateAbout(new Vector3DF(0, 0, 1), -45);
+
+            AssertTransformEqual(expected, operations.Blend(identity_operation, progress).Apply());
+
+            progress = 1.5f;
+
+            expected.MakeIdentity();
+            expected.RotateAbout(new Vector3DF(0, 0, 1), 135);
+
+            AssertTransformEqual(expected, operations.Blend(identity_operation, progress).Apply());
+        }
+    }
 }
