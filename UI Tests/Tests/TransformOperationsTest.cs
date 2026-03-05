@@ -1756,4 +1756,59 @@ public static class TransformOperationsTest
         lhs.At(6).PerspectiveM43 = -1.0f / 810;
         Assert.False(lhs.ApproximatelyEqual(rhs, tolerance));
     }
+
+    [Fact]
+    private static void TestTestDecompositionCache()
+    {
+        TransformOperations transforms = new();
+        Assert.Equal(0, transforms.decomposed_transforms_.Count);
+        Assert.True(transforms.ComputeDecomposedTransform(0));
+        Assert.Equal(1, transforms.decomposed_transforms_.Count);
+
+        // Reset cache when appending a scale transform.
+        transforms.AppendScale(2.0f, 2.0f, 2.0f);
+        Assert.Equal(0, transforms.decomposed_transforms_.Count);
+        Assert.True(transforms.ComputeDecomposedTransform(1));
+        Assert.Equal(1, transforms.decomposed_transforms_.Count);
+        Assert.True(transforms.ComputeDecomposedTransform(1));
+        Assert.Equal(1, transforms.decomposed_transforms_.Count);
+        Assert.True(transforms.ComputeDecomposedTransform(0));
+        Assert.Equal(2, transforms.decomposed_transforms_.Count);
+
+        // Reset cache when appending a rotation transform.
+        transforms.AppendRotate(1, 0, 0, 45);
+        Assert.Equal(0, transforms.decomposed_transforms_.Count);
+        Assert.True(transforms.ComputeDecomposedTransform(0));
+        Assert.Equal(1, transforms.decomposed_transforms_.Count);
+
+        // Reset cache when appending a translation transform.
+        transforms.AppendTranslate(1, 1, 1);
+        Assert.Equal(0, transforms.decomposed_transforms_.Count);
+        Assert.True(transforms.ComputeDecomposedTransform(0));
+        Assert.Equal(1, transforms.decomposed_transforms_.Count);
+
+        // Reset cache when appending a skew transform.
+        transforms.AppendSkew(1, 0);
+        Assert.Equal(0, transforms.decomposed_transforms_.Count);
+        Assert.True(transforms.ComputeDecomposedTransform(0));
+        Assert.Equal(1, transforms.decomposed_transforms_.Count);
+
+        // Reset cache when appending a perspective transform.
+        transforms.AppendPerspective(800);
+        Assert.Equal(0, transforms.decomposed_transforms_.Count);
+        Assert.True(transforms.ComputeDecomposedTransform(0));
+        Assert.Equal(1, transforms.decomposed_transforms_.Count);
+
+        // Reset cache when appending a matrix transform.
+        transforms.AppendMatrix(new Transform());
+        Assert.Equal(0, transforms.decomposed_transforms_.Count);
+        Assert.True(transforms.ComputeDecomposedTransform(0));
+        Assert.Equal(1, transforms.decomposed_transforms_.Count);
+
+        // Reset cache when appending a generic transform operation.
+        transforms.Append(new TransformOperation());
+        Assert.Equal(0, transforms.decomposed_transforms_.Count);
+        Assert.True(transforms.ComputeDecomposedTransform(0));
+        Assert.Equal(1, transforms.decomposed_transforms_.Count);
+    }
 }

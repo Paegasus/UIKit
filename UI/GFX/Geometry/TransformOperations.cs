@@ -15,7 +15,7 @@ public class TransformOperations
     private readonly List<TransformOperation> operations_ = new();
 
     // For efficiency, we cache the decomposed transforms.
-    private readonly Dictionary<int, DecomposedTransform> decomposed_transforms_ = new();
+    public readonly Dictionary<int, DecomposedTransform> decomposed_transforms_ = new();
 
     public TransformOperations() { }
 
@@ -436,7 +436,7 @@ public class TransformOperations
     }
 
     // FRIEND_TEST_ALL_PREFIXES(TransformOperationsTest, TestDecompositionCache)
-    internal bool ComputeDecomposedTransform(int start_offset)
+    public bool ComputeDecomposedTransform(int start_offset)
     {
         if (!decomposed_transforms_.ContainsKey(start_offset))
         {
