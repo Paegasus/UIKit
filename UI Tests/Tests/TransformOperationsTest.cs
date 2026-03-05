@@ -772,4 +772,128 @@ public static class TransformOperationsTest
                 expected, operations.Blend(identity_operation, progress).Apply());
         }
     }
+
+    [Fact]
+    private static void TestBlendSkewFromEmpty()
+    {
+        TransformOperations empty_operation = new();
+
+        TransformOperations operations = new();
+        operations.AppendSkew(2, 2);
+
+        float progress = 0.5f;
+
+        Transform expected = new();
+        expected.Skew(1, 1);
+
+        AssertTransformEqual(expected, operations.Blend(empty_operation, progress).Apply());
+
+        progress = -0.5f;
+
+        expected.MakeIdentity();
+        expected.Skew(-1, -1);
+
+        AssertTransformEqual(expected, operations.Blend(empty_operation, progress).Apply());
+
+        progress = 1.5f;
+
+        expected.MakeIdentity();
+        expected.Skew(3, 3);
+
+        AssertTransformEqual(expected, operations.Blend(empty_operation, progress).Apply());
+    }
+
+    [Fact]
+    private static void TestBlendPerspectiveFromIdentity()
+    {
+        List<TransformOperations> identity_operations = GetIdentityOperations();
+
+        foreach (var identity_operation in identity_operations)
+        {
+            TransformOperations operations = new();
+            operations.AppendPerspective(1000);
+
+            float progress = 0.5f;
+
+            Transform expected = new();
+            expected.ApplyPerspectiveDepth(2000);
+
+            AssertTransformEqual(expected, operations.Blend(identity_operation, progress).Apply());
+        }
+    }
+
+    [Fact]
+    private static void TestBlendRotationToIdentity()
+    {
+        List<TransformOperations> identity_operations =
+      GetIdentityOperations();
+
+        foreach (var identity_operation in identity_operations)
+        {
+            TransformOperations operations = new();
+            operations.AppendRotate(0, 0, 1, 90);
+
+            float progress = 0.5f;
+
+            Transform expected = new();
+            expected.RotateAbout(new Vector3DF(0, 0, 1), 45);
+
+            AssertTransformEqual(expected, identity_operation.Blend(operations, progress).Apply());
+        }
+    }
+
+    [Fact]
+    private static void TestBlendTranslationToIdentity()
+    {
+        List<TransformOperations> identity_operations = GetIdentityOperations();
+
+        foreach (var identity_operation in identity_operations)
+        {
+            TransformOperations operations = new();
+            operations.AppendTranslate(2, 2, 2);
+
+            float progress = 0.5f;
+
+            Transform expected = new();
+            expected.Translate3D(1, 1, 1);
+
+            AssertTransformEqual(expected, identity_operation.Blend(operations, progress).Apply());
+        }
+    }
+
+    [Fact]
+    private static void TestBlendScaleToIdentity()
+    {
+        List<TransformOperations> identity_operations =
+      GetIdentityOperations();
+
+        foreach (var identity_operation in identity_operations)
+        {
+            TransformOperations operations = new();
+            operations.AppendScale(3, 3, 3);
+
+            float progress = 0.5f;
+
+            Transform expected = new();
+            expected.Scale3D(2, 2, 2);
+
+            AssertTransformEqual(expected, identity_operation.Blend(operations, progress).Apply());
+        }
+    }
+
+    [Fact]
+    private static void TestBlendSkewToEmpty()
+    {
+        TransformOperations empty_operation = new();
+
+        TransformOperations operations = new();
+        operations.AppendSkew(2, 2);
+
+        float progress = 0.5f;
+
+        Transform expected = new();
+        expected.Skew(1, 1);
+
+        AssertTransformEqual(expected, empty_operation.Blend(operations, progress).Apply());
+    }
 }
