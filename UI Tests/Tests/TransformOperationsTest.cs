@@ -1231,4 +1231,127 @@ public static class TransformOperationsTest
             Assert.Equal(test.expected.ToString(), bounds.ToString());
         }
     }
+
+    private static void ExpectBoxesApproximatelyEqual(in BoxF lhs, in BoxF rhs, float tolerance)
+    {
+        Assert.Equal(lhs.X, rhs.X, tolerance);
+        Assert.Equal(lhs.Y, rhs.Y, tolerance);
+        Assert.Equal(lhs.Z, rhs.Z, tolerance);
+        Assert.Equal(lhs.Width, rhs.Width, tolerance);
+        Assert.Equal(lhs.Height, rhs.Height, tolerance);
+        Assert.Equal(lhs.Depth, rhs.Depth, tolerance);
+    }
+
+    private static void EmpiricallyTestBounds(in TransformOperations from, in TransformOperations to, float min_progress, float max_progress, bool test_containment_only)
+    {
+        BoxF box = new(200.0f, 500.0f, 100.0f, 100.0f, 300.0f, 200.0f);
+        BoxF bounds;
+        Assert.True(to.BlendedBoundsForBox(box, from, min_progress, max_progress, out bounds));
+
+        bool first_time = true;
+        BoxF empirical_bounds = new();
+        const int kNumSteps = 10;
+        for (int step = 0; step < kNumSteps; ++step)
+        {
+            float t = step / (kNumSteps - 1.0f);
+            t = Tween.FloatValueBetween(t, min_progress, max_progress);
+            Transform partial_transform = to.Blend(from, t).Apply();
+            BoxF transformed = partial_transform.MapBox(box);
+
+            if (first_time)
+            {
+                empirical_bounds = transformed;
+                first_time = false;
+            }
+            else
+            {
+                empirical_bounds.Union(transformed);
+            }
+        }
+
+        if (test_containment_only)
+        {
+            BoxF unified_bounds = bounds;
+            unified_bounds.Union(empirical_bounds);
+            // Convert to the screen space rects these boxes represent.
+            Rect bounds_rect = RectConversions.ToEnclosingRect(new RectF(bounds.X, bounds.Y, bounds.Width, bounds.Height));
+            Rect unified_bounds_rect = RectConversions.ToEnclosingRect(new RectF(unified_bounds.X, unified_bounds.Y, unified_bounds.Width, unified_bounds.Height));
+            Assert.Equal(bounds_rect.ToString(), unified_bounds_rect.ToString());
+        }
+        else
+        {
+            // Our empirical estimate will be a little rough since we're only doing
+            // 100 samples.
+            const float kTolerance = 1e-2f;
+            ExpectBoxesApproximatelyEqual(empirical_bounds, bounds, kTolerance);
+        }
+    }
+
+    private static void EmpiricallyTestBoundsEquality(in TransformOperations from, in TransformOperations to, float min_progress, float max_progress)
+    {
+        EmpiricallyTestBounds(from, to, min_progress, max_progress, false);
+    }
+
+    private static void EmpiricallyTestBoundsContainment(in TransformOperations from, in TransformOperations to, float min_progress, float max_progress)
+    {
+        EmpiricallyTestBounds(from, to, min_progress, max_progress, true);
+    }
+
+    [Fact]
+    private static void TestBlendedBoundsForRotationEmpiricalTests()
+    {
+        // Sets up various axis angle combinations, computes the bounding box 
+        // and empirically tests that the transformed bounds are indeed contained
+        // by the computed bounding box.
+
+        (float x, float y, float z)[] axes =
+        [
+            (1.0f, 1.0f, 1.0f),   (-1.0f, -1.0f, -1.0f), (-1.0f, 2.0f, 3.0f),
+            (1.0f, -2.0f, 3.0f),  (1.0f, 2.0f, -3.0f),   (0.0f, 0.0f, 0.0f),
+            (1.0f, 0.0f, 0.0f),   (0.0f, 1.0f, 0.0f),    (0.0f, 0.0f, 1.0f),
+            (1.0f, 1.0f, 0.0f),   (0.0f, 1.0f, 1.0f),    (1.0f, 0.0f, 1.0f),
+            (-1.0f, 0.0f, 0.0f),  (0.0f, -1.0f, 0.0f),   (0.0f, 0.0f, -1.0f),
+            (-1.0f, -1.0f, 0.0f), (0.0f, -1.0f, -1.0f),  (-1.0f, 0.0f, -1.0f)
+        ];
+
+        (float theta_from, float theta_to)[] angles =
+        [
+            (5.0f, 10.0f),
+            (10.0f, 5.0f),
+            (0.0f, 360.0f),
+            (20.0f, 180.0f),
+            (-20.0f, -180.0f),
+            (180.0f, -220.0f),
+            (220.0f, 320.0f)
+        ];
+
+        // We can go beyond the range [0, 1] (the bezier might slide out of this range
+        // at either end), but since the first and last knots are at (0, 0) and (1, 1)
+        // we will never go within it, so these tests are sufficient.
+        (float min_progress, float max_progress)[] progresses =
+        [
+            (0.0f, 1.0f),
+            (-.25f, 1.25f)
+        ];
+
+        foreach (var axis in axes)
+        {
+            foreach (var angle in angles)
+            {
+                foreach (var progress in progresses)
+                {
+                    float x = axis.x;
+                    float y = axis.y;
+                    float z = axis.z;
+                    TransformOperations operations_from = new();
+                    operations_from.AppendRotate(x, y, z, angle.theta_from);
+                    TransformOperations operations_to = new();
+                    operations_to.AppendRotate(x, y, z, angle.theta_to);
+                    EmpiricallyTestBoundsContainment(operations_from, operations_to,
+                                         progress.min_progress,
+                                         progress.max_progress);
+                }
+            }
+        }
+    }
 }
