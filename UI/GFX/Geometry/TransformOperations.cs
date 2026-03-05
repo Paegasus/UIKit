@@ -1,7 +1,3 @@
-// Copyright 2013 The Chromium Authors
-// Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
-
 using System.Diagnostics;
 
 namespace UI.GFX.Geometry;
@@ -113,12 +109,12 @@ public class TransformOperations
     {
         foreach (var operation in operations_)
         {
-            switch (operation.OperationType)
+            switch (operation.type)
             {
-                case TransformOperation.Type.Identity:
-                case TransformOperation.Type.Translate:
+                case TransformOperation.TransformOperationType.Identity:
+                case TransformOperation.TransformOperationType.Translate:
                     continue;
-                case TransformOperation.Type.Matrix:
+                case TransformOperation.TransformOperationType.Matrix:
                     if (!operation.Matrix.IsIdentityOrTranslation)
                         return false;
                     continue;
@@ -134,13 +130,13 @@ public class TransformOperations
     {
         foreach (var operation in operations_)
         {
-            switch (operation.OperationType)
+            switch (operation.type)
             {
-                case TransformOperation.Type.Identity:
-                case TransformOperation.Type.Translate:
-                case TransformOperation.Type.Scale:
+                case TransformOperation.TransformOperationType.Identity:
+                case TransformOperation.TransformOperationType.Translate:
+                case TransformOperation.TransformOperationType.Scale:
                     continue;
-                case TransformOperation.Type.Matrix:
+                case TransformOperation.TransformOperationType.Matrix:
                     if (!operation.Matrix.IsIdentity &&
                         !operation.Matrix.IsScaleOrTranslation)
                         return false;
@@ -163,7 +159,7 @@ public class TransformOperations
             return false;
 
         for (int i = 0; i < operations_.Count; ++i)
-            if (operations_[i].OperationType != other.operations_[i].OperationType)
+            if (operations_[i].type != other.operations_[i].type)
                 return false;
 
         return true;
@@ -176,7 +172,7 @@ public class TransformOperations
         int num_operations = Math.Min(operations_.Count, other.operations_.Count);
         for (int i = 0; i < num_operations; ++i)
         {
-            if (operations_[i].OperationType != other.operations_[i].OperationType)
+            if (operations_[i].type != other.operations_[i].type)
                 return i;
         }
         return Math.Max(operations_.Count, other.operations_.Count);
@@ -196,13 +192,13 @@ public class TransformOperations
         scale = 1f;
         foreach (var operation in operations_)
         {
-            switch (operation.OperationType)
+            switch (operation.type)
             {
-                case TransformOperation.Type.Identity:
-                case TransformOperation.Type.Translate:
-                case TransformOperation.Type.Rotate:
+                case TransformOperation.TransformOperationType.Identity:
+                case TransformOperation.TransformOperationType.Translate:
+                case TransformOperation.TransformOperationType.Rotate:
                     continue;
-                case TransformOperation.Type.Matrix:
+                case TransformOperation.TransformOperationType.Matrix:
                 {
                     if (operation.Matrix.HasPerspective)
                         return false;
@@ -212,9 +208,9 @@ public class TransformOperations
                     scale *= Math.Max(scale_components.X, scale_components.Y);
                     break;
                 }
-                case TransformOperation.Type.SkewX:
-                case TransformOperation.Type.SkewY:
-                case TransformOperation.Type.Skew:
+                case TransformOperation.TransformOperationType.SkewX:
+                case TransformOperation.TransformOperationType.SkewY:
+                case TransformOperation.TransformOperationType.Skew:
                 {
                     float x_component = TanDegrees(operation.X);
                     float y_component = TanDegrees(operation.Y);
@@ -223,9 +219,9 @@ public class TransformOperations
                     scale *= Math.Max(x_scale, y_scale);
                     break;
                 }
-                case TransformOperation.Type.Perspective:
+                case TransformOperation.TransformOperationType.Perspective:
                     return false;
-                case TransformOperation.Type.Scale:
+                case TransformOperation.TransformOperationType.Scale:
                     scale *= Math.Max(MathF.Abs(operation.X),
                              Math.Max(MathF.Abs(operation.Y),
                                       MathF.Abs(operation.Z)));
@@ -239,7 +235,7 @@ public class TransformOperations
     {
         TransformOperation to_add = new();
         to_add.Matrix.Translate3D(x, y, z);
-        to_add.OperationType = TransformOperation.Type.Translate;
+        to_add.type = TransformOperation.TransformOperationType.Translate;
         to_add.X = x;
         to_add.Y = y;
         to_add.Z = z;
@@ -250,7 +246,7 @@ public class TransformOperations
     public void AppendRotate(float x, float y, float z, float degrees)
     {
         TransformOperation to_add = new();
-        to_add.OperationType = TransformOperation.Type.Rotate;
+        to_add.type = TransformOperation.TransformOperationType.Rotate;
         to_add.X     = x;
         to_add.Y     = y;
         to_add.Z     = z;
@@ -263,7 +259,7 @@ public class TransformOperations
     public void AppendScale(float x, float y, float z)
     {
         TransformOperation to_add = new();
-        to_add.OperationType = TransformOperation.Type.Scale;
+        to_add.type = TransformOperation.TransformOperationType.Scale;
         to_add.X = x;
         to_add.Y = y;
         to_add.Z = z;
@@ -275,7 +271,7 @@ public class TransformOperations
     public void AppendSkewX(float x)
     {
         TransformOperation to_add = new();
-        to_add.OperationType = TransformOperation.Type.SkewX;
+        to_add.type = TransformOperation.TransformOperationType.SkewX;
         to_add.X = x;
         to_add.Y = 0;
         to_add.Bake();
@@ -286,7 +282,7 @@ public class TransformOperations
     public void AppendSkewY(float y)
     {
         TransformOperation to_add = new();
-        to_add.OperationType = TransformOperation.Type.SkewY;
+        to_add.type = TransformOperation.TransformOperationType.SkewY;
         to_add.X = 0;
         to_add.Y = y;
         to_add.Bake();
@@ -297,7 +293,7 @@ public class TransformOperations
     public void AppendSkew(float x, float y)
     {
         TransformOperation to_add = new();
-        to_add.OperationType = TransformOperation.Type.Skew;
+        to_add.type = TransformOperation.TransformOperationType.Skew;
         to_add.X = x;
         to_add.Y = y;
         to_add.Bake();
@@ -308,7 +304,7 @@ public class TransformOperations
     public void AppendPerspective(float? depth)
     {
         TransformOperation to_add = new();
-        to_add.OperationType = TransformOperation.Type.Perspective;
+        to_add.type = TransformOperation.TransformOperationType.Perspective;
         if (depth.HasValue)
         {
             Debug.Assert(depth.Value >= 1.0f);
@@ -327,7 +323,7 @@ public class TransformOperations
     {
         TransformOperation to_add = new();
         to_add.Matrix         = matrix;
-        to_add.OperationType  = TransformOperation.Type.Matrix;
+        to_add.type  = TransformOperation.TransformOperationType.Matrix;
         operations_.Add(to_add);
         decomposed_transforms_.Clear();
     }

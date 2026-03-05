@@ -4,7 +4,7 @@ namespace UI.GFX.Geometry;
 
 public struct TransformOperation
 {
-    public enum Type
+    public enum TransformOperationType
     {
         Translate,
         Rotate,
@@ -19,7 +19,7 @@ public struct TransformOperation
 
     private const float kAngleEpsilon = 1e-4f;
 
-    public Type OperationType = Type.Identity;
+    public TransformOperationType type = TransformOperationType.Identity;
     public Transform Matrix;
 
     // Union fields — only fields relevant to OperationType are valid.
@@ -38,7 +38,7 @@ public struct TransformOperation
 
     public readonly bool IsIdentity()
     {
-        if (OperationType == Type.Rotate)
+        if (type == TransformOperationType.Rotate)
         {
             // We can't use Matrix.IsIdentity() because rotate(n*360) is not
             // identity, but the matrix is identity.
@@ -53,31 +53,31 @@ public struct TransformOperation
     public void Bake()
     {
         Matrix.MakeIdentity();
-        switch (OperationType)
+        switch (type)
         {
-            case Type.Translate:
+            case TransformOperationType.Translate:
                 Matrix.Translate3D(X, Y, Z);
                 break;
-            case Type.Rotate:
+            case TransformOperationType.Rotate:
                 Matrix.RotateAbout(new Vector3DF(X, Y, Z), Angle);
                 break;
-            case Type.Scale:
+            case TransformOperationType.Scale:
                 Matrix.Scale3D(X, Y, Z);
                 break;
-            case Type.SkewX:
-            case Type.SkewY:
-            case Type.Skew:
+            case TransformOperationType.SkewX:
+            case TransformOperationType.SkewY:
+            case TransformOperationType.Skew:
                 Matrix.Skew(X, Y);
                 break;
-            case Type.Perspective:
+            case TransformOperationType.Perspective:
             {
                 Transform m = new();
                 m.set_rc(3, 2, PerspectiveM43);
                 Matrix.PreConcat(m);
                 break;
             }
-            case Type.Matrix:
-            case Type.Identity:
+            case TransformOperationType.Matrix:
+            case TransformOperationType.Identity:
                 break;
         }
     }
@@ -85,33 +85,33 @@ public struct TransformOperation
     public readonly bool ApproximatelyEqual(in TransformOperation other, float tolerance)
     {
         Debug.Assert(tolerance >= 0);
-        if (OperationType != other.OperationType)
+        if (type != other.type)
             return false;
-        switch (OperationType)
+        switch (type)
         {
-            case Type.Translate:
+            case TransformOperationType.Translate:
                 return MathF.Abs(X - other.X) <= tolerance &&
                        MathF.Abs(Y - other.Y) <= tolerance &&
                        MathF.Abs(Z - other.Z) <= tolerance;
-            case Type.Rotate:
+            case TransformOperationType.Rotate:
                 return MathF.Abs(X     - other.X)     <= tolerance &&
                        MathF.Abs(Y     - other.Y)     <= tolerance &&
                        MathF.Abs(Z     - other.Z)     <= tolerance &&
                        MathF.Abs(Angle - other.Angle) <= tolerance;
-            case Type.Scale:
+            case TransformOperationType.Scale:
                 return MathF.Abs(X - other.X) <= tolerance &&
                        MathF.Abs(Y - other.Y) <= tolerance &&
                        MathF.Abs(Z - other.Z) <= tolerance;
-            case Type.SkewX:
-            case Type.SkewY:
-            case Type.Skew:
+            case TransformOperationType.SkewX:
+            case TransformOperationType.SkewY:
+            case TransformOperationType.Skew:
                 return MathF.Abs(X - other.X) <= tolerance &&
                        MathF.Abs(Y - other.Y) <= tolerance;
-            case Type.Perspective:
+            case TransformOperationType.Perspective:
                 return MathF.Abs(PerspectiveM43 - other.PerspectiveM43) <= tolerance;
-            case Type.Matrix:
+            case TransformOperationType.Matrix:
                 return Matrix.ApproximatelyEqual(other.Matrix, tolerance);
-            case Type.Identity:
+            case TransformOperationType.Identity:
                 return other.Matrix.IsIdentity;
         }
         throw new InvalidOperationException("Unknown TransformOperation type");
@@ -198,13 +198,13 @@ public struct TransformOperation
         if (is_identity_from && is_identity_to)
             return true;
 
-        Type interpolation_type = is_identity_to ? from!.Value.OperationType
-                                                 : to!.Value.OperationType;
-        result.OperationType = interpolation_type;
+        TransformOperationType interpolation_type = is_identity_to ? from!.Value.type
+                                                 : to!.Value.type;
+        result.type = interpolation_type;
 
         switch (interpolation_type)
         {
-            case Type.Translate:
+            case TransformOperationType.Translate:
             {
                 float from_x = is_identity_from ? 0 : from!.Value.X;
                 float from_y = is_identity_from ? 0 : from!.Value.Y;
@@ -218,7 +218,7 @@ public struct TransformOperation
                 result.Bake();
                 break;
             }
-            case Type.Rotate:
+            case TransformOperationType.Rotate:
             {
                 float axis_x = 0, axis_y = 0, axis_z = 1, from_angle = 0;
                 float to_angle = is_identity_to ? 0 : to!.Value.Angle;
@@ -243,7 +243,7 @@ public struct TransformOperation
                 }
                 break;
             }
-            case Type.Scale:
+            case TransformOperationType.Scale:
             {
                 float from_x = is_identity_from ? 1 : from!.Value.X;
                 float from_y = is_identity_from ? 1 : from!.Value.Y;
@@ -257,9 +257,9 @@ public struct TransformOperation
                 result.Bake();
                 break;
             }
-            case Type.SkewX:
-            case Type.SkewY:
-            case Type.Skew:
+            case TransformOperationType.SkewX:
+            case TransformOperationType.SkewY:
+            case TransformOperationType.Skew:
             {
                 float from_x = is_identity_from ? 0 : from!.Value.X;
                 float from_y = is_identity_from ? 0 : from!.Value.Y;
@@ -270,7 +270,7 @@ public struct TransformOperation
                 result.Bake();
                 break;
             }
-            case Type.Perspective:
+            case TransformOperationType.Perspective:
             {
                 float from_m43 = is_identity_from ? 0f : from!.Value.PerspectiveM43;
                 float to_m43   = is_identity_to   ? 0f : to!.Value.PerspectiveM43;
@@ -281,7 +281,7 @@ public struct TransformOperation
                 result.Bake();
                 break;
             }
-            case Type.Matrix:
+            case TransformOperationType.Matrix:
             {
                 if (!is_identity_to)
                     result.Matrix = to!.Value.Matrix;
@@ -292,7 +292,7 @@ public struct TransformOperation
                     return false;
                 break;
             }
-            case Type.Identity:
+            case TransformOperationType.Identity:
                 break;
         }
 
@@ -317,21 +317,21 @@ public struct TransformOperation
             return true;
         }
 
-        Type interpolation_type = is_identity_to ? from!.Value.OperationType
-                                                 : to!.Value.OperationType;
+        TransformOperationType interpolation_type = is_identity_to ? from!.Value.type
+                                                 : to!.Value.type;
 
         switch (interpolation_type)
         {
-            case Type.Identity:
+            case TransformOperationType.Identity:
                 bounds = box;
                 return true;
 
-            case Type.Translate:
-            case Type.SkewX:
-            case Type.SkewY:
-            case Type.Skew:
-            case Type.Perspective:
-            case Type.Scale:
+            case TransformOperationType.Translate:
+            case TransformOperationType.SkewX:
+            case TransformOperationType.SkewY:
+            case TransformOperationType.Skew:
+            case TransformOperationType.Perspective:
+            case TransformOperationType.Scale:
             {
                 if (!BlendTransformOperations(from, to, min_progress, out TransformOperation from_op) ||
                     !BlendTransformOperations(from, to, max_progress, out TransformOperation to_op))
@@ -343,7 +343,7 @@ public struct TransformOperation
                 return true;
             }
 
-            case Type.Rotate:
+            case TransformOperationType.Rotate:
             {
                 if (!ShareSameAxis(from, is_identity_from, to, is_identity_to,
                                    out _, out _, out _, out _))
@@ -368,7 +368,7 @@ public struct TransformOperation
                 return true;
             }
 
-            case Type.Matrix:
+            case TransformOperationType.Matrix:
                 return false;
         }
 

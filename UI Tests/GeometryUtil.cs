@@ -26,6 +26,8 @@ public static class GeometryUtil
         return distance <= 4;
     }
 
+    public static void AssertFloatEqual(float a, float b) => Assert.True(FloatAlmostEqual(a, b));
+
     public static void AssertRectFEqual(in RectF lhs, in RectF rhs)
     {
         Assert.True(FloatAlmostEqual(lhs.X, rhs.X), $"X: {lhs.X} != {rhs.X}");
