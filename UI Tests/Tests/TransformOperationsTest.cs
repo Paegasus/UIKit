@@ -255,4 +255,29 @@ public static class TransformOperationsTest
         expected.RotateAbout(new Vector3DF(x, y, z), degrees);
         AssertTransformEqual(expected, operations.Apply());
     }
+
+    [Fact]
+    private static void TestApplyScale()
+    {
+        float x = 1;
+        float y = 2;
+        float z = 3;
+        TransformOperations operations = new();
+        operations.AppendScale(x, y, z);
+        Transform expected = new();
+        expected.Scale3D(x, y, z);
+        AssertTransformEqual(expected, operations.Apply());
+    }
+
+    [Fact]
+    private static void TestApplySkew()
+    {
+        float x = 1;
+        float y = 2;
+        TransformOperations operations = new();
+        operations.AppendSkew(x, y);
+        Transform expected = new();
+        expected.Skew(x, y);
+        AssertTransformEqual(expected, operations.Apply());
+    }
 }
