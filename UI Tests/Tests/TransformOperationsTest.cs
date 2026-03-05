@@ -113,4 +113,29 @@ public static class TransformOperationsTest
         Assert.Equal(3, translates.MatchingPrefixLength(translates3));
         Assert.Equal(1, translates.MatchingPrefixLength(mixed));
     }
+
+    [Fact]
+    private static void TestMatchingPrefixDifferentLength()
+    {
+        TransformOperations translates = new();
+        translates.AppendTranslate(1, 0, 0);
+        translates.AppendTranslate(1, 0, 0);
+        translates.AppendTranslate(1, 0, 0);
+
+        TransformOperations skews = new();
+        skews.AppendSkew(2, 0);
+        skews.AppendSkew(2, 0);
+
+        TransformOperations translates2 = new();
+        translates2.AppendTranslate(0, 2, 0);
+        translates2.AppendTranslate(0, 2, 0);
+
+        TransformOperations none = new();
+
+        Assert.Equal(0, translates.MatchingPrefixLength(skews));
+        // Pad the length of the shorter list provided all previous operation-pairs match per spec
+        // (https://drafts.csswg.org/css-transforms/#interpolation-of-transforms).
+        Assert.Equal(3, translates.MatchingPrefixLength(translates2));
+        Assert.Equal(3, translates.MatchingPrefixLength(none));
+    }
 }
