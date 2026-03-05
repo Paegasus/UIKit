@@ -1354,4 +1354,33 @@ public static class TransformOperationsTest
             }
         }
     }
+
+    [Fact]
+    private static void TestPerspectiveMatrixAndTransformBlendingEquivalency()
+    {
+        TransformOperations from_operations = new();
+        from_operations.AppendPerspective(200);
+
+        TransformOperations to_operations = new();
+        to_operations.AppendPerspective(1000);
+
+        Transform from_transform = new();
+        from_transform.ApplyPerspectiveDepth(200);
+
+        Transform to_transform = new();
+        to_transform.ApplyPerspectiveDepth(1000);
+
+        const int steps = 20;
+        for (int i = 0; i < steps; ++i)
+        {
+            double progress = (double)i / (steps - 1);
+
+            Transform blended_matrix = to_transform;
+            Assert.True(blended_matrix.Blend(from_transform, progress));
+
+            Transform blended_transform = to_operations.Blend(from_operations, (float)progress).Apply();
+
+            AssertTransformEqual(blended_matrix, blended_transform);
+        }
+    }
 }
