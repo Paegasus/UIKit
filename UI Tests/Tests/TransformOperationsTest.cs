@@ -1442,4 +1442,110 @@ public static class TransformOperationsTest
             }
         }
     }
+
+    [Fact]
+    private static void TestNonCommutativeRotations()
+    {
+        TransformOperations operations_from = new();
+        operations_from.AppendRotate(1.0f, 0.0f, 0.0f, 0.0f);
+        operations_from.AppendRotate(0.0f, 1.0f, 0.0f, 0.0f);
+        TransformOperations operations_to = new();
+        operations_to.AppendRotate(1.0f, 0.0f, 0.0f, 45.0f);
+        operations_to.AppendRotate(0.0f, 1.0f, 0.0f, 135.0f);
+
+        BoxF box = new(0f, 0f, 0f, 1f, 1f, 1f);
+        BoxF bounds;
+
+        float min_progress = 0.0f;
+        float max_progress = 1.0f;
+        Assert.True(operations_to.BlendedBoundsForBox(
+            box, operations_from, min_progress, max_progress, out bounds));
+        Transform blended_transform =
+            operations_to.Blend(operations_from, max_progress).Apply();
+        Point3F blended_point = new(0.9f, 0.9f, 0.0f);
+        blended_point = blended_transform.MapPoint(blended_point);
+        BoxF expanded_bounds = bounds;
+        expanded_bounds.ExpandTo(blended_point);
+        Assert.Equal(bounds.ToString(), expanded_bounds.ToString());
+    }
+
+    [Fact]
+    private static void TestBlendedBoundsForSequence()
+    {
+        TransformOperations operations_from = new();
+        operations_from.AppendTranslate(1.0f, -5.0f, 1.0f);
+        operations_from.AppendScale(-1.0f, 2.0f, 3.0f);
+        operations_from.AppendTranslate(2.0f, 4.0f, -1.0f);
+        TransformOperations operations_to = new();
+        operations_to.AppendTranslate(13.0f, -1.0f, 5.0f);
+        operations_to.AppendScale(-3.0f, -2.0f, 5.0f);
+        operations_to.AppendTranslate(6.0f, -2.0f, 3.0f);
+
+        BoxF box = new(1.0f, 2.0f, 3.0f, 4.0f, 4.0f, 4.0f);
+        BoxF bounds;
+
+        float min_progress = -0.5f;
+        float max_progress = 1.5f;
+        Assert.True(operations_to.BlendedBoundsForBox(box, operations_from, min_progress, max_progress, out bounds));
+        Assert.Equal(new BoxF(-57.0f, -59.0f, -1.0f, 76.0f, 112.0f, 80.0f).ToString(), bounds.ToString());
+
+        min_progress = 0.0f;
+        max_progress = 1.0f;
+        Assert.True(operations_to.BlendedBoundsForBox(box, operations_from, min_progress, max_progress, out bounds));
+        Assert.Equal(new BoxF(-32.0f, -25.0f, 7.0f, 42.0f, 44.0f, 48.0f).ToString(), bounds.ToString());
+
+        TransformOperations identity = new();
+        Assert.True(operations_to.BlendedBoundsForBox(box, identity, min_progress, max_progress, out bounds));
+        Assert.Equal(new BoxF(-33.0f, -13.0f, 3.0f, 57.0f, 19.0f, 52.0f).ToString(),bounds.ToString());
+
+        Assert.True(identity.BlendedBoundsForBox(box, operations_from, min_progress, max_progress, out bounds));
+        Assert.Equal(new BoxF(-7.0f, -3.0f, 2.0f, 15.0f, 23.0f, 20.0f).ToString(), bounds.ToString());
+    }
+
+    [Fact]
+    private static void TestIsTranslationWithSingleOperation()
+    {
+        TransformOperations empty_operations = new();
+        Assert.True(empty_operations.IsTranslation());
+
+        TransformOperations identity = new();
+        identity.AppendIdentity();
+        Assert.True(identity.IsTranslation());
+
+        TransformOperations translate = new();
+        translate.AppendTranslate(1.0f, 2.0f, 3.0f);
+        Assert.True(translate.IsTranslation());
+
+        TransformOperations rotate = new();
+        rotate.AppendRotate(1.0f, 2.0f, 3.0f, 4.0f);
+        Assert.False(rotate.IsTranslation());
+
+        TransformOperations scale = new();
+        scale.AppendScale(1.0f, 2.0f, 3.0f);
+        Assert.False(scale.IsTranslation());
+
+        TransformOperations skew = new();
+        skew.AppendSkew(1.0f, 2.0f);
+        Assert.False(skew.IsTranslation());
+
+        TransformOperations perspective = new();
+        perspective.AppendPerspective(1.0f);
+        Assert.False(perspective.IsTranslation());
+
+        TransformOperations identity_matrix = new();
+        identity_matrix.AppendMatrix(new Transform());
+        Assert.True(identity_matrix.IsTranslation());
+
+        TransformOperations translation_matrix = new();
+        Transform translation_transform = new();
+        translation_transform.Translate3D(1.0f, 2.0f, 3.0f);
+        translation_matrix.AppendMatrix(translation_transform);
+        Assert.True(translation_matrix.IsTranslation());
+
+        TransformOperations scaling_matrix = new();
+        Transform scaling_transform = new();
+        scaling_transform.Scale(2.0f, 2.0f);
+        scaling_matrix.AppendMatrix(scaling_transform);
+        Assert.False(scaling_matrix.IsTranslation());
+    }
 }
