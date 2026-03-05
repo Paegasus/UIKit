@@ -48,7 +48,7 @@ public static class TransformOperationsTest
                 break;
         }
     }
-    
+
     [Fact]
     private static void TestTransformTypesAreUnique()
     {
@@ -239,6 +239,20 @@ public static class TransformOperationsTest
         operations.AppendTranslate(x, y, z);
         Transform expected = new();
         expected.Translate3D(x, y, z);
+        AssertTransformEqual(expected, operations.Apply());
+    }
+
+    [Fact]
+    private static void TestApplyRotate()
+    {
+        float x = 1;
+        float y = 2;
+        float z = 3;
+        float degrees = 80;
+        TransformOperations operations = new();
+        operations.AppendRotate(x, y, z, degrees);
+        Transform expected = new();
+        expected.RotateAbout(new Vector3DF(x, y, z), degrees);
         AssertTransformEqual(expected, operations.Apply());
     }
 }
