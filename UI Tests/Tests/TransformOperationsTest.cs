@@ -408,9 +408,11 @@ public static class TransformOperationsTest
             ExpectTransformOperationEqual(expected_op, blended_op);
         }
 
-        // In C++ = on a class-type calls the copy constructor — a deep copy.
-        // TransformOperations base_operations_expected = operations_expected;
-        // In C# we need to do this explicitly:
+        // Note: In C++ = on a class-type calls the copy constructor — a deep copy.
+        //
+        //       TransformOperations base_operations_expected = operations_expected;
+        //
+        //       In C# we need to do this explicitly:
         TransformOperations base_operations_expected = new(operations_expected);
 
         // Create a mismatch in number of operations. Pairwise interpolation is still
