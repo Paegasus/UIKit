@@ -1102,4 +1102,29 @@ public static class TransformOperationsTest
         Assert.True(zero_scale.BlendedBoundsForBox(box, zero_scale, min_progress, max_progress, out bounds));
         Assert.Equal(new BoxF().ToString(), bounds.ToString());
     }
+
+    [Fact]
+    private static void TestBlendedBoundsForRotationTrivial()
+    {
+        TransformOperations operations_from = new();
+        operations_from.AppendRotate(0.0f, 0.0f, 1.0f, 0.0f);
+        TransformOperations operations_to = new();
+        operations_to.AppendRotate(0.0f, 0.0f, 1.0f, 360.0f);
+
+        float sqrt_2 = MathF.Sqrt(2.0f);
+        BoxF box = new(-sqrt_2, -sqrt_2, 0.0f, sqrt_2, sqrt_2, 0.0f);
+        BoxF bounds;
+
+        // Since we're rotating 360 degrees, any box with dimensions between 0 and
+        // 2 * sqrt(2) should give the same result.
+        float[] sizes = [0.0f, 0.1f, sqrt_2, 2.0f * sqrt_2];
+        foreach (float size in sizes)
+        {
+            box.SetSize(size, size, 0.0f);
+            float min_progress = 0.0f;
+            float max_progress = 1.0f;
+            Assert.True(operations_to.BlendedBoundsForBox(box, operations_from, min_progress, max_progress, out bounds));
+            Assert.Equal(new BoxF(-2.0f, -2.0f, 0.0f, 4.0f, 4.0f, 0.0f).ToString(), bounds.ToString());
+        }
+    }
 }
