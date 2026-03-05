@@ -1566,4 +1566,126 @@ public static class TransformOperationsTest
         operations2.AppendMatrix(translation_transform);
         Assert.True(operations2.IsTranslation());
     }
+
+    [Fact]
+    private static void TestScaleComponent()
+    {
+        float scale;
+
+        // Scale.
+        TransformOperations operations1 = new();
+        operations1.AppendScale(-3.0f, 2.0f, 5.0f);
+        Assert.True(operations1.ScaleComponent(out scale));
+        Assert.Equal(5.0f, scale);
+
+        // Translate.
+        TransformOperations operations2 = new();
+        operations2.AppendTranslate(1.0f, 2.0f, 3.0f);
+        Assert.True(operations2.ScaleComponent(out scale));
+        Assert.Equal(1.0f, scale);
+
+        // Rotate.
+        TransformOperations operations3 = new();
+        operations3.AppendRotate(1.0f, 2.0f, 3.0f, 4.0f);
+        Assert.True(operations3.ScaleComponent(out scale));
+        Assert.Equal(1.0f, scale);
+
+        // Matrix that's only a translation.
+        TransformOperations operations4 = new();
+        Transform translation_transform = new();
+        translation_transform.Translate3D(1.0f, 2.0f, 3.0f);
+        operations4.AppendMatrix(translation_transform);
+        Assert.True(operations4.ScaleComponent(out scale));
+        Assert.Equal(1.0f, scale);
+
+        // Matrix that includes scale.
+        TransformOperations operations5 = new();
+        Transform matrix = new();
+        matrix.RotateAboutZAxis(30.0);
+        matrix.Scale(-7.0f, 6.0f);
+        matrix.Translate3D(new Vector3DF(3.0f, 7.0f, 1.0f));
+        operations5.AppendMatrix(matrix);
+        Assert.True(operations5.ScaleComponent(out scale));
+        Assert.Equal(7.0f, scale);
+
+        // Matrix with perspective.
+        TransformOperations operations6 = new();
+        matrix.ApplyPerspectiveDepth(2000.0f);
+        operations6.AppendMatrix(matrix);
+        Assert.False(operations6.ScaleComponent(out scale));
+
+        // Skew.
+        TransformOperations operations7 = new();
+        operations7.AppendSkew(30.0f, 60.0f);
+        Assert.True(operations7.ScaleComponent(out scale));
+        Assert.Equal(2.0f, scale);
+
+        // Perspective.
+        TransformOperations operations8 = new();
+        operations8.AppendPerspective(500.0f);
+        Assert.False(operations8.ScaleComponent(out scale));
+
+        // Translate + Scale.
+        TransformOperations operations9 = new();
+        operations9.AppendTranslate(1.0f, 2.0f, 3.0f);
+        operations9.AppendScale(2.0f, 5.0f, 4.0f);
+        Assert.True(operations9.ScaleComponent(out scale));
+        Assert.Equal(5.0f, scale);
+
+        // Translate + Scale + Matrix with translate.
+        operations9.AppendMatrix(translation_transform);
+        Assert.True(operations9.ScaleComponent(out scale));
+        Assert.Equal(5.0f, scale);
+
+        // Scale + translate.
+        TransformOperations operations10 = new();
+        operations10.AppendScale(2.0f, 3.0f, 2.0f);
+        operations10.AppendTranslate(1.0f, 2.0f, 3.0f);
+        Assert.True(operations10.ScaleComponent(out scale));
+        Assert.Equal(3.0f, scale);
+
+        // Two Scales.
+        TransformOperations operations11 = new();
+        operations11.AppendScale(2.0f, 3.0f, 2.0f);
+        operations11.AppendScale(-3.0f, -2.0f, -3.0f);
+        Assert.True(operations11.ScaleComponent(out scale));
+        Assert.Equal(9.0f, scale);
+
+        // Scale + Matrix.
+        TransformOperations operations12 = new();
+        operations12.AppendScale(2.0f, 2.0f, 2.0f);
+        Transform scaling_transform = new();
+        scaling_transform.Scale(2.0f, 2.0f);
+        operations12.AppendMatrix(scaling_transform);
+        Assert.True(operations12.ScaleComponent(out scale));
+        Assert.Equal(4.0f, scale);
+
+        // Scale + Rotate.
+        TransformOperations operations13 = new();
+        operations13.AppendScale(2.0f, 2.0f, 2.0f);
+        operations13.AppendRotate(1.0f, 2.0f, 3.0f, 4.0f);
+        Assert.True(operations13.ScaleComponent(out scale));
+        Assert.Equal(2.0f, scale);
+
+        // Scale + Skew.
+        TransformOperations operations14 = new();
+        operations14.AppendScale(2.0f, 2.0f, 2.0f);
+        operations14.AppendSkew(60.0f, 45.0f);
+        Assert.True(operations14.ScaleComponent(out scale));
+        Assert.Equal(4.0f, scale);
+
+        // Scale + Perspective.
+        TransformOperations operations15 = new();
+        operations15.AppendScale(2.0f, 2.0f, 2.0f);
+        operations15.AppendPerspective(1.0f);
+        Assert.False(operations15.ScaleComponent(out scale));
+
+        // Matrix with skew.
+        TransformOperations operations16 = new();
+        Transform skew_transform = new();
+        skew_transform.Skew(50.0f, 60.0f);
+        operations16.AppendMatrix(skew_transform);
+        Assert.True(operations16.ScaleComponent(out scale));
+        Assert.Equal(2.0f, scale);
+    }
 }
