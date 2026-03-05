@@ -62,7 +62,7 @@ public struct BoxF
         ExpandTo(box);
     }
 
-    public override readonly string ToString() => $"{m_Origin} {m_Width}x{m_Height}x{m_Depth}";
+    public override readonly string ToString() => $"{m_Origin:G6} {m_Width:G6}x{m_Height:G6}x{m_Depth:G6}";
 
     public void SetSize(float width, float height, float depth)
     {

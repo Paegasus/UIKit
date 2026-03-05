@@ -1118,7 +1118,7 @@ public static class TransformOperationsTest
         // Since we're rotating 360 degrees,
         // any box with dimensions between 0 and 2 * sqrt(2) should give the same result.
         float[] sizes = [0.0f, 0.1f, sqrt_2, 2.0f * sqrt_2];
-        
+
         foreach (float size in sizes)
         {
             box.SetSize(size, size, 0.0f);
@@ -1127,5 +1127,68 @@ public static class TransformOperationsTest
             Assert.True(operations_to.BlendedBoundsForBox(box, operations_from, min_progress, max_progress, out bounds));
             Assert.Equal(new BoxF(-2.0f, -2.0f, 0.0f, 4.0f, 4.0f, 0.0f).ToString(), bounds.ToString());
         }
+    }
+
+    [Fact]
+    private static void TestBlendedBoundsForRotationAllExtrema()
+    {
+        // If the normal is out of the plane, we can have up to 6 extrema (a min/max
+        // in each dimension) between the endpoints of the arc. This test ensures that
+        // we consider all 6.
+        TransformOperations operations_from = new();
+        operations_from.AppendRotate(1.0f, 1.0f, 1.0f, 30.0f);
+        TransformOperations operations_to = new();
+        operations_to.AppendRotate(1.0f, 1.0f, 1.0f, 390.0f);
+
+        BoxF box = new(1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
+        BoxF bounds;
+
+        float min = -1.0f / 3.0f;
+        float max = 1.0f;
+        float size = max - min;
+        Assert.True(operations_to.BlendedBoundsForBox(box, operations_from, 0.0f, 1.0f, out bounds));
+        string a = new BoxF(min, min, min, size, size, size).ToString();
+        string b = bounds.ToString();
+        Assert.Equal(a, b);
+    }
+
+    [Fact]
+    private static void TestBlendedBoundsForRotationDifferentAxes()
+    {
+        // We can handle rotations about a single axis. If the axes are different,
+        // we revert to matrix interpolation for which inflated bounds cannot be
+        // computed.
+        TransformOperations operations_from = new();
+        operations_from.AppendRotate(1.0f, 1.0f, 1.0f, 30.0f);
+        TransformOperations operations_to_same = new();
+        operations_to_same.AppendRotate(1.0f, 1.0f, 1.0f, 390.0f);
+        TransformOperations operations_to_opposite = new();
+        operations_to_opposite.AppendRotate(-1.0f, -1.0f, -1.0f, 390.0f);
+        TransformOperations operations_to_different = new();
+        operations_to_different.AppendRotate(1.0f, 3.0f, 1.0f, 390.0f);
+
+        BoxF box = new(1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
+        BoxF bounds;
+
+        Assert.True(operations_to_same.BlendedBoundsForBox(box, operations_from, 0.0f, 1.0f, out bounds));
+        Assert.True(operations_to_opposite.BlendedBoundsForBox(box, operations_from, 0.0f, 1.0f, out bounds));
+        Assert.False(operations_to_different.BlendedBoundsForBox(box, operations_from, 0.0f, 1.0f, out bounds));
+    }
+
+    [Fact]
+    private static void TestBlendedBoundsForRotationPointOnAxis()
+    {
+        // Checks that if the point to rotate is sitting on the axis of rotation, that
+        // it does not get affected.
+        TransformOperations operations_from = new();
+        operations_from.AppendRotate(1.0f, 1.0f, 1.0f, 30.0f);
+        TransformOperations operations_to = new();
+        operations_to.AppendRotate(1.0f, 1.0f, 1.0f, 390.0f);
+
+        BoxF box = new(1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f);
+        BoxF bounds;
+
+        Assert.True(operations_to.BlendedBoundsForBox(box, operations_from, 0.0f, 1.0f, out bounds));
+        Assert.Equal(box.ToString(), bounds.ToString());
     }
 }
