@@ -1,4 +1,4 @@
-namespace UI.Renderer.Core.DOM;
+ namespace UI.Renderer.Core.DOM;
 
 public class Document
 {
