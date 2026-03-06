@@ -22,4 +22,9 @@ public class Document
     {
         throw new NotImplementedException();
     }
+
+    public bool hasFocus()
+    {
+        throw new NotImplementedException();
+    }
 }
