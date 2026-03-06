@@ -29,30 +29,32 @@ public class DOMTokenList // ElementRareDataField
 
     //public DOMTokenList& operator=(const DOMTokenList&) = delete;
 
+    /*
     unsigned length() const { return token_set_.size(); }
-  const AtomicString item(unsigned index) const;
-  bool contains(const AtomicString&) const;
-  void add(const Vector<String>&, ExceptionState&);
-  void remove(const Vector<String>&, ExceptionState&);
-  bool toggle(const AtomicString&, ExceptionState&);
-  bool toggle(const AtomicString&, bool force, ExceptionState&);
-  bool replace(const AtomicString& token,
+    const AtomicString item(unsigned index) const;
+    bool contains(const AtomicString&) const;
+    void add(const Vector<String>&, ExceptionState&);
+    void remove(const Vector<String>&, ExceptionState&);
+    bool toggle(const AtomicString&, ExceptionState&);
+    bool toggle(const AtomicString&, bool force, ExceptionState&);
+    bool replace(const AtomicString& token,
                const AtomicString& new_token,
                ExceptionState&);
-  bool supports(const AtomicString&, ExceptionState&);
-  AtomicString value() const;
-  void setValue(const AtomicString&);
+    bool supports(const AtomicString&, ExceptionState&);
+    AtomicString value() const;
+    void setValue(const AtomicString&);
 
-  // This function should be called when the associated attribute value was
-  // updated.
-  void DidUpdateAttributeValue(const AtomicString& old_value,
+    // This function should be called when the associated attribute value was
+    // updated.
+    void DidUpdateAttributeValue(const AtomicString& old_value,
                                const AtomicString& new_value);
 
-  const SpaceSplitString& TokenSet() const { return token_set_; }
-  // Add() and Remove() have DCHECK for syntax of the specified token.
-  void Add(const AtomicString&);
-  void Remove(const AtomicString&);
-
+    const SpaceSplitString& TokenSet() const { return token_set_; }
+    // Add() and Remove() have DCHECK for syntax of the specified token.
+    void Add(const AtomicString&);
+    void Remove(const AtomicString&);
+    */
+    
     public Element GetElement()
     {
         return element_;
