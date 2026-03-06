@@ -1758,7 +1758,7 @@ public static class TransformOperationsTest
     }
 
     [Fact]
-    private static void TestTestDecompositionCache()
+    private static void TestDecompositionCache()
     {
         TransformOperations transforms = new();
         Assert.Empty(transforms.decomposed_transforms_);
@@ -1810,5 +1810,56 @@ public static class TransformOperationsTest
         Assert.Empty(transforms.decomposed_transforms_);
         Assert.True(transforms.ComputeDecomposedTransform(0));
         Assert.Single(transforms.decomposed_transforms_);
+    }
+
+    [Fact]
+    private static void TestBlendSkewMismatch()
+    {
+        TransformOperations from_ops = new();
+        TransformOperations to_ops = new();
+        TransformOperations expected_ops = new();
+
+        from_ops.AppendSkewX(0);
+        from_ops.AppendRotate(0, 0, 1, 0);
+        to_ops.AppendSkewY(0);
+        to_ops.AppendRotate(0, 0, 1, 360);
+
+        // Skew types do not match so use matrix interpolation
+        expected_ops.AppendMatrix(new Transform());
+
+        TransformOperations blended_ops = to_ops.Blend(from_ops, 0.5f);
+        Assert.Equal(1, blended_ops.Size);
+        ExpectTransformOperationEqual(blended_ops.At(0), expected_ops.At(0));
+    }
+
+    [Fact]
+    private static void TestBlendSkewMatch()
+    {
+        TransformOperations from_ops = new();
+        TransformOperations to_ops = new();
+        TransformOperations expected_ops = new();
+
+        from_ops.AppendSkew(30, 0);
+        from_ops.AppendRotate(0, 0, 1, 0);
+        to_ops.AppendSkew(0, 30);
+        to_ops.AppendRotate(0, 0, 1, 360);
+
+        // Skew types match so interpolate as a function.
+        expected_ops.AppendSkew(15, 15);
+        expected_ops.AppendRotate(0, 0, 1, 180);
+
+        TransformOperations blended_ops = to_ops.Blend(from_ops, 0.5f);
+        Assert.Equal(2, blended_ops.Size);
+        ExpectTransformOperationEqual(blended_ops.At(0), expected_ops.At(0));
+        ExpectTransformOperationEqual(blended_ops.At(1), expected_ops.At(1));
+    }
+
+    [Fact]
+    private static void TestRotate360IsNotIdentityOperation()
+    {
+        TransformOperations operations = new();
+        operations.AppendRotate(0, 0, 2, 360);
+        Assert.False(operations.IsIdentity());
+        Assert.True(operations.Apply().IsIdentity);
     }
 }
