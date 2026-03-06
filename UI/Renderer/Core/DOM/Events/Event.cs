@@ -1,3 +1,5 @@
+using UI.Renderer.Framework.Text;
+
 namespace UI.Renderer.Core.DOM.Events;
 
 public class Event
@@ -43,8 +45,7 @@ public class Event
         kPassiveDefault,
     }
 
-    //AtomicString type_;
-    string type_;
+    AtomicString type_;
     bool bubbles_ = true;
     bool cancelable_ = true;
     bool composed_ = true;
