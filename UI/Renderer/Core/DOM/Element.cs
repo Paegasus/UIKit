@@ -1,6 +1,6 @@
 namespace UI.Renderer.Core.DOM;
 
-public class EventTarget
+public class Element
 {
     
 }
