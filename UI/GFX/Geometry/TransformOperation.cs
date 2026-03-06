@@ -88,7 +88,9 @@ public struct TransformOperation
 
     public readonly bool ApproximatelyEqual(in TransformOperation other, float tolerance)
     {
+#if DEBUG
         Debug.Assert(tolerance >= 0);
+#endif
         if (type != other.type)
             return false;
         switch (type)
@@ -133,10 +135,11 @@ public struct TransformOperation
         out float axis_x, out float axis_y, out float axis_z,
         out float angle_from)
     {
+#if DEBUG
         Debug.Assert(is_identity_from == IsOperationIdentity(from));
         Debug.Assert(is_identity_to   == IsOperationIdentity(to));
         Debug.Assert(!is_identity_from || !is_identity_to);
-
+#endif
         if (is_identity_from && !is_identity_to)
         {
             axis_x = to!.Value.X;
@@ -278,8 +281,10 @@ public struct TransformOperation
             {
                 float from_m43 = is_identity_from ? 0f : from!.Value.PerspectiveM43;
                 float to_m43   = is_identity_to   ? 0f : to!.Value.PerspectiveM43;
+#if DEBUG
                 Debug.Assert(is_identity_from || (from_m43 <= 0f && from_m43 >= -1f));
                 Debug.Assert(is_identity_to   || (to_m43   <= 0f && to_m43   >= -1f));
+#endif
                 result.PerspectiveM43 = Math.Clamp(
                     BlendFloats(from_m43, to_m43, progress), -1f, 0f);
                 result.Bake();
