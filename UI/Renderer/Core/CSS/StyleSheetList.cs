@@ -1,4 +1,5 @@
 using UI.Renderer.Core.DOM;
+using UI.Renderer.Core.HTML;
 using UI.Renderer.Framework.Text;
 
 namespace UI.Renderer.Core.CSS;
@@ -36,11 +37,29 @@ public class StyleSheetList
     public CSSStyleSheet AnonymousNamedGetter(AtomicString str)
     {
         throw new NotImplementedException();
-    }
 
-    public bool NamedPropertyQuery(AtomicString str, ExceptionState state)
+        /*
+        if (GetDocument() != null)
+            UseCounter.Count(GetDocument()!, WebFeature.StyleSheetListAnonymousNamedGetter);
+
+        HTMLStyleElement? item = GetNamedItem(name);
+
+        if (item == null)
+            return null;
+
+        CSSStyleSheet? sheet = item.Sheet;
+
+        if (sheet != null)
+            UseCounter.Count(GetDocument()!, WebFeature.StyleSheetListNonNullAnonymousNamedGetter);
+
+        return sheet;
+        */
+    }
+    
+    //public bool NamedPropertyQuery(AtomicString str, ExceptionState state)
+    public bool NamedPropertyQuery(AtomicString name)
     {
-        throw new NotImplementedException();
+        return AnonymousNamedGetter(name) != null;
     }
 
     //public void Trace(Visitor*) const override;
@@ -54,12 +73,5 @@ public class StyleSheetList
     private TreeScope tree_scope_;
     private List<CSSStyleSheet> style_sheet_vector_;
 
-    /*
-    const HeapVector<Member<StyleSheet>>& StyleSheets() const;
-
-    private TreeScope tree_scope_;
-    private List<CSSStyleSheet> style_sheet_vector_;
-    
-    
-    */
+    //const HeapVector<Member<StyleSheet>>& StyleSheets() const;
 }
