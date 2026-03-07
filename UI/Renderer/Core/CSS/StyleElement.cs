@@ -1,4 +1,5 @@
 using UI.Renderer.Core.DOM;
+using UI.Renderer.Framework.Text;
 
 namespace UI.Renderer.Core.CSS;
 
