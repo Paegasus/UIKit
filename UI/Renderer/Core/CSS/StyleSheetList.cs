@@ -34,7 +34,7 @@ public class StyleSheetList
         throw new NotImplementedException();
     }
 
-    public CSSStyleSheet? AnonymousNamedGetter(AtomicString str)
+    public CSSStyleSheet? AnonymousNamedGetter(AtomicString name)
     {
         /*
         if (GetDocument() != null)
