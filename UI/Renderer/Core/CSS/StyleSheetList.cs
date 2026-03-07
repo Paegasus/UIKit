@@ -34,13 +34,12 @@ public class StyleSheetList
         throw new NotImplementedException();
     }
 
-    public CSSStyleSheet AnonymousNamedGetter(AtomicString str)
+    public CSSStyleSheet? AnonymousNamedGetter(AtomicString str)
     {
-        throw new NotImplementedException();
-
         /*
         if (GetDocument() != null)
             UseCounter.Count(GetDocument()!, WebFeature.StyleSheetListAnonymousNamedGetter);
+        */
 
         HTMLStyleElement? item = GetNamedItem(name);
 
@@ -49,11 +48,13 @@ public class StyleSheetList
 
         CSSStyleSheet? sheet = item.Sheet;
 
+        /*
         if (sheet != null)
             UseCounter.Count(GetDocument()!, WebFeature.StyleSheetListNonNullAnonymousNamedGetter);
+        */
 
         return sheet;
-        */
+        
     }
     
     //public bool NamedPropertyQuery(AtomicString str, ExceptionState state)
