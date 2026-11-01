@@ -10,6 +10,9 @@ public static class Program
 {
     public static void Main(string[] args)
     {
+        /*
+        // transform test
+
         Transform t = new();
 
         Debug.WriteLine(t);
@@ -17,5 +20,6 @@ public static class Program
         TransformOperation to = new();
 
         Debug.WriteLine(to.Matrix);
+        */
     }
 }
